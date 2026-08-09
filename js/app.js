@@ -10,6 +10,7 @@ import { renderLesson } from './lesson.js';
 import { renderTutor } from './tutor.js';
 import { renderVoice } from './voice.js';
 import { renderLeaderboard } from './leaderboard.js';
+import { renderExam } from './exam.js';
 import {
     mountProfile,
     openProfileDialog,
@@ -56,6 +57,7 @@ function wireBottomNav() {
             }
             else if (route === 'voice') navigate('#/voice');
             else if (route === 'leaderboard') navigate('#/leaderboard');
+            else if (route === 'exam') navigate('#/exam');
         });
     });
 }
@@ -211,6 +213,7 @@ async function bootstrap() {
             tutor: renderTutor,
             voice: renderVoice,
             leaderboard: renderLeaderboard,
+            exam: renderExam,
         },
         rootEl
     );

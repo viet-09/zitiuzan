@@ -276,3 +276,59 @@ create policy "voice delete"
 
 create policy "gloss self"
   on public.kanji_gloss_cache for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- ---------------------------------------------------------------------------
+-- 11. exam_content — canonical mock-exam questions + answer key, server-side
+-- only. No client SELECT policy at all: the answer key and reference notes
+-- live in this row, so a direct client query would leak correct answers via
+-- the Network tab before/during the test. The exam-fetch Edge Function is
+-- the only reader — it strips answerIndex/referenceNote before responding.
+-- Populated by scripts/load-exam.mjs (service role), not by client code.
+-- ---------------------------------------------------------------------------
+create table if not exists public.exam_content (
+  jlpt_level  text not null,
+  sitting     text not null,
+  content     jsonb not null,
+  updated_at  timestamptz not null default now(),
+  primary key (jlpt_level, sitting)
+);
+alter table public.exam_content enable row level security;
+-- Intentionally no policies — service-role (Edge Functions, load script)
+-- bypasses RLS entirely; every other role is denied by default.
+
+-- Private bucket for exam listening audio (owned source, never public/git —
+-- see .gitignore). No storage.objects policy is created: the exam-fetch
+-- Edge Function mints short-lived signed URLs with the service-role key,
+-- which bypasses bucket privacy the same way it bypasses table RLS.
+insert into storage.buckets (id, name, public)
+values ('exam-audio', 'exam-audio', false)
+on conflict (id) do nothing;
+
+-- ---------------------------------------------------------------------------
+-- 12. exam_attempts — mock JLPT exam history + AI review + retest quiz.
+-- Insert-only from the server: the exam-review Edge Function computes the
+-- score/review itself (against exam_content's answer key, never a
+-- client-supplied score) and writes with the service-role key, bypassing
+-- RLS. There is deliberately NO client-facing insert/update policy — a
+-- client that could insert its own row could fabricate a perfect score.
+-- ---------------------------------------------------------------------------
+create table if not exists public.exam_attempts (
+  id                uuid primary key default gen_random_uuid(),
+  user_id           uuid not null references auth.users(id) on delete cascade,
+  jlpt_level        text not null,
+  source_file       text not null,
+  score             jsonb not null,            -- {total, max, percentage}
+  weakness_tags     text[] not null default '{}',
+  detailed_review   jsonb not null,            -- [{question_id, user_answer, correct_answer, is_correct, explanation, remediation_rule}]
+  retest_generated  boolean not null default false,
+  retest_questions  jsonb,                      -- generated 3-5 question re-test quiz, null until generated
+  created_at        timestamptz not null default now()
+);
+create index if not exists exam_attempts_user_created_idx
+  on public.exam_attempts (user_id, created_at desc);
+
+alter table public.exam_attempts enable row level security;
+
+drop policy if exists "exam attempts read self" on public.exam_attempts;
+create policy "exam attempts read self"
+  on public.exam_attempts for select using (auth.uid() = user_id);

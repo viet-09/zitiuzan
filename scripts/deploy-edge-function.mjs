@@ -40,7 +40,7 @@ if (gemini) {
 // 3. Deploy functions. Supabase defaults to verify-jwt=true since 2024, so
 // no flag needed; explicit --verify-jwt would be defensive but the CLI
 // rejects the boolean-negation form `--no-verify-jwt=false` on some versions.
-const FUNCTIONS = ['evaluate-ai', 'gemini-proxy', 'mint-live-token'];
+const FUNCTIONS = ['evaluate-ai', 'gemini-proxy', 'mint-live-token', 'exam-fetch', 'exam-review'];
 for (const fn of FUNCTIONS) {
   sh('supabase', ['functions', 'deploy', fn, '--project-ref', ref]);
 }

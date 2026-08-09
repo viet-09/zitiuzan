@@ -1,5 +1,6 @@
 # User-owned source media and extraction intermediates (never deploy/publish)
 N2_somatome/
+N2/
 tmp/
 scratchpad/
 data/bot-toc/
@@ -22,6 +23,8 @@ node_modules/
 # Resumable Gemini extraction checkpoints; canonical JSON is tracked instead
 data/book/*.draft.json
 data/book/*.tmp
+data/exams/*.draft.json
+data/exams/*.tmp
 
 # Local secrets (Supabase project keys, DB password). Never commit.
 .env
