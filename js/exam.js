@@ -25,7 +25,7 @@ let mountToken = 0;
 let timerInterval = null;
 
 const state = {
-  view: 'picker', // picker | taking | review | retest
+  view: 'picker', // picker | taking | score | review | retest
   examList: [],
   listLoading: false,
   listError: '',
@@ -43,6 +43,8 @@ const state = {
   historyLoading: false,
   retest: { answers: new Map() },
   audioPartIndex: 0, // which entry of state.content.audioUrls is currently loaded
+  explainLoading: false,
+  explainError: '',
 };
 
 function esc(value) {
@@ -91,6 +93,8 @@ function resetForNewExam() {
   state.review = null;
   state.submitError = '';
   state.audioPartIndex = 0;
+  state.explainLoading = false;
+  state.explainError = '';
 }
 
 async function loadExamList(token) {
@@ -191,6 +195,7 @@ async function advancePhaseOrSubmit(token, auto = false) {
     paint();
     startPhaseTimer(token);
     playFirstListeningPart();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   } else {
     await submitExam(token, auto);
   }
@@ -250,17 +255,42 @@ async function submitExam(token, auto = false) {
     return { section, part, number: Number(number), selectedIndex };
   });
   try {
+    // exam-review only grades — instant, no AI call — so the score always
+    // comes back right away. The AI explanation/weakness/retest is a
+    // separate opt-in step (see requestDetailedReview), fetched only if the
+    // user clicks "Xem chi tiết" on the score screen.
     const review = await invokeExamFn('exam-review', { level: state.level, sitting: state.sitting, answers });
     if (token !== mountToken) return;
     state.review = review;
     state.retest = { answers: new Map() };
-    state.view = 'review';
+    state.view = 'score';
   } catch (err) {
     if (token !== mountToken) return;
     state.submitError = err instanceof Error ? err.message : String(err);
   } finally {
     if (token === mountToken) {
       state.submitting = false;
+      paint();
+    }
+  }
+}
+
+async function requestDetailedReview(token) {
+  if (state.explainLoading || !state.review?.session_id) return;
+  state.explainLoading = true;
+  state.explainError = '';
+  paint();
+  try {
+    const detailed = await invokeExamFn('exam-review-explain', { attempt_id: state.review.session_id });
+    if (token !== mountToken) return;
+    state.review = detailed;
+    state.view = 'review';
+  } catch (err) {
+    if (token !== mountToken) return;
+    state.explainError = err instanceof Error ? err.message : String(err);
+  } finally {
+    if (token === mountToken) {
+      state.explainLoading = false;
       paint();
     }
   }
@@ -387,6 +417,23 @@ function sectionProgress(section) {
   return { total, done };
 }
 
+/** Answer-sheet-style navigator: every question in the visible sections as a
+ * small cell, green once answered — click jumps straight to that question. */
+function renderTracker(visibleSections) {
+  const cells = visibleSections.flatMap((section) => section.parts.flatMap((part) =>
+    part.questions.map((q) => {
+      const key = qKey(section.id, part.part, q.number);
+      const answered = questionAnswered(section.id, part.part, q.number);
+      return `<button type="button" class="exam-tracker-cell${answered ? ' is-answered' : ''}" data-action="exam-jump" data-key="${esc(key)}" title="Câu ${esc(q.number)}${answered ? ' — đã làm' : ' — chưa làm'}">${esc(q.number)}</button>`;
+    })
+  )).join('');
+  return `
+    <aside class="exam-tracker" aria-label="Theo dõi câu đã làm">
+      <h4 class="exam-tracker-title">Theo dõi</h4>
+      <div class="exam-tracker-grid">${cells}</div>
+    </aside>`;
+}
+
 function renderAudioPlayer() {
   const urls = Array.isArray(state.content?.audioUrls) ? state.content.audioUrls : [];
   if (urls.length === 0) return '<p class="dash-empty-state">🎧 Chưa có file nghe cho đề này.</p>';
@@ -420,6 +467,11 @@ function renderTaking() {
   const totalQuestions = visibleSections.reduce((sum, s) => sum + sectionProgress(s).total, 0);
   const isLastPhase = state.phaseIndex >= PHASES.length - 1;
   const msLeft = state.phaseDeadline - Date.now();
+  const advanceLabel = state.submitting ? 'Đang chấm bài…' : isLastPhase ? 'Nộp bài & xem kết quả' : 'Nộp phần này → chuyển sang Nghe';
+  const advanceButton = (extraClass) => `
+    <button type="button" class="complete-modal-btn${extraClass ? ' ' + extraClass : ''}" data-action="exam-advance" ${state.submitting ? 'disabled' : ''}>
+      ${advanceLabel}
+    </button>`;
 
   rootEl.innerHTML = `
     <section class="exam-page">
@@ -428,15 +480,46 @@ function renderTaking() {
         <span class="exam-timer-phase">${esc(phase.label)}</span>
         <span class="exam-timer-clock" data-timer>${formatClock(msLeft)}</span>
         <span class="lesson-meta">${totalAnswered}/${totalQuestions} câu</span>
+        ${advanceButton('exam-advance-top')}
       </header>
+      ${renderTracker(visibleSections)}
       ${tabs ? `<div class="category-tabs" role="group" aria-label="Phần thi">${tabs}</div>` : ''}
       ${audioHtml}
       <div class="exam-questions">${partsHtml}</div>
       ${state.submitError ? `<p class="dash-empty-state" role="alert">${esc(state.submitError)}</p>` : ''}
       <footer class="exam-submit-bar">
-        <button type="button" class="complete-modal-btn" data-action="exam-advance" ${state.submitting ? 'disabled' : ''}>
-          ${state.submitting ? 'Đang chấm bài…' : isLastPhase ? 'Nộp bài & xem kết quả' : 'Nộp phần này → chuyển sang Nghe'}
+        ${advanceButton()}
+      </footer>
+    </section>`;
+}
+
+/** Shown immediately after grading — score is already final at this point
+ * (exam-review never calls Gemini). "Xem chi tiết" is the only thing that
+ * triggers the AI explanation/weakness/retest generation; "Kết thúc" skips
+ * it entirely and the attempt just sits in history as a bare score. */
+function renderScore() {
+  const review = state.review;
+  if (!review) return renderPicker();
+  const bySection = review.score?.bySection || {};
+  const sectionRows = Object.entries(bySection).map(([id, v]) => `
+    <div class="stat-item">
+      <div class="stat-value">${esc(v.correct)}/${esc(v.total)}</div>
+      <div class="stat-label">${esc(SECTION_LABELS[id] || id)}</div>
+    </div>`).join('');
+
+  rootEl.innerHTML = `
+    <section class="exam-page">
+      <h2 class="sr-only" data-route-heading>Kết quả thi thử</h2>
+      <header class="exam-review-head">
+        <h1 class="section-heading">Kết quả: ${esc(review.score?.total)}/${esc(review.score?.max)} (${esc(review.score?.percentage)})</h1>
+      </header>
+      <section class="stats-bar">${sectionRows}</section>
+      ${state.explainError ? `<p class="dash-empty-state" role="alert">${esc(state.explainError)}</p>` : ''}
+      <footer class="exam-submit-bar">
+        <button type="button" class="complete-modal-btn" data-action="exam-view-detail" ${state.explainLoading ? 'disabled' : ''}>
+          ${state.explainLoading ? 'Đang tạo nhận xét…' : 'Xem chi tiết'}
         </button>
+        <button type="button" class="tts-btn back-btn" data-action="exam-exit">Kết thúc</button>
       </footer>
     </section>`;
 }
@@ -514,6 +597,7 @@ function paint() {
   if (!rootEl) return;
   const savedAudio = captureAudioState();
   if (state.view === 'taking' && state.content) renderTaking();
+  else if (state.view === 'score') renderScore();
   else if (state.view === 'review') renderReview();
   else if (state.view === 'retest') renderRetest();
   else renderPicker();
@@ -535,6 +619,17 @@ function onRootClick(event) {
   if (tab) {
     state.activeSectionId = tab.getAttribute('data-id') || '';
     paint();
+    return;
+  }
+  const jump = event.target.closest('[data-action="exam-jump"]');
+  if (jump) {
+    const key = jump.getAttribute('data-key') || '';
+    const [section] = key.split(':');
+    if (section && section !== state.activeSectionId) {
+      state.activeSectionId = section;
+      paint();
+    }
+    rootEl?.querySelector(`.quiz-question[data-key="${key}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     return;
   }
   const option = event.target.closest('[data-action="quiz-option"]');
@@ -560,6 +655,10 @@ function onRootClick(event) {
     paint();
     void loadExamList(token);
     void loadHistory(token);
+    return;
+  }
+  if (event.target.closest('[data-action="exam-view-detail"]')) {
+    void requestDetailedReview(token);
     return;
   }
   if (event.target.closest('[data-action="exam-advance"]')) {

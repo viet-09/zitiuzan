@@ -37,7 +37,7 @@ async function extractFunctionError(error) {
  * @param {{system?:string, history?:Array, user?:string, schema?:object, audio?:{base64:string,mimeType:string}}} body
  * @returns {Promise<string>}
  */
-async function callGeminiProxy(body) {
+async function callGeminiProxy(body, feature) {
   const sb = await getClient();
   if (!sb) {
     throw new Error('Chưa đăng nhập. Vui lòng đăng nhập để dùng trợ lý AI.');
@@ -47,7 +47,7 @@ async function callGeminiProxy(body) {
   let data;
   let error;
   try {
-    ({ data, error } = await sb.functions.invoke('gemini-proxy', { body: { ...body, model } }));
+    ({ data, error } = await sb.functions.invoke('gemini-proxy', { body: { ...body, model, feature } }));
   } catch (networkErr) {
     throw new Error(`Không thể kết nối tới máy chủ AI: ${networkErr && networkErr.message ? networkErr.message : networkErr}`);
   }
@@ -71,7 +71,7 @@ async function callGeminiProxy(body) {
  * @returns {Promise<string>}
  */
 export async function askText({ system, history = [], user }) {
-  return callGeminiProxy({ system, history, user: String(user || '') });
+  return callGeminiProxy({ system, history, user: String(user || '') }, 'tutor');
 }
 
 /**
@@ -80,7 +80,7 @@ export async function askText({ system, history = [], user }) {
  * @returns {Promise<object>}
  */
 export async function askJSON({ system, history = [], user, schema }) {
-  const text = await callGeminiProxy({ system, history, user: String(user || ''), schema });
+  const text = await callGeminiProxy({ system, history, user: String(user || ''), schema }, 'voice');
   try {
     return JSON.parse(text);
   } catch (parseErr) {
@@ -106,7 +106,7 @@ export async function askAudio({ system, history = [], audioBase64, mimeType, pr
     user: promptText ? String(promptText) : undefined,
     schema,
     audio: { base64: audioBase64, mimeType: mimeType || 'audio/webm' },
-  });
+  }, 'voice');
 
   if (schema) {
     try {

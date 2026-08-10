@@ -29,6 +29,7 @@ function parseHash(hash) {
   if (parts[0] === 'voice') return { name: 'voice', params: [] };
   if (parts[0] === 'leaderboard') return { name: 'leaderboard', params: [] };
   if (parts[0] === 'exam') return { name: 'exam', params: [] };
+  if (parts[0] === 'profile') return { name: 'profile', params: [] };
   return { name: 'dashboard', params: [] };
 }
 
@@ -68,6 +69,7 @@ function updateRouteMetadata(routeName) {
     voice: 'Luyện nói',
     leaderboard: 'Bảng xếp hạng',
     exam: 'Thi thử',
+    profile: 'Hồ sơ cá nhân',
   };
   const label = labels[routeName] || labels.dashboard;
   document.title = `${label} – 日本語総まとめ N2`;
@@ -102,6 +104,8 @@ function render() {
       result = _routes.leaderboard(_rootEl);
     } else if (name === 'exam' && typeof _routes.exam === 'function') {
       result = _routes.exam(_rootEl);
+    } else if (name === 'profile' && typeof _routes.profile === 'function') {
+      result = _routes.profile(_rootEl);
     } else if (typeof _routes.dashboard === 'function') {
       result = _routes.dashboard(_rootEl);
     }

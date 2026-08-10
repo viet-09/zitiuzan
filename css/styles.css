@@ -2322,6 +2322,47 @@ body.furigana-off rt {
 .tutor-context-banner span { flex: 1; }
 .tutor-context-banner button { width: 44px; height: 44px; border: 0; background: transparent; cursor: pointer; }
 
+/* Top-right account avatar — persistent across every page, like a Google
+   account icon; opens the dedicated #/profile page. */
+.account-avatar-btn {
+    position: fixed;
+    top: 14px;
+    right: 14px;
+    z-index: 60;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border: 1px solid var(--border-dark);
+    border-radius: 50%;
+    background: var(--bg-card);
+    cursor: pointer;
+    display: inline-grid;
+    place-items: center;
+    overflow: hidden;
+}
+.account-avatar-btn .profile-avatar { width: 100%; height: 100%; flex: none; border-radius: 0; }
+
+.profile-page {
+    max-width: 480px;
+    margin: 0 auto;
+}
+.profile-page__head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+    padding: 28px 0;
+}
+.profile-page__avatar .profile-avatar { width: 88px; height: 88px; flex-basis: 88px; font-size: 44px; }
+.profile-page__email { color: var(--text-muted); font-family: var(--font-sans); font-size: 13px; }
+.profile-page__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
 /* Profile */
 .masthead-tools { align-items: center; gap: 10px; flex-wrap: wrap; }
 .profile-mount { display: inline-flex; }
@@ -2588,6 +2629,7 @@ body.furigana-off rt {
     .streak-pet-button,
     .streak-pet-card__copy,
     .streak-pet-status { grid-column: 1; grid-row: auto; }
+    .exam-tracker-grid { grid-template-columns: repeat(auto-fill, minmax(34px, 1fr)); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2977,6 +3019,81 @@ body.furigana-off rt {
     font-size: 20px;
     font-variant-numeric: tabular-nums;
     color: var(--accent-red);
+}
+
+.exam-advance-top {
+    padding: 8px 14px;
+    min-height: 36px;
+    font-size: 11px;
+    margin-left: auto;
+}
+
+/* Fixed top-right placement only kicks in once the viewport is wide enough
+   that it lands in the empty margin beside .container's 1000px column
+   (@media below) — otherwise it would float on top of the questions. */
+.exam-tracker {
+    position: static;
+    width: auto;
+    margin-bottom: 14px;
+    padding: 12px;
+    border: 1px solid var(--border-dark);
+    border-radius: var(--radius);
+    background: var(--paper-2);
+}
+
+@media (min-width: 1300px) {
+    .exam-tracker {
+        position: fixed;
+        top: 90px;
+        right: 20px;
+        width: 176px;
+        max-height: calc(100vh - 110px);
+        overflow-y: auto;
+        margin-bottom: 0;
+        z-index: 20;
+    }
+}
+
+.exam-tracker-title {
+    margin: 0 0 8px;
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+}
+
+.exam-tracker-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+}
+
+.exam-tracker-cell {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+}
+
+.exam-tracker-cell:hover {
+    border-color: var(--border-dark);
+}
+
+.exam-tracker-cell.is-answered {
+    background: var(--accent-green-bg);
+    border-color: var(--accent-green-border);
+    color: var(--accent-green);
 }
 
 .exam-audio-player {

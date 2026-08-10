@@ -11,11 +11,12 @@ import { renderTutor } from './tutor.js';
 import { renderVoice } from './voice.js';
 import { renderLeaderboard } from './leaderboard.js';
 import { renderExam } from './exam.js';
+import { renderProfilePage } from './profile-page.js';
 import {
     mountProfile,
-    openProfileDialog,
-    hasSeenProfilePrompt,
     markProfilePromptSeen,
+    getProfile,
+    renderAvatar,
     PROFILE_UPDATED_EVENT,
 } from './profile.js';
 import { openSignInGate } from './auth.js';
@@ -60,6 +61,15 @@ function wireBottomNav() {
             else if (route === 'exam') navigate('#/exam');
         });
     });
+}
+
+function wireAccountButton() {
+    const btn = document.getElementById('btn-account');
+    if (!btn) return;
+    const paint = () => { btn.innerHTML = renderAvatar(getProfile(), { decorative: true }); };
+    btn.addEventListener('click', () => navigate('#/profile'));
+    window.addEventListener(PROFILE_UPDATED_EVENT, paint);
+    paint();
 }
 
 async function loadLessons() {
@@ -139,31 +149,25 @@ async function bootstrap() {
     initFuriganaToggle();
     wireSettingsButton();
     wireBottomNav();
+    wireAccountButton();
     // First-visit choice is now gated explicitly below (sign-in vs. offline
     // name/avatar prompt), so mountProfile never auto-opens on its own.
     const profileController = mountProfile('#profile-mount', { promptOnFirstVisit: false });
 
-    // Auth sync — pull config, decide the first-visit gate, listen for
-    // sign-in, migrate legacy localStorage once, then pull cloud state into
-    // the in-memory store. Degrades gracefully when Supabase isn't
-    // configured (offline / no credentials yet).
+    // Auth sync — pull config, enforce the mandatory sign-in gate, listen
+    // for sign-in, migrate legacy localStorage once, then pull cloud state
+    // into the in-memory store.
     setTimeout(async () => {
         const sb = await supabaseReady();
         const user = sb ? await currentUser() : null;
 
-        if (!hasSeenProfilePrompt()) {
-            if (user) {
-                // Already signed in (restored session) — nothing to ask.
-                markProfilePromptSeen();
-            } else {
-                openSignInGate({
-                    trigger: profileButton(profileController),
-                    onSkip: () => {
-                        markProfilePromptSeen();
-                        openProfileDialog({ firstVisit: true, trigger: profileButton(profileController) });
-                    },
-                });
-            }
+        if (user) {
+            markProfilePromptSeen();
+        } else {
+            // No offline mode — the app requires a Google session. The gate
+            // has no close/skip affordance; it stays up until sign-in redirects.
+            openSignInGate({ trigger: profileButton(profileController) });
+            return;
         }
 
         if (!sb) return;
@@ -214,6 +218,7 @@ async function bootstrap() {
             voice: renderVoice,
             leaderboard: renderLeaderboard,
             exam: renderExam,
+            profile: renderProfilePage,
         },
         rootEl
     );

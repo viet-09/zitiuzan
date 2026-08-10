@@ -32,7 +32,10 @@ declare const Deno: {
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
-const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') ?? '';
+// Voice conversation gets its own key where set, so heavy tutor/exam usage
+// elsewhere can't rate-limit live voice sessions — falls back to the shared
+// GEMINI_API_KEY when a voice-specific one isn't configured.
+const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY_VOICE') || Deno.env.get('GEMINI_API_KEY') || '';
 const DEFAULT_LIVE_MODEL = Deno.env.get('GEMINI_LIVE_MODEL') ?? 'gemini-3.1-flash-live-preview';
 
 const ALLOWED_LIVE_MODELS = new Set([

@@ -28,8 +28,17 @@ declare const Deno: {
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
-const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') ?? '';
+const GEMINI_API_KEY_SHARED = Deno.env.get('GEMINI_API_KEY') ?? '';
+const GEMINI_API_KEY_TUTOR = Deno.env.get('GEMINI_API_KEY_TUTOR') || GEMINI_API_KEY_SHARED;
+const GEMINI_API_KEY_VOICE = Deno.env.get('GEMINI_API_KEY_VOICE') || GEMINI_API_KEY_SHARED;
 const DEFAULT_MODEL = Deno.env.get('GEMINI_MODEL') ?? 'gemini-3.5-flash-lite';
+
+/** Each page (tutor Q&A, voice conversation) gets its own key where set, so
+ * heavy usage on one page can't rate-limit the other — falls back to the
+ * shared GEMINI_API_KEY when a page-specific one isn't configured. */
+function keyForFeature(feature: unknown): string {
+  return feature === 'voice' ? GEMINI_API_KEY_VOICE : GEMINI_API_KEY_TUTOR;
+}
 
 // The client (Settings modal) may request a faster/slower model, but only
 // from this allowlist — never forward an arbitrary client-supplied string
@@ -99,7 +108,7 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (req.method !== 'POST') return jsonResponse({ error: 'Method not allowed' }, 405);
 
-  if (!GEMINI_API_KEY || !SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  if (!GEMINI_API_KEY_SHARED || !SUPABASE_URL || !SUPABASE_ANON_KEY) {
     return jsonResponse({ error: 'Server misconfigured: missing secrets' }, 500);
   }
 
@@ -127,6 +136,7 @@ Deno.serve(async (req) => {
     schema?: unknown;
     audio?: unknown;
     model?: unknown;
+    feature?: unknown;
   } = {};
   try {
     raw = await req.json();
@@ -163,7 +173,7 @@ Deno.serve(async (req) => {
     generationConfig.responseSchema = schema;
   }
 
-  const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${GEMINI_API_KEY}`;
+  const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${keyForFeature(raw.feature)}`;
 
   try {
     const geminiRes = await fetch(geminiUrl, {

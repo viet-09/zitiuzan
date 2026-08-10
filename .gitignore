@@ -23,6 +23,14 @@ node_modules/
 # Resumable Gemini extraction checkpoints; canonical JSON is tracked instead
 data/book/*.draft.json
 data/book/*.tmp
+
+# Exam answer keys (answerIndex/referenceNote) — the entire point of
+# exam_content's zero-client-policy RLS + exam-fetch's server-side answer
+# stripping is that these never reach the browser before/during a test.
+# Committing the canonical JSON defeats that outright: this repo is public,
+# so anyone could read every sitting's correct answers straight from git
+# history. Only the DB (loaded via scripts/load-exam.mjs) is canonical now.
+data/exams/*.json
 data/exams/*.draft.json
 data/exams/*.tmp
 
