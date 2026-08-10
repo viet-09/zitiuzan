@@ -2629,7 +2629,14 @@ body.furigana-off rt {
     .streak-pet-button,
     .streak-pet-card__copy,
     .streak-pet-status { grid-column: 1; grid-row: auto; }
-    .exam-tracker-grid { grid-template-columns: repeat(auto-fill, minmax(34px, 1fr)); }
+    .exam-tracker-grid { grid-template-columns: repeat(auto-fill, minmax(30px, 1fr)); gap: 4px; }
+    .exam-tracker { padding: 8px; margin-bottom: 10px; }
+    .exam-tracker-cell { font-size: 10px; }
+    .account-avatar-btn { top: 8px; right: 8px; width: 30px; height: 30px; }
+    .exam-timer-bar { padding: 8px 10px; gap: 8px; }
+    .exam-timer-phase { font-size: 11px; }
+    .exam-timer-clock { font-size: 16px; }
+    .exam-advance-top { padding: 6px 10px; min-height: 30px; font-size: 9px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

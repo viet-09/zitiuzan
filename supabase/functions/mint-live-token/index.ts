@@ -7,12 +7,18 @@
 // Body: { model?: string }
 // Response: { accessToken: string, expiresAt: string }
 //
-// Reference: https://ai.google.dev/gemini-api/docs/ephemeral-tokens
+// Reference: https://ai.google.dev/gemini-api/docs/live-api/ephemeral-tokens
 // The token is single-use (uses:1), must start a session within 1 minute
 // (newSessionExpireTime), and that session may run for up to 30 minutes
 // (expireTime). js/live.js connects with `?access_token=` against the
-// *v1alpha* "Constrained" WebSocket variant — ephemeral tokens are only
-// supported on v1alpha, unlike the rest of this app's Gemini calls.
+// *v1alpha* "Constrained" WebSocket variant.
+//
+// The auth_tokens.create request schema constraining a token to a specific
+// Live model/config is `bidiGenerateContentSetup` (verified directly against
+// the live API on 2026-08-10) — NOT `liveConnectConstraints`, which the
+// public docs still describe but the API now rejects with "Cannot find
+// field". Using the v1beta endpoint (confirmed working); the WebSocket
+// connect in js/live.js is a separate endpoint and stays on v1alpha.
 //
 // Auth: Supabase verifies the Authorization JWT automatically. Anonymous → 401.
 // Secrets (set via `supabase secrets set`):
@@ -112,7 +118,7 @@ Deno.serve(async (req) => {
   const newSessionExpireTime = new Date(now + 60_000).toISOString();
 
   try {
-    const tokenRes = await fetch('https://generativelanguage.googleapis.com/v1alpha/auth_tokens', {
+    const tokenRes = await fetch('https://generativelanguage.googleapis.com/v1beta/auth_tokens', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -122,9 +128,9 @@ Deno.serve(async (req) => {
         uses: 1,
         expireTime,
         newSessionExpireTime,
-        liveConnectConstraints: {
+        bidiGenerateContentSetup: {
           model: `models/${model}`,
-          config: { responseModalities: ['AUDIO'] },
+          generationConfig: { responseModalities: ['AUDIO'] },
         },
       }),
     });
