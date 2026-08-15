@@ -10,6 +10,9 @@ scratch_*.jpg
 scratch_*.jpeg
 scratch_*.js
 
+# Scratch/staging area for files pending manual deletion (repo cleanup)
+_cleanup_trash/
+
 # Local editor / OS state
 .vscode/
 .DS_Store
