@@ -9,15 +9,17 @@
 //
 // Auth: Supabase verifies the Authorization JWT automatically. Anonymous → 401.
 // Secrets (set via `supabase secrets set`):
-//   GEMINI_API_KEY       — Google AI Studio key
+//   GEMINI_API_KEYS      — comma-separated pool of Google AI Studio keys
+//                          (see _shared/gemini-key-pool.ts; falls back to
+//                          the single GEMINI_API_KEY secret if unset)
 //   SUPABASE_URL         — auto-injected
 //   SUPABASE_ANON_KEY    — auto-injected (used only to forward the user's JWT)
 //
 // Deploy:
 //   supabase functions deploy evaluate-ai --project-ref <ref>
-//   supabase secrets set GEMINI_API_KEY=... --project-ref <ref>
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.0';
+import { hasGeminiKeys, withGeminiKeyFailover } from '../_shared/gemini-key-pool.ts';
 
 declare const Deno: {
   env: { get(name: string): string | undefined };
@@ -26,8 +28,7 @@ declare const Deno: {
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
-const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') ?? '';
-const GEMINI_MODEL = Deno.env.get('GEMINI_MODEL') ?? 'gemini-2.0-flash';
+const GEMINI_MODEL = Deno.env.get('GEMINI_MODEL') ?? 'gemini-3.5-flash';
 
 const ALLOWED_LEVELS = new Set(['N5', 'N4', 'N3', 'N2', 'N1']);
 const COOLDOWN_MS = 60_000; // per-user rate-limit window
@@ -111,7 +112,7 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (req.method !== 'POST') return jsonResponse({ error: 'Method not allowed' }, 405);
 
-  if (!GEMINI_API_KEY || !SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  if (!hasGeminiKeys() || !SUPABASE_URL || !SUPABASE_ANON_KEY) {
     return jsonResponse({ error: 'Server misconfigured: missing secrets' }, 500);
   }
 
@@ -166,38 +167,41 @@ Deno.serve(async (req) => {
     `Recent lesson IDs: ${recent.join(', ') || '(none)'}`,
   ].join('\n');
 
-  const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent?key=${GEMINI_API_KEY}`;
-
-  let result: { level: string; reasoning: string } | null = null;
-  try {
-    const geminiRes = await fetch(geminiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        generationConfig: {
-          responseMimeType: 'application/json',
-          temperature: 0.2,
-        },
-      }),
-    });
-    if (!geminiRes.ok) {
-      const errText = await geminiRes.text().catch(() => '');
-      console.error('Gemini non-OK:', geminiRes.status, errText.slice(0, 200));
-    } else {
+  const attempt = await withGeminiKeyFailover<{ level: string; reasoning: string }>(async (key) => {
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent?key=${key}`;
+    try {
+      const geminiRes = await fetch(geminiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          generationConfig: {
+            responseMimeType: 'application/json',
+            temperature: 0.2,
+          },
+        }),
+      });
+      if (!geminiRes.ok) {
+        const errText = await geminiRes.text().catch(() => '');
+        return { ok: false, status: geminiRes.status, errorText: errText.slice(0, 200) };
+      }
       const geminiJson = await geminiRes.json();
       const text = geminiJson?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
-      result = safeParseLevel(text);
+      const parsed = safeParseLevel(text);
+      if (!parsed) return { ok: false, status: 502, errorText: 'unparseable response' };
+      return { ok: true, value: parsed };
+    } catch (err) {
+      return { ok: false, status: 502, errorText: String(err) };
     }
-  } catch (err) {
-    console.error('Gemini call failed:', err);
-  }
+  });
 
-  // On parse failure, refuse to persist and tell the client to retry. We
-  // never silently write the wrong level.
-  if (!result) {
+  // On failure, refuse to persist and tell the client to retry. We never
+  // silently write the wrong level.
+  if (!attempt.ok) {
+    console.error('Gemini call failed after trying all keys:', attempt.status, attempt.errorText);
     return jsonResponse({ error: 'AI returned an unparseable response' }, 502);
   }
+  const result = attempt.value;
 
   const { error: updateErr } = await sb
     .from('user_profiles')

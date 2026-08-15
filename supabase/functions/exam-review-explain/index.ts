@@ -14,9 +14,12 @@
 // Idempotent: if the attempt was already explained (or has nothing wrong to
 // explain), returns the existing row without calling Gemini again.
 // Secrets: SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY (auto-injected),
-//          GEMINI_API_KEY_EXAM (falls back to GEMINI_API_KEY if unset).
+//          GEMINI_API_KEYS — comma-separated pool of keys (see
+//          _shared/gemini-key-pool.ts; falls back to the single
+//          GEMINI_API_KEY secret if unset).
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.0';
+import { hasGeminiKeys, withGeminiKeyFailover } from '../_shared/gemini-key-pool.ts';
 
 declare const Deno: {
   env: { get(name: string): string | undefined };
@@ -26,7 +29,6 @@ declare const Deno: {
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
-const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY_EXAM') || Deno.env.get('GEMINI_API_KEY') || '';
 const GEMINI_MODEL = Deno.env.get('GEMINI_MODEL') ?? 'gemini-3.5-flash';
 
 const COOLDOWN_MS = 15_000;
@@ -85,24 +87,32 @@ function questionId(q: { section: string; part: string; number: number }): strin
 }
 
 async function callGemini(systemInstruction: string, prompt: string, schema: Record<string, unknown>) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent?key=${GEMINI_API_KEY}`;
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      systemInstruction: { parts: [{ text: systemInstruction }] },
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0.3, responseMimeType: 'application/json', responseSchema: schema },
-    }),
+  const attempt = await withGeminiKeyFailover<unknown>(async (key) => {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent?key=${key}`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: systemInstruction }] },
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.3, responseMimeType: 'application/json', responseSchema: schema },
+      }),
+    });
+    if (!res.ok) {
+      const detail = await res.text().catch(() => '');
+      return { ok: false, status: res.status, errorText: detail.slice(0, 300) };
+    }
+    const json = await res.json();
+    const text = json?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+    if (!text) return { ok: false, status: 502, errorText: 'Gemini returned no content' };
+    try {
+      return { ok: true, value: JSON.parse(text) };
+    } catch (err) {
+      return { ok: false, status: 502, errorText: `JSON parse failed: ${err}` };
+    }
   });
-  if (!res.ok) {
-    const detail = await res.text().catch(() => '');
-    throw new Error(`Gemini HTTP ${res.status}: ${detail.slice(0, 300)}`);
-  }
-  const json = await res.json();
-  const text = json?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
-  if (!text) throw new Error('Gemini returned no content');
-  return JSON.parse(text);
+  if (!attempt.ok) throw new Error(`Gemini HTTP ${attempt.status}: ${attempt.errorText}`);
+  return attempt.value;
 }
 
 const REVIEW_SCHEMA = {
@@ -149,7 +159,7 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (req.method !== 'POST') return jsonResponse({ error: 'Method not allowed' }, 405);
 
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !SUPABASE_SERVICE_ROLE_KEY || !GEMINI_API_KEY) {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !SUPABASE_SERVICE_ROLE_KEY || !hasGeminiKeys()) {
     return jsonResponse({ error: 'Server misconfigured: missing secrets' }, 500);
   }
 

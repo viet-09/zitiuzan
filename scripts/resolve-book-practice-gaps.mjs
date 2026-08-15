@@ -9,23 +9,28 @@
 // book JSON files (these are git-tracked, unlike data/exams/*.json, so a bad
 // run is recoverable via git diff/checkout).
 //
-// Usage:
-//   GEMINI_API_KEY=... node scripts/resolve-book-practice-gaps.mjs --category grammar
+// Usage (GEMINI_API_KEYS accepts a comma-separated pool with automatic
+// failover — see scripts/lib/gemini-key-pool.mjs; GEMINI_API_KEY also works
+// for a single key):
+//   GEMINI_API_KEYS=key1,key2 node scripts/resolve-book-practice-gaps.mjs --category grammar
 //   GEMINI_API_KEY=... node scripts/resolve-book-practice-gaps.mjs --category grammar --limit g1d1,g1d2
 //   GEMINI_API_KEY=... node scripts/resolve-book-practice-gaps.mjs --category grammar --dry-run
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { loadGeminiKeyPool, createGeminiKeyRotator, GeminiKeyError } from './lib/gemini-key-pool.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const BOOK_DIR = join(ROOT, 'data', 'book');
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.GEMINI_KEY;
-if (!GEMINI_API_KEY) {
-  console.error('Missing GEMINI_API_KEY (env).');
+const KEY_POOL = loadGeminiKeyPool();
+if (KEY_POOL.length === 0) {
+  console.error('Missing Gemini API key (set GEMINI_API_KEY or GEMINI_API_KEYS).');
   process.exit(1);
 }
+const rotator = createGeminiKeyRotator(KEY_POOL);
+console.log(`Using a pool of ${KEY_POOL.length} Gemini API key(s).`);
 
 const MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
 const GEN_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
@@ -63,7 +68,7 @@ async function throttle() {
   lastCallAt = Date.now();
 }
 
-async function solveLesson(category, lessonId, practice, indexes) {
+async function solveLesson(category, lessonId, practice, indexes, key) {
   const list = indexes
     .map((i) => {
       const q = practice[i];
@@ -82,7 +87,7 @@ ${list}
 CHỈ trả về JSON thuần, không markdown, không giải thích thêm.`;
 
   await throttle();
-  const url = `${GEN_BASE}/${encodeURIComponent(MODEL)}:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
+  const url = `${GEN_BASE}/${encodeURIComponent(MODEL)}:generateContent?key=${encodeURIComponent(key)}`;
   const body = {
     contents: [{ role: 'user', parts: [{ text: prompt }] }],
     generationConfig: {
@@ -105,35 +110,23 @@ CHỈ trả về JSON thuần, không markdown, không giải thích thêm.`;
     },
   };
 
-  let lastError;
-  for (let attempt = 0; attempt < 5; attempt += 1) {
-    try {
-      const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-      if (!res.ok) {
-        const text = await res.text();
-        const retryable = [429, 500, 502, 503, 504].includes(res.status);
-        if (!retryable || attempt === 4) throw new Error(`generateContent failed (${res.status}): ${text.slice(0, 300)}`);
-        await new Promise((r) => setTimeout(r, Math.min(30000, 2 ** attempt * 1000 + 2000)));
-        continue;
-      }
-      const data = await res.json();
-      const parts = data?.candidates?.[0]?.content?.parts || [];
-      const text = parts.map((p) => (p && typeof p.text === 'string' ? p.text : '')).join('');
-      if (!text) throw new Error('Empty response from Gemini.');
-      const parsed = JSON.parse(text);
-      const out = new Map();
-      for (const item of Array.isArray(parsed?.items) ? parsed.items : []) {
-        const i = Number.isInteger(item?.index) ? item.index : -1;
-        const ai = Number.isInteger(item?.answerIndex) ? item.answerIndex : -1;
-        if (indexes.includes(i) && ai >= 0 && ai < (practice[i].options || []).length) out.set(i, ai);
-      }
-      return out;
-    } catch (err) {
-      lastError = err;
-      if (attempt === 4) throw lastError;
-    }
+  const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new GeminiKeyError(res.status, `generateContent failed (${res.status}): ${text.slice(0, 300)}`);
   }
-  throw lastError;
+  const data = await res.json();
+  const parts = data?.candidates?.[0]?.content?.parts || [];
+  const text = parts.map((p) => (p && typeof p.text === 'string' ? p.text : '')).join('');
+  if (!text) throw new Error('Empty response from Gemini.');
+  const parsed = JSON.parse(text);
+  const out = new Map();
+  for (const item of Array.isArray(parsed?.items) ? parsed.items : []) {
+    const i = Number.isInteger(item?.index) ? item.index : -1;
+    const ai = Number.isInteger(item?.answerIndex) ? item.answerIndex : -1;
+    if (indexes.includes(i) && ai >= 0 && ai < (practice[i].options || []).length) out.set(i, ai);
+  }
+  return out;
 }
 
 async function runCategory(cat) {
@@ -151,7 +144,7 @@ async function runCategory(cat) {
     if (indexes.length === 0) continue;
     totalGapped += indexes.length;
     try {
-      const resolved = await solveLesson(cat, lessonId, practice, indexes);
+      const resolved = await rotator.run((key) => solveLesson(cat, lessonId, practice, indexes, key));
       for (const [i, ai] of resolved.entries()) {
         practice[i].answerIndex = ai;
         practice[i].answerSource = 'ai-solved';

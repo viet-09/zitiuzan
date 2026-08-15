@@ -19,8 +19,10 @@ page images (no new source needed beyond what extraction already used):
      re-asks Gemini to reconstruct the four-blank-group layout with ★ in the
      correct blank, based on the same page images.
 
-Usage:
-  GEMINI_API_KEY=... python scripts/fix_underlined_words.py [--sitting 2019-12 ...] [--dry-run]
+Usage (GEMINI_API_KEYS accepts a comma-separated pool with automatic
+failover on a quota/invalid-key error — see gemini_key_pool.py;
+GEMINI_API_KEY also works for a single key):
+  GEMINI_API_KEYS=key1,key2 python scripts/fix_underlined_words.py [--sitting 2019-12 ...] [--dry-run]
   (no --sitting filters -> processes all 31 sittings for fix 1; fix 2 always
   runs only for its two known-affected sittings)
 """
@@ -40,6 +42,8 @@ from pathlib import Path
 from typing import Any
 
 import fitz
+
+from gemini_key_pool import GeminiKeyError, KeyRotator, load_key_pool
 
 ROOT = Path(__file__).resolve().parents[1]
 EXAM_DATA_DIR = ROOT / "data" / "exams"
@@ -109,7 +113,12 @@ def _throttle() -> None:
     _last_call_at = time.monotonic()
 
 
-def api_request(api_key: str, model: str, task: str, schema: dict[str, Any], images: list[str], retries: int = 6) -> dict[str, Any]:
+def api_request(api_key: str, model: str, task: str, schema: dict[str, Any], images: list[str], retries: int = 2) -> dict[str, Any]:
+    """Makes the actual call for ONE key. `retries` only covers transient
+    network hiccups on that same key — a real HTTP failure (quota, invalid
+    key, upstream error) raises GeminiKeyError immediately so the caller's
+    KeyRotator can move on to the next key in the pool instead of wasting
+    time retrying a key that's already known-bad."""
     _throttle()
     parts: list[dict[str, Any]] = [{"text": task}]
     parts.extend({"inlineData": {"mimeType": "image/jpeg", "data": image}} for image in images)
@@ -131,7 +140,6 @@ def api_request(api_key: str, model: str, task: str, schema: dict[str, Any], ima
     body = json.dumps(payload).encode("utf-8")
 
     for attempt in range(retries):
-        raw_text = ""
         try:
             request = urllib.request.Request(endpoint, data=body, method="POST", headers={"Content-Type": "application/json"})
             with urllib.request.urlopen(request, timeout=300) as response:
@@ -144,17 +152,17 @@ def api_request(api_key: str, model: str, task: str, schema: dict[str, Any], ima
                 raise ValueError("Gemini response is not an object")
             return parsed
         except urllib.error.HTTPError as error:
-            retryable = error.code in {408, 409, 429, 500, 502, 503, 504}
-            if not retryable or attempt + 1 >= retries:
-                detail = error.read().decode("utf-8", "replace")[:500]
-                raise RuntimeError(f"Gemini HTTP {error.code}: {detail}") from error
+            detail = error.read().decode("utf-8", "replace")[:500]
+            transient = error.code in {408, 409, 500, 502, 503, 504}
+            if not transient or attempt + 1 >= retries:
+                raise GeminiKeyError(error.code, f"Gemini HTTP {error.code}: {detail}") from error
         except json.JSONDecodeError as error:
             if attempt + 1 >= retries:
                 raise RuntimeError(f"Gemini response failed: {error}") from error
         except (urllib.error.URLError, TimeoutError, KeyError, ValueError) as error:
             if attempt + 1 >= retries:
                 raise RuntimeError(f"Gemini response failed: {error}") from error
-        time.sleep(min(60, 2**attempt + 1))
+        time.sleep(min(15, 2**attempt + 1))
     raise RuntimeError("Gemini request exhausted retries")
 
 
@@ -200,7 +208,7 @@ def find_part(exam: dict[str, Any], part_num: int) -> dict[str, Any] | None:
     return None
 
 
-def fix_underline(exam: dict[str, Any], images: list[str], api_key: str, model: str, dry_run: bool) -> tuple[int, list[str]]:
+def fix_underline(exam: dict[str, Any], images: list[str], rotator: KeyRotator, model: str, dry_run: bool) -> tuple[int, list[str]]:
     part = find_part(exam, 1)
     if part is None or not part.get("questions"):
         return 0, ["no 問題1 part found"]
@@ -216,7 +224,7 @@ def fix_underline(exam: dict[str, Any], images: list[str], api_key: str, model: 
         "sentence but there genuinely is no visible underline on it, set found=false and return the "
         "sentence completely unchanged with no markers. Sentences:\n" + numbered
     )
-    result = api_request(api_key, model, task, UNDERLINE_SCHEMA, images)
+    result = rotator.run(lambda key: api_request(key, model, task, UNDERLINE_SCHEMA, images))
 
     by_number = {q["number"]: q for q in part["questions"]}
     applied = 0
@@ -245,7 +253,7 @@ def fix_underline(exam: dict[str, Any], images: list[str], api_key: str, model: 
     return applied, notes
 
 
-def fix_word_order(exam: dict[str, Any], images: list[str], api_key: str, model: str, dry_run: bool) -> tuple[int, list[str]]:
+def fix_word_order(exam: dict[str, Any], images: list[str], rotator: KeyRotator, model: str, dry_run: bool) -> tuple[int, list[str]]:
     part = find_part(exam, 8)
     if part is None or not part.get("questions"):
         return 0, ["no 問題8 part found"]
@@ -264,7 +272,7 @@ def fix_word_order(exam: dict[str, Any], images: list[str], api_key: str, model:
         "sentence but cannot determine the ★ position, set found=false and return it unchanged. "
         "Sentences:\n" + numbered
     )
-    result = api_request(api_key, model, task, WORD_ORDER_SCHEMA, images)
+    result = rotator.run(lambda key: api_request(key, model, task, WORD_ORDER_SCHEMA, images))
 
     by_number = {q["number"]: q for q in part["questions"]}
     applied = 0
@@ -301,9 +309,11 @@ def main() -> int:
     parser.add_argument("--dry-run", action="store_true", help="Report what would change without writing")
     args = parser.parse_args()
 
-    api_key = os.environ.get("GEMINI_API_KEY", "").strip()
-    if not api_key:
-        raise SystemExit("GEMINI_API_KEY is required")
+    keys = load_key_pool()
+    if not keys:
+        raise SystemExit("GEMINI_API_KEY or GEMINI_API_KEYS is required")
+    rotator = KeyRotator(keys)
+    print(f"Using a pool of {len(keys)} Gemini API key(s).")
 
     files = sorted(EXAM_DATA_DIR.glob("n2-*.json"))
     files = [f for f in files if not f.name.endswith(".draft.json") and not f.name.endswith(".tmp")]
@@ -321,14 +331,14 @@ def main() -> int:
         print(f"\n=== {sitting} ({main_pdf.relative_to(ROOT)}) ===", flush=True)
         images = render_pages(main_pdf)
 
-        applied, notes = fix_underline(exam, images, api_key, args.model, args.dry_run)
+        applied, notes = fix_underline(exam, images, rotator, args.model, args.dry_run)
         total_underline += applied
         print(f"問題1: {applied}/5 markers applied", flush=True)
         for note in notes:
             print(f"  - {note}", flush=True)
 
         if sitting in WORD_ORDER_TARGETS:
-            applied8, notes8 = fix_word_order(exam, images, api_key, args.model, args.dry_run)
+            applied8, notes8 = fix_word_order(exam, images, rotator, args.model, args.dry_run)
             total_word_order += applied8
             print(f"問題8: {applied8} ★ markers applied", flush=True)
             for note in notes8:

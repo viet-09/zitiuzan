@@ -9,23 +9,28 @@
 // (kanji[] only — NOT reviewKanji[], which is an answer-free recall quiz and
 // must stay that way; flattened sections[].words[]; patterns[]).
 //
-// Usage:
-//   GEMINI_API_KEY=... node scripts/generate-vietnamese-explanations.mjs --category kanji
+// Usage (GEMINI_API_KEYS accepts a comma-separated pool with automatic
+// failover — see scripts/lib/gemini-key-pool.mjs; GEMINI_API_KEY also works
+// for a single key):
+//   GEMINI_API_KEYS=key1,key2 node scripts/generate-vietnamese-explanations.mjs --category kanji
 //   GEMINI_API_KEY=... node scripts/generate-vietnamese-explanations.mjs --category kanji --limit k1d1,k1d2
 //   GEMINI_API_KEY=... node scripts/generate-vietnamese-explanations.mjs --category kanji --dry-run
 
 import { readFileSync, writeFileSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { loadGeminiKeyPool, createGeminiKeyRotator, GeminiKeyError } from './lib/gemini-key-pool.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const BOOK_DIR = join(ROOT, 'data', 'book');
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.GEMINI_KEY;
-if (!GEMINI_API_KEY) {
-  console.error('Missing GEMINI_API_KEY (env).');
+const KEY_POOL = loadGeminiKeyPool();
+if (KEY_POOL.length === 0) {
+  console.error('Missing Gemini API key (set GEMINI_API_KEY or GEMINI_API_KEYS).');
   process.exit(1);
 }
+const rotator = createGeminiKeyRotator(KEY_POOL);
+console.log(`Using a pool of ${KEY_POOL.length} Gemini API key(s).`);
 
 // gemini-3.5-flash's free-tier daily quota (20 req/day/project/model — yes,
 // per DAY despite the misleading "retry in Ns" hint in 429 responses) was
@@ -96,10 +101,10 @@ function flattenItems(category, lesson) {
   return [];
 }
 
-async function uploadPdf(filePath) {
+async function uploadPdf(filePath, key) {
   const displayName = filePath.split(/[\\/]/).pop();
   const numBytes = statSync(filePath).size;
-  const startRes = await fetch(`${UPLOAD_BASE}?key=${encodeURIComponent(GEMINI_API_KEY)}`, {
+  const startRes = await fetch(`${UPLOAD_BASE}?key=${encodeURIComponent(key)}`, {
     method: 'POST',
     headers: {
       'X-Goog-Upload-Protocol': 'resumable',
@@ -136,8 +141,8 @@ async function uploadPdf(filePath) {
   return { name: file.name, uri: file.uri };
 }
 
-async function waitForFileActive(fileUri, fileName) {
-  const url = `${fileUri}?key=${encodeURIComponent(GEMINI_API_KEY)}`;
+async function waitForFileActive(fileUri, fileName, key) {
+  const url = `${fileUri}?key=${encodeURIComponent(key)}`;
   const deadline = Date.now() + 60_000;
   while (Date.now() < deadline) {
     const res = await fetch(url);
@@ -165,7 +170,7 @@ async function throttle() {
   lastCallAt = Date.now();
 }
 
-async function askVietnamese(fileUri, category, lessonId, lesson) {
+async function askVietnamese(fileUri, category, lessonId, lesson, key) {
   const items = flattenItems(category, lesson);
   if (items.length === 0) return [];
   const max = MAX_CHARS[category];
@@ -180,7 +185,7 @@ ${items.map((line, i) => `${i}. ${line}`).join('\n')}
 CHỈ trả về JSON thuần, không markdown, không giải thích thêm.`;
 
   await throttle();
-  const url = `${GEN_BASE}/${encodeURIComponent(MODEL)}:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
+  const url = `${GEN_BASE}/${encodeURIComponent(MODEL)}:generateContent?key=${encodeURIComponent(key)}`;
   const body = {
     contents: [{
       role: 'user',
@@ -209,35 +214,23 @@ CHỈ trả về JSON thuần, không markdown, không giải thích thêm.`;
     },
   };
 
-  let lastError;
-  for (let attempt = 0; attempt < 5; attempt += 1) {
-    try {
-      const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-      if (!res.ok) {
-        const text = await res.text();
-        const retryable = [429, 500, 502, 503, 504].includes(res.status);
-        if (!retryable || attempt === 4) throw new Error(`generateContent failed (${res.status}): ${text.slice(0, 300)}`);
-        await new Promise((r) => setTimeout(r, Math.min(30000, 2 ** attempt * 1000 + 2000)));
-        continue;
-      }
-      const data = await res.json();
-      const parts = data?.candidates?.[0]?.content?.parts || [];
-      const text = parts.map((p) => (p && typeof p.text === 'string' ? p.text : '')).join('');
-      if (!text) throw new Error('Empty response from Gemini.');
-      const parsed = JSON.parse(text);
-      const out = [];
-      for (const item of Array.isArray(parsed?.items) ? parsed.items : []) {
-        const idx = Number.isInteger(item?.index) ? item.index : -1;
-        const vi = typeof item?.vi === 'string' ? item.vi.trim().slice(0, max + 40) : '';
-        if (idx >= 0 && idx < items.length && vi) out.push({ index: idx, vi });
-      }
-      return out;
-    } catch (err) {
-      lastError = err;
-      if (attempt === 4) throw lastError;
-    }
+  const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new GeminiKeyError(res.status, `generateContent failed (${res.status}): ${text.slice(0, 300)}`);
   }
-  throw lastError;
+  const data = await res.json();
+  const parts = data?.candidates?.[0]?.content?.parts || [];
+  const text = parts.map((p) => (p && typeof p.text === 'string' ? p.text : '')).join('');
+  if (!text) throw new Error('Empty response from Gemini.');
+  const parsed = JSON.parse(text);
+  const out = [];
+  for (const item of Array.isArray(parsed?.items) ? parsed.items : []) {
+    const idx = Number.isInteger(item?.index) ? item.index : -1;
+    const vi = typeof item?.vi === 'string' ? item.vi.trim().slice(0, max + 40) : '';
+    if (idx >= 0 && idx < items.length && vi) out.push({ index: idx, vi });
+  }
+  return out;
 }
 
 async function main() {
@@ -255,10 +248,21 @@ async function main() {
   }
 
   const pdfPath = join(pdfDir, BOOKS[category]);
-  console.log(`Uploading ${BOOKS[category]}...`);
-  const { uri, name } = await uploadPdf(pdfPath);
-  console.log(`Uploaded as ${name}`);
-  await waitForFileActive(uri, name);
+
+  // The Files API upload is scoped to whichever key created it, so a
+  // generateContent call using a DIFFERENT key can't reference it — upload
+  // (once) under each key lazily, the first time the rotator actually picks
+  // that key, rather than assuming a single upload works for the whole pool.
+  const fileByKey = new Map();
+  async function ensureUploadedFor(key) {
+    if (fileByKey.has(key)) return fileByKey.get(key);
+    console.log(`Uploading ${BOOKS[category]} (key ...${key.slice(-6)})...`);
+    const { uri, name } = await uploadPdf(pdfPath, key);
+    await waitForFileActive(uri, name, key);
+    console.log(`Uploaded as ${name}`);
+    fileByKey.set(key, uri);
+    return uri;
+  }
 
   const outPath = join(BOOK_DIR, `${category}.vietnamese.json`);
   let out = {};
@@ -269,7 +273,10 @@ async function main() {
     const expected = flattenItems(category, book[lessonId]).length;
     if (expected === 0) { console.log(`${category} ${lessonId}: no items, skipped`); continue; }
     try {
-      const results = await askVietnamese(uri, category, lessonId, book[lessonId]);
+      const results = await rotator.run(async (key) => {
+        const fileUri = await ensureUploadedFor(key);
+        return askVietnamese(fileUri, category, lessonId, book[lessonId], key);
+      });
       const arr = new Array(expected).fill(null);
       for (const { index, vi } of results) arr[index] = vi;
       const filled = arr.filter(Boolean).length;

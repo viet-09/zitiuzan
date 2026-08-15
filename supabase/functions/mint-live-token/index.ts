@@ -22,7 +22,9 @@
 //
 // Auth: Supabase verifies the Authorization JWT automatically. Anonymous → 401.
 // Secrets (set via `supabase secrets set`):
-//   GEMINI_API_KEY       — Google AI Studio key
+//   GEMINI_API_KEYS      — comma-separated pool of Google AI Studio keys
+//                          (see _shared/gemini-key-pool.ts; falls back to
+//                          the single GEMINI_API_KEY secret if unset)
 //   SUPABASE_URL         — auto-injected
 //   SUPABASE_ANON_KEY    — auto-injected (used only to forward the user's JWT)
 //
@@ -30,6 +32,7 @@
 //   supabase functions deploy mint-live-token --project-ref <ref>
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.0';
+import { hasGeminiKeys, withGeminiKeyFailover } from '../_shared/gemini-key-pool.ts';
 
 declare const Deno: {
   env: { get(name: string): string | undefined };
@@ -38,10 +41,6 @@ declare const Deno: {
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
-// Voice conversation gets its own key where set, so heavy tutor/exam usage
-// elsewhere can't rate-limit live voice sessions — falls back to the shared
-// GEMINI_API_KEY when a voice-specific one isn't configured.
-const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY_VOICE') || Deno.env.get('GEMINI_API_KEY') || '';
 const DEFAULT_LIVE_MODEL = Deno.env.get('GEMINI_LIVE_MODEL') ?? 'gemini-3.1-flash-live-preview';
 
 const ALLOWED_LIVE_MODELS = new Set([
@@ -84,7 +83,7 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (req.method !== 'POST') return jsonResponse({ error: 'Method not allowed' }, 405);
 
-  if (!GEMINI_API_KEY || !SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  if (!hasGeminiKeys() || !SUPABASE_URL || !SUPABASE_ANON_KEY) {
     return jsonResponse({ error: 'Server misconfigured: missing secrets' }, 500);
   }
 
@@ -117,37 +116,40 @@ Deno.serve(async (req) => {
   const expireTime = new Date(now + 30 * 60_000).toISOString();
   const newSessionExpireTime = new Date(now + 60_000).toISOString();
 
-  try {
-    const tokenRes = await fetch('https://generativelanguage.googleapis.com/v1beta/auth_tokens', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': GEMINI_API_KEY,
-      },
-      body: JSON.stringify({
-        uses: 1,
-        expireTime,
-        newSessionExpireTime,
-        bidiGenerateContentSetup: {
-          model: `models/${model}`,
-          generationConfig: { responseModalities: ['AUDIO'] },
+  const attempt = await withGeminiKeyFailover<string>(async (key) => {
+    try {
+      const tokenRes = await fetch('https://generativelanguage.googleapis.com/v1beta/auth_tokens', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': key,
         },
-      }),
-    });
-
-    if (!tokenRes.ok) {
-      const errText = await tokenRes.text().catch(() => '');
-      console.error('auth_tokens.create non-OK:', tokenRes.status, errText.slice(0, 300));
-      return jsonResponse({ error: 'Không thể tạo access token cho Gemini Live' }, 502);
+        body: JSON.stringify({
+          uses: 1,
+          expireTime,
+          newSessionExpireTime,
+          bidiGenerateContentSetup: {
+            model: `models/${model}`,
+            generationConfig: { responseModalities: ['AUDIO'] },
+          },
+        }),
+      });
+      if (!tokenRes.ok) {
+        const errText = await tokenRes.text().catch(() => '');
+        return { ok: false, status: tokenRes.status, errorText: errText.slice(0, 300) };
+      }
+      const tokenJson = await tokenRes.json();
+      const accessToken = typeof tokenJson?.name === 'string' ? tokenJson.name : '';
+      if (!accessToken) return { ok: false, status: 502, errorText: 'empty token' };
+      return { ok: true, value: accessToken };
+    } catch (err) {
+      return { ok: false, status: 502, errorText: String(err) };
     }
+  });
 
-    const tokenJson = await tokenRes.json();
-    const accessToken = typeof tokenJson?.name === 'string' ? tokenJson.name : '';
-    if (!accessToken) return jsonResponse({ error: 'Gemini trả về token rỗng' }, 502);
-
-    return jsonResponse({ accessToken, expiresAt: expireTime });
-  } catch (err) {
-    console.error('mint-live-token failed:', err);
+  if (!attempt.ok) {
+    console.error('auth_tokens.create failed after trying all keys:', attempt.status, attempt.errorText);
     return jsonResponse({ error: 'Không thể tạo access token cho Gemini Live' }, 502);
   }
+  return jsonResponse({ accessToken: attempt.value, expiresAt: expireTime });
 });

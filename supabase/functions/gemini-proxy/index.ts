@@ -12,7 +12,9 @@
 //
 // Auth: Supabase verifies the Authorization JWT automatically. Anonymous → 401.
 // Secrets (set via `supabase secrets set`):
-//   GEMINI_API_KEY       — Google AI Studio key
+//   GEMINI_API_KEYS      — comma-separated pool of Google AI Studio keys
+//                          (see _shared/gemini-key-pool.ts; falls back to
+//                          the single GEMINI_API_KEY secret if unset)
 //   SUPABASE_URL         — auto-injected
 //   SUPABASE_ANON_KEY    — auto-injected (used only to forward the user's JWT)
 //
@@ -20,6 +22,7 @@
 //   supabase functions deploy gemini-proxy --project-ref <ref>
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.0';
+import { hasGeminiKeys, withGeminiKeyFailover } from '../_shared/gemini-key-pool.ts';
 
 declare const Deno: {
   env: { get(name: string): string | undefined };
@@ -28,22 +31,14 @@ declare const Deno: {
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
-const GEMINI_API_KEY_SHARED = Deno.env.get('GEMINI_API_KEY') ?? '';
-const GEMINI_API_KEY_TUTOR = Deno.env.get('GEMINI_API_KEY_TUTOR') || GEMINI_API_KEY_SHARED;
-const GEMINI_API_KEY_VOICE = Deno.env.get('GEMINI_API_KEY_VOICE') || GEMINI_API_KEY_SHARED;
 const DEFAULT_MODEL = Deno.env.get('GEMINI_MODEL') ?? 'gemini-3.5-flash-lite';
-
-/** Each page (tutor Q&A, voice conversation) gets its own key where set, so
- * heavy usage on one page can't rate-limit the other — falls back to the
- * shared GEMINI_API_KEY when a page-specific one isn't configured. */
-function keyForFeature(feature: unknown): string {
-  return feature === 'voice' ? GEMINI_API_KEY_VOICE : GEMINI_API_KEY_TUTOR;
-}
 
 // The client (Settings modal) may request a faster/slower model, but only
 // from this allowlist — never forward an arbitrary client-supplied string
-// into the upstream URL.
-const ALLOWED_MODELS = new Set(['gemini-3.5-flash-lite', 'gemini-3.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash']);
+// into the upstream URL. Kept in sync with js/gemini.js's MODEL_SUGGESTIONS;
+// gemini-2.0-flash (fully deprecated) and gemini-2.5-flash (not available to
+// this project's API keys) were removed after both broke evaluate-ai.
+const ALLOWED_MODELS = new Set(['gemini-3.5-flash-lite', 'gemini-3.5-flash']);
 
 const MAX_TEXT_CHARS = 4000;
 const MAX_HISTORY_TURNS = 40;
@@ -108,7 +103,7 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (req.method !== 'POST') return jsonResponse({ error: 'Method not allowed' }, 405);
 
-  if (!GEMINI_API_KEY_SHARED || !SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  if (!hasGeminiKeys() || !SUPABASE_URL || !SUPABASE_ANON_KEY) {
     return jsonResponse({ error: 'Server misconfigured: missing secrets' }, 500);
   }
 
@@ -173,32 +168,37 @@ Deno.serve(async (req) => {
     generationConfig.responseSchema = schema;
   }
 
-  const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${keyForFeature(raw.feature)}`;
-
-  try {
-    const geminiRes = await fetch(geminiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        system_instruction: { parts: [{ text: system }] },
-        contents,
-        generationConfig,
-      }),
-    });
-
-    if (!geminiRes.ok) {
-      const errText = await geminiRes.text().catch(() => '');
-      console.error('Gemini non-OK:', geminiRes.status, errText.slice(0, 200));
-      return jsonResponse({ error: 'Gemini request failed' }, 502);
+  const result = await withGeminiKeyFailover<string>(async (key) => {
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${key}`;
+    try {
+      const geminiRes = await fetch(geminiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: system }] },
+          contents,
+          generationConfig,
+        }),
+      });
+      if (!geminiRes.ok) {
+        const errText = await geminiRes.text().catch(() => '');
+        return { ok: false, status: geminiRes.status, errorText: errText.slice(0, 200) };
+      }
+      const geminiJson = await geminiRes.json();
+      const text = geminiJson?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+      if (!text) return { ok: false, status: 502, errorText: 'empty response' };
+      return { ok: true, value: text };
+    } catch (err) {
+      return { ok: false, status: 502, errorText: String(err) };
     }
+  });
 
-    const geminiJson = await geminiRes.json();
-    const text = geminiJson?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
-    if (!text) return jsonResponse({ error: 'Gemini trả về nội dung trống.' }, 502);
-
-    return jsonResponse({ text });
-  } catch (err) {
-    console.error('Gemini call failed:', err);
-    return jsonResponse({ error: 'Gemini request failed' }, 502);
+  if (!result.ok) {
+    console.error('Gemini call failed after trying all keys:', result.status, result.errorText);
+    const clientMsg = result.status === 429
+      ? 'Đã hết lượt dùng AI hôm nay, vui lòng thử lại sau.'
+      : 'Gemini request failed';
+    return jsonResponse({ error: clientMsg }, result.status === 429 ? 429 : 502);
   }
+  return jsonResponse({ text: result.value });
 });
