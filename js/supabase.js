@@ -94,7 +94,7 @@ export async function fetchLeaderboard(limit = 50) {
   if (!sb) return [];
   const { data, error } = await sb
     .from('leaderboard')
-    .select('rank,user_id,display_name,avatar_type,avatar_data,streak,total_score,ai_level')
+    .select('rank,user_id,display_name,avatar_type,avatar_data,streak,ai_level,completion_percent,total_study_ms,avg_study_ms')
     .order('rank', { ascending: true })
     .limit(limit);
   if (error) {

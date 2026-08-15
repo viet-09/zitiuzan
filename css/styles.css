@@ -2829,6 +2829,14 @@ body.furigana-off rt {
     width: 48px;
 }
 
+.lb-completion,
+.lb-hours,
+.lb-avg,
+.lb-streak {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
 .lb-id-cell {
     display: inline-flex;
     align-items: center;

@@ -17,6 +17,7 @@ import { renderTutor } from './tutor.js';
 import { getQuestionClassification, getLessonImages, getVietnameseExplanation } from './store.js';
 import { questionTypeInfo } from './question-types.js';
 import { hydrateLessonAudio } from './lesson-audio.js';
+import { startLessonTimer } from './study-time.js';
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (char) => ({
@@ -550,6 +551,7 @@ export function renderLesson(root, id) {
   let tutorModal = null;
   let tutorController = null;
   let tutorTrigger = null;
+  const studyTimer = startLessonTimer();
 
   const closePopup = () => {
     if (!popup) return;
@@ -809,6 +811,7 @@ export function renderLesson(root, id) {
       closePopup();
       closeTutorModal();
       if (typeof speechSynthesis !== 'undefined') speechSynthesis.cancel();
+      studyTimer.flush();
     },
   };
 }

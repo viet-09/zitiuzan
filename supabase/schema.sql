@@ -20,6 +20,13 @@ create table if not exists public.user_profiles (
   ai_level_updated_at  timestamptz,
   tutor_memory         text not null default '',
   furigana             boolean not null default true,
+  -- Real (not estimated) study time, accumulated via record_study_time() —
+  -- see js/study-time.js. total_study_ms sums the tab-visible time spent on
+  -- lesson pages; study_session_count increments once per lesson visit
+  -- (not per flush), so total_study_ms/study_session_count is a meaningful
+  -- average time per study session.
+  total_study_ms       bigint not null default 0 check (total_study_ms >= 0),
+  study_session_count  integer not null default 0 check (study_session_count >= 0),
   created_at           timestamptz not null default now(),
   updated_at           timestamptz not null default now()
 );
@@ -109,6 +116,10 @@ create table if not exists public.kanji_gloss_cache (
 -- Drop with CASCADE because the view has dependent GRANTs / future policies.
 drop view if exists public.leaderboard cascade;
 
+-- Total lesson count across every category in data/lessons.json (kanji 56 +
+-- vocabulary 56 + grammar 56 + reading 42 + listening 23 = 233). Hardcoded
+-- since the curriculum is static content, not DB-tracked — update this if
+-- lessons.json's lesson count ever changes.
 create view public.leaderboard as
   select
     up.user_id,
@@ -119,17 +130,53 @@ create view public.leaderboard as
     -- a future sync bug can never leak one through this broadly-readable view.
     case when up.avatar_type = 'upload' then null else up.avatar_data end as avatar_data,
     up.streak,
-    up.total_score,
     up.ai_level,
+    coalesce(lp.completed_count, 0) as completed_count,
+    round(coalesce(lp.completed_count, 0) * 100.0 / 233)::int as completion_percent,
+    up.total_study_ms,
+    case when up.study_session_count > 0 then up.total_study_ms / up.study_session_count else 0 end as avg_study_ms,
     row_number() over (
-      order by up.total_score desc, up.streak desc, up.created_at asc
+      order by coalesce(lp.completed_count, 0) desc, up.streak desc, up.created_at asc
     ) as rank
   from public.user_profiles up
-  where up.total_score > 0 or up.streak > 0
-  order by up.total_score desc, up.streak desc, up.created_at asc;
+  left join (
+    select user_id, count(distinct lesson_id) as completed_count
+    from public.learning_progress
+    group by user_id
+  ) lp on lp.user_id = up.user_id
+  where coalesce(lp.completed_count, 0) > 0 or up.streak > 0
+  order by coalesce(lp.completed_count, 0) desc, up.streak desc, up.created_at asc;
 
 -- Leaderboard requires sign-in (anon traffic cannot pull user data).
 grant select on public.leaderboard to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- 7b. record_study_time — accumulates real (tab-visible) study time from
+-- js/study-time.js. Always operates on auth.uid(), never a client-supplied
+-- user_id, so a caller can only inflate their own stats. p_new_session
+-- should be true exactly once per lesson visit (the first flush of that
+-- visit) so study_session_count counts VISITS, not flush ticks, keeping
+-- total_study_ms / study_session_count a meaningful per-session average.
+-- ---------------------------------------------------------------------------
+create or replace function public.record_study_time(p_duration_ms integer, p_new_session boolean default false)
+returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  -- Defensive bounds: ignore non-positive values and anything above a
+  -- generous single-flush cap (a real flush interval is well under this;
+  -- a much larger value can only be a bad client, not real study time).
+  if p_duration_ms is null or p_duration_ms <= 0 or p_duration_ms > 3 * 60 * 60 * 1000 then
+    return;
+  end if;
+  update public.user_profiles
+  set total_study_ms = total_study_ms + p_duration_ms,
+      study_session_count = study_session_count + case when p_new_session then 1 else 0 end,
+      updated_at = now()
+  where user_id = auth.uid();
+end;
+$$;
+
+grant execute on function public.record_study_time(integer, boolean) to authenticated;
 
 -- ---------------------------------------------------------------------------
 -- 8. touch_user_streak — atomic day-bump streak (Asia/Tokyo timezone).
