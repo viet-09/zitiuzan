@@ -10,7 +10,6 @@ import {
 import {
   writeProgressMapExternal,
   writeStreak,
-  writeContentMapExternal,
 } from './store.js';
 import { normalizeProfile, saveProfile } from './profile.js';
 
@@ -198,10 +197,9 @@ export async function pullFromCloud(userId) {
   const sb = await getClient();
   if (!sb || !userId) return;
 
-  const [profileRes, progressRes, contentRes] = await Promise.all([
+  const [profileRes, progressRes] = await Promise.all([
     sb.from('user_profiles').select('display_name,avatar_type,avatar_data,streak,last_study_date,furigana,total_score,ai_level').eq('user_id', userId).maybeSingle(),
     sb.from('learning_progress').select('lesson_id').eq('user_id', userId),
-    sb.from('lesson_content_cache').select('lesson_id,payload').eq('user_id', userId),
   ]);
 
   if (profileRes.data) {
@@ -229,11 +227,6 @@ export async function pullFromCloud(userId) {
     const map = {};
     for (const row of progressRes.data) map[row.lesson_id] = true;
     writeProgressMapExternal(map);
-  }
-  if (contentRes.data) {
-    const cache = {};
-    for (const row of contentRes.data) cache[row.lesson_id] = row.payload;
-    writeContentMapExternal(cache);
   }
 }
 
@@ -331,87 +324,6 @@ export async function pushScore(userId, delta) {
   const { data, error } = await sb.rpc('bump_score', { p_user_id: userId, p_delta: delta });
   if (error) {
     console.warn('[sync] pushScore failed:', error.message);
-    return null;
-  }
-  return data;
-}
-
-/**
- * Push a single AI content-cache row for a lesson.
- */
-export async function pushLessonContent(userId, lessonId, payload) {
-  const sb = await getClient();
-  if (!sb) return;
-  const { error } = await sb
-    .from('lesson_content_cache')
-    .upsert({ user_id: userId, lesson_id: lessonId, payload });
-  if (error) console.warn('[sync] pushLessonContent failed:', error.message);
-}
-
-/**
- * Append a tutor / voice message. Old messages stay on the server; local
- * cache remains the source-of-truth for fast startup reads.
- */
-export async function pushTutorMessage(userId, role, text) {
-  const sb = await getClient();
-  if (!sb) return;
-  const { error } = await sb.from('tutor_messages').insert({
-    user_id: userId,
-    role,
-    text: String(text ?? '').slice(0, 4000),
-  });
-  if (error) console.warn('[sync] pushTutorMessage failed:', error.message);
-}
-
-export async function pushVoiceMessage(userId, topic, role, text) {
-  const sb = await getClient();
-  if (!sb) return;
-  const { error } = await sb.from('voice_messages').insert({
-    user_id: userId,
-    topic,
-    role,
-    text: String(text ?? '').slice(0, 4000),
-  });
-  if (error) console.warn('[sync] pushVoiceMessage failed:', error.message);
-}
-
-/**
- * Persist a single tap-kanji gloss.
- */
-export async function pushKanjiGloss(userId, key, payload) {
-  const sb = await getClient();
-  if (!sb) return;
-  const { error } = await sb.from('kanji_gloss_cache').upsert({
-    user_id: userId,
-    key: String(key),
-    payload,
-  });
-  if (error) console.warn('[sync] pushKanjiGloss failed:', error.message);
-}
-
-/**
- * Update the rolling tutor-memory note.
- */
-export async function pushTutorMemory(userId, note) {
-  const sb = await getClient();
-  if (!sb) return;
-  const { error } = await sb
-    .from('user_profiles')
-    .update({ tutor_memory: String(note ?? '').slice(0, 600) })
-    .eq('user_id', userId);
-  if (error) console.warn('[sync] pushTutorMemory failed:', error.message);
-}
-
-/**
- * Call the AI-level evaluation Edge Function. Body is built by the caller
- * based on local stats; the function validates the JWT and persists ai_level.
- */
-export async function evaluateAiLevel(metrics) {
-  const sb = await getClient();
-  if (!sb) return null;
-  const { data, error } = await sb.functions.invoke('evaluate-ai', { body: { metrics } });
-  if (error) {
-    console.warn('[sync] evaluateAiLevel failed:', error.message);
     return null;
   }
   return data;

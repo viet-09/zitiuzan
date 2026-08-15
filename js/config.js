@@ -6,7 +6,6 @@ export const STORAGE = {
   progress: 'n2_progress_v2',
   streak: 'n2_streak_v2',
   settings: 'n2_settings_v2',
-  content: 'n2_content_v2',
   tutor: 'n2_tutor_v2',
   tutorContext: 'n2_tutor_context_v2',
   tutorMemory: 'n2_tutor_memory_v2',
@@ -16,13 +15,7 @@ export const STORAGE = {
   pet: 'n2_pet_v2',
 };
 
-export const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
-
-// No default key ships in client code — a hardcoded key here is public to
-// anyone via devtools/network tab regardless of any obfuscation. Each user
-// supplies their own key via the ⚙ Settings modal (see js/gemini.js).
 export const DEFAULT_SETTINGS = {
-  apiKey: '',
   model: 'gemini-3.5-flash-lite',
   liveModel: 'gemini-3.1-flash-live-preview',
   furigana: true,

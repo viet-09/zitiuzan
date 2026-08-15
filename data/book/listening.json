@@ -2,7 +2,7 @@
   "l1d1": {
     "title": "第1章 準備しよう 1 発音に関する聞き取り",
     "titleEn": "Chapter 1: Mastering the Basics 1 Correctly Understanding Pronunciation",
-    "audio": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/02.mp3",
+    "audio": "cd1/02.mp3",
     "script": "1番 例題）まち（町） マッチ\n①ひっこしのトラック（引っ越しのトラック）\n②こきょうにかえる（故郷に帰る）\n③いけんをしゅちょうする（意見を主張する）\n④だっせんじこ（脱線事故）\n⑤パソコンのバックアップ（back up）\n⑥しょちゅうみまい（暑中見舞い）\n2番 例題）こうこう（高校）に行きます。\n①しゅるいがおおい。（種類が多い）\n②またじけんだ。（また事件だ）\n③しりょうをあつめる。（資料を集める）\n④かんきょうについてのけんきゅう（環境についての研究）\n⑤このクラスはしょきゅう（初級）です。\n3番 例題）荷物、そこ、おいていて。\n（おいておいて）\n①あの川でおよいじゃいけないよ。\n（およいでは）\n②できるかどうか、やってみなけりゃ、わかんない。\n（やってみなければ）（わからない）\n③毎月20万円ももらってんのに、まだたんないの？\n（もらっている）（たりない）\n④ストレスが原因だっていわれたって聞いたけど。\n（だといわれたと）",
     "questions": [
       {
@@ -42,21 +42,21 @@
     "audioTracks": [
       {
         "label": "CD1-02",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/02.mp3"
+        "src": "cd1/02.mp3"
       },
       {
         "label": "CD1-03",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/03.mp3"
+        "src": "cd1/03.mp3"
       },
       {
         "label": "CD1-04",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/04.mp3"
+        "src": "cd1/04.mp3"
       }
     ],
     "introTracks": [
       {
         "label": "CD1-01",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/01.mp3"
+        "src": "cd1/01.mp3"
       }
     ],
     "audioCoverage": {
@@ -69,7 +69,7 @@
   "l1d2": {
     "title": "文法に関する聞き取り①",
     "titleEn": "Correctly Understanding Grammar ①",
-    "audio": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/05.mp3",
+    "audio": "cd1/05.mp3",
     "script": "",
     "questions": [
       {
@@ -157,11 +157,11 @@
     "audioTracks": [
       {
         "label": "CD1-05",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/05.mp3"
+        "src": "cd1/05.mp3"
       },
       {
         "label": "CD1-06",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/06.mp3"
+        "src": "cd1/06.mp3"
       }
     ],
     "introTracks": [],
@@ -175,7 +175,7 @@
   "l1d3": {
     "title": "文法に関する聞き取り②",
     "titleEn": "Correctly Understanding Grammar ②",
-    "audio": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/07.mp3",
+    "audio": "cd1/07.mp3",
     "script": "",
     "questions": [
       {
@@ -267,11 +267,11 @@
     "audioTracks": [
       {
         "label": "CD1-07",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/07.mp3"
+        "src": "cd1/07.mp3"
       },
       {
         "label": "CD1-08",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/08.mp3"
+        "src": "cd1/08.mp3"
       }
     ],
     "introTracks": [],
@@ -285,7 +285,7 @@
   "l1d4": {
     "title": "会話表現",
     "titleEn": "Conversational Phrases",
-    "audio": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/09.mp3",
+    "audio": "cd1/09.mp3",
     "script": "",
     "questions": [
       {
@@ -380,15 +380,15 @@
     "audioTracks": [
       {
         "label": "CD1-09",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/09.mp3"
+        "src": "cd1/09.mp3"
       },
       {
         "label": "CD1-10",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/10.mp3"
+        "src": "cd1/10.mp3"
       },
       {
         "label": "CD1-11",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/11.mp3"
+        "src": "cd1/11.mp3"
       }
     ],
     "introTracks": [],
@@ -402,7 +402,7 @@
   "l1d5": {
     "title": "まとめ問題",
     "titleEn": "Mastering the Basics",
-    "audio": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/12.mp3",
+    "audio": "cd1/12.mp3",
     "script": "",
     "questions": [
       {
@@ -579,27 +579,27 @@
     "audioTracks": [
       {
         "label": "CD1-12",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/12.mp3"
+        "src": "cd1/12.mp3"
       },
       {
         "label": "CD1-13",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/13.mp3"
+        "src": "cd1/13.mp3"
       },
       {
         "label": "CD1-14",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/14.mp3"
+        "src": "cd1/14.mp3"
       },
       {
         "label": "CD1-15",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/15.mp3"
+        "src": "cd1/15.mp3"
       },
       {
         "label": "CD1-16",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/16.mp3"
+        "src": "cd1/16.mp3"
       },
       {
         "label": "CD1-17",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/17.mp3"
+        "src": "cd1/17.mp3"
       }
     ],
     "introTracks": [],
@@ -613,7 +613,7 @@
   "l2d1": {
     "title": "どんな返事をしますか―即時応答―",
     "titleEn": "Pick out the expressions and forms of intonation regularly used in conversation!",
-    "audio": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/19.mp3",
+    "audio": "cd1/19.mp3",
     "script": "",
     "questions": [
       {
@@ -656,29 +656,29 @@
     "audioTracks": [
       {
         "label": "CD1-19",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/19.mp3"
+        "src": "cd1/19.mp3"
       },
       {
         "label": "CD1-20",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/20.mp3"
+        "src": "cd1/20.mp3"
       },
       {
         "label": "CD1-21",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/21.mp3"
+        "src": "cd1/21.mp3"
       },
       {
         "label": "CD1-22",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/22.mp3"
+        "src": "cd1/22.mp3"
       },
       {
         "label": "CD1-23",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/23.mp3"
+        "src": "cd1/23.mp3"
       }
     ],
     "introTracks": [
       {
         "label": "CD1-18",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/18.mp3"
+        "src": "cd1/18.mp3"
       }
     ],
     "audioCoverage": {
@@ -691,7 +691,7 @@
   "l2d2": {
     "title": "これから何をしますか-課題理解-",
     "titleEn": "",
-    "audio": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/24.mp3",
+    "audio": "cd1/24.mp3",
     "script": "",
     "questions": [
       {
@@ -718,15 +718,15 @@
     "audioTracks": [
       {
         "label": "CD1-24",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/24.mp3"
+        "src": "cd1/24.mp3"
       },
       {
         "label": "CD1-25",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/25.mp3"
+        "src": "cd1/25.mp3"
       },
       {
         "label": "CD1-26",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/26.mp3"
+        "src": "cd1/26.mp3"
       }
     ],
     "introTracks": [],
@@ -740,7 +740,7 @@
   "l2d3": {
     "title": "どうしてですか-ポイント理解-",
     "titleEn": "Use the information given in the question and answer selections and try to anticipate what the speakers will discuss!",
-    "audio": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/27.mp3",
+    "audio": "cd1/27.mp3",
     "script": "",
     "questions": [
       {
@@ -767,19 +767,19 @@
     "audioTracks": [
       {
         "label": "CD1-27",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/27.mp3"
+        "src": "cd1/27.mp3"
       },
       {
         "label": "CD1-28",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/28.mp3"
+        "src": "cd1/28.mp3"
       },
       {
         "label": "CD1-29",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/29.mp3"
+        "src": "cd1/29.mp3"
       },
       {
         "label": "CD1-30",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/30.mp3"
+        "src": "cd1/30.mp3"
       }
     ],
     "introTracks": [],
@@ -793,7 +793,7 @@
   "l2d4": {
     "title": "どんな内容ですかー概要理解ー",
     "titleEn": "",
-    "audio": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/31.mp3",
+    "audio": "cd1/31.mp3",
     "script": "",
     "questions": [
       {
@@ -820,15 +820,15 @@
     "audioTracks": [
       {
         "label": "CD1-31",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/31.mp3"
+        "src": "cd1/31.mp3"
       },
       {
         "label": "CD1-32",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/32.mp3"
+        "src": "cd1/32.mp3"
       },
       {
         "label": "CD1-33",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/33.mp3"
+        "src": "cd1/33.mp3"
       }
     ],
     "introTracks": [],
@@ -842,7 +842,7 @@
   "l2d5": {
     "title": "どうすることにしますかー統合理解①ー",
     "titleEn": "",
-    "audio": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/34.mp3",
+    "audio": "cd1/34.mp3",
     "script": "",
     "questions": [
       {
@@ -869,15 +869,15 @@
     "audioTracks": [
       {
         "label": "CD1-34",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/34.mp3"
+        "src": "cd1/34.mp3"
       },
       {
         "label": "CD1-35",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/35.mp3"
+        "src": "cd1/35.mp3"
       },
       {
         "label": "CD1-36",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/36.mp3"
+        "src": "cd1/36.mp3"
       }
     ],
     "introTracks": [],
@@ -891,7 +891,7 @@
   "l2d6": {
     "title": "どれにしますか－統合理解(2)－",
     "titleEn": "",
-    "audio": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/37.mp3",
+    "audio": "cd1/37.mp3",
     "script": "",
     "questions": [
       {
@@ -918,11 +918,11 @@
     "audioTracks": [
       {
         "label": "CD1-37",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/37.mp3"
+        "src": "cd1/37.mp3"
       },
       {
         "label": "CD1-38",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/38.mp3"
+        "src": "cd1/38.mp3"
       }
     ],
     "introTracks": [],
@@ -936,7 +936,7 @@
   "l2d7": {
     "title": "まとめ問題",
     "titleEn": "Chapter 2: Recognizing the Question Patterns",
-    "audio": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/39.mp3",
+    "audio": "cd1/39.mp3",
     "script": "",
     "questions": [
       {
@@ -1048,55 +1048,55 @@
     "audioTracks": [
       {
         "label": "CD1-39",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/39.mp3"
+        "src": "cd1/39.mp3"
       },
       {
         "label": "CD1-40",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/40.mp3"
+        "src": "cd1/40.mp3"
       },
       {
         "label": "CD1-41",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/41.mp3"
+        "src": "cd1/41.mp3"
       },
       {
         "label": "CD1-42",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/42.mp3"
+        "src": "cd1/42.mp3"
       },
       {
         "label": "CD1-43",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/43.mp3"
+        "src": "cd1/43.mp3"
       },
       {
         "label": "CD1-44",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/44.mp3"
+        "src": "cd1/44.mp3"
       },
       {
         "label": "CD1-45",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/45.mp3"
+        "src": "cd1/45.mp3"
       },
       {
         "label": "CD1-46",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/46.mp3"
+        "src": "cd1/46.mp3"
       },
       {
         "label": "CD1-47",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/47.mp3"
+        "src": "cd1/47.mp3"
       },
       {
         "label": "CD1-48",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/48.mp3"
+        "src": "cd1/48.mp3"
       },
       {
         "label": "CD1-49",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/49.mp3"
+        "src": "cd1/49.mp3"
       },
       {
         "label": "CD1-50",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/50.mp3"
+        "src": "cd1/50.mp3"
       },
       {
         "label": "CD1-51",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/51.mp3"
+        "src": "cd1/51.mp3"
       }
     ],
     "introTracks": [],
@@ -1110,7 +1110,7 @@
   "l3d1": {
     "title": "指示や説明を聞こう",
     "titleEn": "Following Instructions and Explanations",
-    "audio": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/53.mp3",
+    "audio": "cd1/53.mp3",
     "script": "",
     "questions": [
       {
@@ -1147,21 +1147,21 @@
     "audioTracks": [
       {
         "label": "CD1-53",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/53.mp3"
+        "src": "cd1/53.mp3"
       },
       {
         "label": "CD1-54",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/54.mp3"
+        "src": "cd1/54.mp3"
       },
       {
         "label": "CD1-55",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/55.mp3"
+        "src": "cd1/55.mp3"
       }
     ],
     "introTracks": [
       {
         "label": "CD1-52",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/52.mp3"
+        "src": "cd1/52.mp3"
       }
     ],
     "audioCoverage": {
@@ -1174,7 +1174,7 @@
   "l3d2": {
     "title": "会話を聞こう",
     "titleEn": "Understanding Conversations",
-    "audio": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/56.mp3",
+    "audio": "cd1/56.mp3",
     "script": "",
     "questions": [
       {
@@ -1211,15 +1211,15 @@
     "audioTracks": [
       {
         "label": "CD1-56",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/56.mp3"
+        "src": "cd1/56.mp3"
       },
       {
         "label": "CD1-57",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/57.mp3"
+        "src": "cd1/57.mp3"
       },
       {
         "label": "CD1-58",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/58.mp3"
+        "src": "cd1/58.mp3"
       }
     ],
     "introTracks": [],
@@ -1233,7 +1233,7 @@
   "l3d3": {
     "title": "電話の会話やメッセージを聞こう",
     "titleEn": "Understanding Phone Conversations and Messages",
-    "audio": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/59.mp3",
+    "audio": "cd1/59.mp3",
     "script": "",
     "questions": [
       {
@@ -1270,15 +1270,15 @@
     "audioTracks": [
       {
         "label": "CD1-59",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/59.mp3"
+        "src": "cd1/59.mp3"
       },
       {
         "label": "CD1-60",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/60.mp3"
+        "src": "cd1/60.mp3"
       },
       {
         "label": "CD1-61",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/61.mp3"
+        "src": "cd1/61.mp3"
       }
     ],
     "introTracks": [],
@@ -1292,7 +1292,7 @@
   "l3d4": {
     "title": "意見や感想を聞こう",
     "titleEn": "Catching People's Opinions and Thoughts",
-    "audio": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/62.mp3",
+    "audio": "cd1/62.mp3",
     "script": "",
     "questions": [
       {
@@ -1329,15 +1329,15 @@
     "audioTracks": [
       {
         "label": "CD1-62",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/62.mp3"
+        "src": "cd1/62.mp3"
       },
       {
         "label": "CD1-63",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/63.mp3"
+        "src": "cd1/63.mp3"
       },
       {
         "label": "CD1-64",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD1/64.mp3"
+        "src": "cd1/64.mp3"
       }
     ],
     "introTracks": [],
@@ -1351,7 +1351,7 @@
   "l3d5": {
     "title": "まとめ問題",
     "titleEn": "Chapter 3: Understanding Different Types of Conversation",
-    "audio": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/01.mp3",
+    "audio": "cd2/01.mp3",
     "script": "",
     "questions": [
       {
@@ -1418,35 +1418,35 @@
     "audioTracks": [
       {
         "label": "CD2-01",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/01.mp3"
+        "src": "cd2/01.mp3"
       },
       {
         "label": "CD2-02",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/02.mp3"
+        "src": "cd2/02.mp3"
       },
       {
         "label": "CD2-03",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/03.mp3"
+        "src": "cd2/03.mp3"
       },
       {
         "label": "CD2-04",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/04.mp3"
+        "src": "cd2/04.mp3"
       },
       {
         "label": "CD2-05",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/05.mp3"
+        "src": "cd2/05.mp3"
       },
       {
         "label": "CD2-06",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/06.mp3"
+        "src": "cd2/06.mp3"
       },
       {
         "label": "CD2-07",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/07.mp3"
+        "src": "cd2/07.mp3"
       },
       {
         "label": "CD2-08",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/08.mp3"
+        "src": "cd2/08.mp3"
       }
     ],
     "introTracks": [],
@@ -1460,7 +1460,7 @@
   "l4d1": {
     "title": "町で",
     "titleEn": "Around Town",
-    "audio": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/10.mp3",
+    "audio": "cd2/10.mp3",
     "script": "",
     "questions": [
       {
@@ -1497,21 +1497,21 @@
     "audioTracks": [
       {
         "label": "CD2-10",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/10.mp3"
+        "src": "cd2/10.mp3"
       },
       {
         "label": "CD2-11",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/11.mp3"
+        "src": "cd2/11.mp3"
       },
       {
         "label": "CD2-12",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/12.mp3"
+        "src": "cd2/12.mp3"
       }
     ],
     "introTracks": [
       {
         "label": "CD2-09",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/09.mp3"
+        "src": "cd2/09.mp3"
       }
     ],
     "audioCoverage": {
@@ -1524,7 +1524,7 @@
   "l4d2": {
     "title": "気象情報・交通情報",
     "titleEn": "Weather and Traffic Reports",
-    "audio": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/13.mp3",
+    "audio": "cd2/13.mp3",
     "script": "",
     "questions": [
       {
@@ -1561,15 +1561,15 @@
     "audioTracks": [
       {
         "label": "CD2-13",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/13.mp3"
+        "src": "cd2/13.mp3"
       },
       {
         "label": "CD2-14",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/14.mp3"
+        "src": "cd2/14.mp3"
       },
       {
         "label": "CD2-15",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/15.mp3"
+        "src": "cd2/15.mp3"
       }
     ],
     "introTracks": [],
@@ -1583,7 +1583,7 @@
   "l4d3": {
     "title": "キャンパスで",
     "titleEn": "Around Campus",
-    "audio": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/16.mp3",
+    "audio": "cd2/16.mp3",
     "script": "",
     "questions": [
       {
@@ -1620,15 +1620,15 @@
     "audioTracks": [
       {
         "label": "CD2-16",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/16.mp3"
+        "src": "cd2/16.mp3"
       },
       {
         "label": "CD2-17",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/17.mp3"
+        "src": "cd2/17.mp3"
       },
       {
         "label": "CD2-18",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/18.mp3"
+        "src": "cd2/18.mp3"
       }
     ],
     "introTracks": [],
@@ -1642,7 +1642,7 @@
   "l4d4": {
     "title": "いろいろな場面で",
     "titleEn": "Different Situations",
-    "audio": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/19.mp3",
+    "audio": "cd2/19.mp3",
     "script": "",
     "questions": [
       {
@@ -1679,15 +1679,15 @@
     "audioTracks": [
       {
         "label": "CD2-19",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/19.mp3"
+        "src": "cd2/19.mp3"
       },
       {
         "label": "CD2-20",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/20.mp3"
+        "src": "cd2/20.mp3"
       },
       {
         "label": "CD2-21",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/21.mp3"
+        "src": "cd2/21.mp3"
       }
     ],
     "introTracks": [],
@@ -1701,7 +1701,7 @@
   "l4d5": {
     "title": "まとめ問題",
     "titleEn": "Chapter 4: Understanding the Language Around You",
-    "audio": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/22.mp3",
+    "audio": "cd2/22.mp3",
     "script": "",
     "questions": [
       {
@@ -1758,35 +1758,35 @@
     "audioTracks": [
       {
         "label": "CD2-22",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/22.mp3"
+        "src": "cd2/22.mp3"
       },
       {
         "label": "CD2-23",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/23.mp3"
+        "src": "cd2/23.mp3"
       },
       {
         "label": "CD2-24",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/24.mp3"
+        "src": "cd2/24.mp3"
       },
       {
         "label": "CD2-25",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/25.mp3"
+        "src": "cd2/25.mp3"
       },
       {
         "label": "CD2-26",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/26.mp3"
+        "src": "cd2/26.mp3"
       },
       {
         "label": "CD2-27",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/27.mp3"
+        "src": "cd2/27.mp3"
       },
       {
         "label": "CD2-28",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/28.mp3"
+        "src": "cd2/28.mp3"
       },
       {
         "label": "CD2-29",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/29.mp3"
+        "src": "cd2/29.mp3"
       }
     ],
     "introTracks": [],
@@ -1800,7 +1800,7 @@
   "l5d1": {
     "title": "総まとめ問題",
     "titleEn": "Comprehensive Review",
-    "audio": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/30.mp3",
+    "audio": "cd2/30.mp3",
     "script": "問題Ⅰ\n1番\n男：あのう、口座の暗証番号を変えたいんですが、どうすればいいですか。\n女：はい。では、こちらの「お預かり入れ」のボタンを押してください。次に画面の指示に従って操作してください。\n（質問）男の人はどのボタンを押しますか。\n\n2番\n女：あ、田中さん。この紙、ちょっと……。\n男：はい、コピーですね。何パーセントにしましょうか。\n女：B4の紙に、A4の資料を大きくしたいんですが。\n（質問）女の人はどうしてほしいと言っていますか。\n\n3番\n女：会議の資料、来週の月曜日の朝までにお願いできますか。\n男：はい、わかりました。あ、月曜日は祝日ですね。火曜日ではいけませんか。\n女：あ、そうですね。では、火曜日の朝にお願いします。\n（質問）資料はいつまでに必要ですか。\n\n4番\n男：もしもし、佐藤さんですか。今、時間が大丈夫ですか。\n女：すみません。今、ちょっと手が離せないんですが、あとでこちらから携帯に電話しますから、お待ちいただけますか。\n（質問）男の人はどうしますか。\n\n問題Ⅱ\n1番\n男：最近、会社を辞める人が多いらしいね。\n女：うん。部長も先月辞めちゃったしね。\n男：えっ、部長、定年までまだかなりあるのに、どうして辞めたんだろう。\n女：親の店を継ぐんだって。\n（質問）部長はどうして会社を辞めましたか。\n\n2番\n男：課長、来週の会議の件ですが、いつにしましょうか。\n女：そうねえ。４日の午前中は予定が入っているから……あ、午後の１時からはどう？\n男：あ、４日は他の会議があります。８日ではいかがですか。\n女：８日ね。ええと、午前中なら空いているわよ。\n男：じゃあ、その時間にお願いします。\n（質問）会議はいつになりましたか。\n\n3番\n男：日本の結婚式っていろいろな習慣があって面白いですね。\n女：そうですね。地域によってかなり違いますからね。例えば、若い女性が好きな人に泥をつけたり、泥の中に入ったりする祭りがあるんですよ。\n男：えっ、それはすごいですね。\n（質問）若い女性は何をしますか。\n\n4番\n男：車、買ったんだって？ いいなあ。\n女：うん、でもローンが大変でさあ。\n男：新車だもんね。でも、自分の好みの車が買えてよかったじゃない。\n女：それが、予算の関係で、本当はもっと大きい車が欲しかったんだけど、これになったんだよ。\n男：あ、そうなの。\n（質問）男の人が車を買って一番大変だと言っていることは何ですか。\n\n5番\n女：あ、来週のレポートのテーマ、決まった？\n男：うん、「伝統工芸について」書こうと思っているんだ。でも、何を書けばいいのか、迷っていて……。\n女：うーん、例えば、作るのにかかる費用とか、材料とか、どう？\n男：それ、面白そうだね。そうしようかな。\n（質問）男の人はこれから何を調べますか。\n\n問題Ⅲ\n1番\n女：山本さん、この間の旅行の写真、見せていただけますか。\n男：あ、はい。どうぞ。\n女：わあ、きれいですね。ここ、どこですか。\n男：北海道の美瑛というところです。広くて気持ちがいいところですよ。\n女：本当ですね。建物も何もなくて、空が広くて……。あ、この花畑もきれいですね。ここは？\n男：そこは富良野です。ラベンダーが有名なんですよ。\n女：いいですねえ。私も一度行ってみたいです。\n（質問）女の人はどうしてこの話を聞いていますか。\n\n2番\n男：あのう、すみません。実は、さっきここで黒い財布を落としてしまったんですが……。\n店員：黒い財布ですね。ちょっとお待ちください。……落とし物は届いていませんね。警察に届けたほうがいいですよ。\n男：そうですか。あのう、中にはお金とカードが入っているんですが、カードはどうすればいいですか。\n店員：すぐにカード会社に連絡して、止めてもらったほうがいいですよ。\n男：わかりました。そうします。\n（質問）男の人はどうしてこの話を聞いていますか。\n\n3番\n女：山田さん、ちょっと相談があるんですが。\n男：何ですか。\n女：この間買ったパソコン、あまり使っていないのに、時々動かなくなるんです。買った店に持って行ったほうがいいでしょうか。\n男：そうですねえ。その前に、電源を切って、もう一度入れてみましたか。\n女：ええ、何度も。でも、やっぱりダメなんです。\n男：そうですか。じゃあ、店に持って行ったほうがいいですね。保証書はありますか。\n女：はい、あります。\n男：じゃあ、大丈夫ですね。早く見てもらったほうがいいですよ。\n（質問）女の人はどうしてこの話を聞いていますか。\n\n4番\n男：佐藤さん、今度の日曜日の午後、うちに来ませんか。みんなでうちの庭でバーベキューをすることになったんです。\n女：バーベキューですか。楽しそうですね。ぜひ行きたいです。何か持って行きましょうか。\n男：何もいりませんよ。あ、でも、ビールが好きだったら、ビールを少しお願いします。\n女：わかりました。じゃあ、ビールを持って行きますね。\n（質問）女の人はどうしてこの話を聞いていますか。\n\n問題Ⅳ\n1番\n男：あ、鈴木さん、その資料、コピーしておきましょうか。\n女：\n① はい、お願いします。\n② いいえ、コピーしません。\n③ はい、コピーしました。\n\n2番\n男：あ、雨が降ってきましたね。傘、持っていますか。\n女：\n① ええ、持っていますから。\n② ええ、持っていませんから。\n③ いいえ、持っていませんから。\n\n3番\n男：部長、この書類、どこに置きましょうか。\n女：\n① 机の上に置いてください。\n② 机の上を置いてください。\n③ 机の上においてあります。\n\n4番\n男：あれ、田中さん、昨日会社を休みましたね。どうかしたんですか。\n女：\n① ええ、風邪をひいてしまいました。\n② ええ、風邪が治ってしまいました。\n③ ええ、病院に行っていませんでした。\n\n5番\n男：いらっしゃいませ。何名様ですか。\n女：\n① はい、一人です。\n② 二人です。\n③ テーブルです。\n\n6番\n男：この漢字、どう読みますか。\n女：\n① さあ、読めますよ。\n② さあ、読みにくいですよ。\n③ さあ、読めませんね。\n\n7番\n男：すみません、この漢字の書き方を教えていただけませんか。\n女：\n① はい、いいですよ。\n② はい、教えてもらいます。\n③ はい、教えてあげます。\n\n問題Ⅴ\n1番\n女：もしもし、佐藤さん？ 今、どこ？\n男：今、駅を出たところだよ。そっちは？\n女：私はもうすぐ着くから、先に入って席を取っていて。あ、待って。今、入り口のところで田中さんに会ったんだけど、田中さんも一緒に入ってもいい？\n男：もちろんいいよ。席、広いところに変えてもらおうか。\n女：ううん、今のままで大丈夫だよ。じゃ、あとでね。\n（質問）男の人はこれから何をしますか。\n\n2番\n男：ねえ、今度の連休、どこか旅行に行かない？\n女：いいねえ。どこに行く？\n男：北海道はどう？ 美味しいものがたくさんあるよ。\n女：北海道かあ、いいねえ。でも、連休は飛行機のチケットが高いんじゃない？\n男：うーん、そうかあ。じゃあ、車で温泉に行こうか。それならお金もあまりかからないし。\n女：温泉、いいねえ。そうしようか。\n（質問）二人はこれからどこに行きますか。\n\n3番\n男：最近、新しい仕事をする人が増えています。今日は、その仕事について、４つのタイプに分けてお話しします。\nまず、Aタイプです。Aタイプの人は、自分でスケジュールを立てて、自分のペースで仕事をする人です。自分のアイデアをいかしたい人に向いています。\n次に、Bタイプです。Bタイプの人は、決まった時間に出社して、会社が決めた方法で仕事をする人です。安定した生活をしたい人に向いています。\n3番目は、Cタイプです。Cタイプの人は、家で仕事をする人です。通勤の時間がありませんから、自分の時間を大切にしたい人に向いています。\n最後は、Dタイプです。Dタイプの人は、いろいろな会社に行って、そこで必要な仕事をする人です。新しい経験をしたい人に向いています。皆さんはどのタイプですか。\n\n質問1\n（質問）自分の時間を大切にしたい人はどのタイプですか。\n\n質問2\n（質問）新しい経験をしたい人はどのタイプですか。",
     "questions": [
       {
@@ -2040,95 +2040,95 @@
     "audioTracks": [
       {
         "label": "CD2-30",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/30.mp3"
+        "src": "cd2/30.mp3"
       },
       {
         "label": "CD2-31",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/31.mp3"
+        "src": "cd2/31.mp3"
       },
       {
         "label": "CD2-32",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/32.mp3"
+        "src": "cd2/32.mp3"
       },
       {
         "label": "CD2-33",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/33.mp3"
+        "src": "cd2/33.mp3"
       },
       {
         "label": "CD2-34",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/34.mp3"
+        "src": "cd2/34.mp3"
       },
       {
         "label": "CD2-35",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/35.mp3"
+        "src": "cd2/35.mp3"
       },
       {
         "label": "CD2-36",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/36.mp3"
+        "src": "cd2/36.mp3"
       },
       {
         "label": "CD2-37",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/37.mp3"
+        "src": "cd2/37.mp3"
       },
       {
         "label": "CD2-38",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/38.mp3"
+        "src": "cd2/38.mp3"
       },
       {
         "label": "CD2-39",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/39.mp3"
+        "src": "cd2/39.mp3"
       },
       {
         "label": "CD2-40",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/40.mp3"
+        "src": "cd2/40.mp3"
       },
       {
         "label": "CD2-41",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/41.mp3"
+        "src": "cd2/41.mp3"
       },
       {
         "label": "CD2-42",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/42.mp3"
+        "src": "cd2/42.mp3"
       },
       {
         "label": "CD2-43",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/43.mp3"
+        "src": "cd2/43.mp3"
       },
       {
         "label": "CD2-44",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/44.mp3"
+        "src": "cd2/44.mp3"
       },
       {
         "label": "CD2-45",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/45.mp3"
+        "src": "cd2/45.mp3"
       },
       {
         "label": "CD2-46",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/46.mp3"
+        "src": "cd2/46.mp3"
       },
       {
         "label": "CD2-47",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/47.mp3"
+        "src": "cd2/47.mp3"
       },
       {
         "label": "CD2-48",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/48.mp3"
+        "src": "cd2/48.mp3"
       },
       {
         "label": "CD2-49",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/49.mp3"
+        "src": "cd2/49.mp3"
       },
       {
         "label": "CD2-50",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/50.mp3"
+        "src": "cd2/50.mp3"
       },
       {
         "label": "CD2-51",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/51.mp3"
+        "src": "cd2/51.mp3"
       },
       {
         "label": "CD2-52",
-        "src": "N2_somatome/53. Somatome N2 Chokai CDs/N2 Somatome Chokai CDs/N2 Somatome CD2/52.mp3"
+        "src": "cd2/52.mp3"
       }
     ],
     "introTracks": [],

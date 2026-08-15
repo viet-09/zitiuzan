@@ -1,14 +1,22 @@
 // js/furigana.js
-// Furigana markup renderer + global on/off toggle.
-// Markup convention: {漢字|かんじ} -> <ruby>漢字<rt>かんじ</rt></ruby>
+// Furigana + underlined-word markup renderer, plus the furigana on/off toggle.
+// Markup conventions:
+//   {漢字|かんじ} -> <ruby>漢字<rt>かんじ</rt></ruby>
+//   《下旬》      -> <u>下旬</u>  (JLPT 問題1 "reading of the underlined word"
+//                    questions — the underline is the only way to tell which
+//                    word the question is actually about; see
+//                    scripts/fix_underlined_words.py for how these markers
+//                    get added to exam data)
 // Plain text passes through untouched (aside from HTML-escaping). "\n" becomes <br>.
 
 import { getSettings, setSettings } from './store.js';
 
 const FURIGANA_OFF_CLASS = 'furigana-off';
 
-// Matches {base|reading} — base/reading may not contain '{', '}' or '|'.
-const FURIGANA_PATTERN = /\{([^{}|]+)\|([^{}|]+)\}/g;
+// Matches {base|reading} (base/reading may not contain '{', '}' or '|') OR
+// 《underlined word》 (word may not contain '《'/'》') — whichever appears
+// first wins at each position, same combined left-to-right scan.
+const MARKUP_PATTERN = /\{([^{}|]+)\|([^{}|]+)\}|《([^《》]+)》/g;
 const NEWLINE_PATTERN = /\r\n|\r|\n/g;
 
 /**
@@ -41,14 +49,15 @@ export function renderFurigana(text) {
   let lastIndex = 0;
   let match;
 
-  FURIGANA_PATTERN.lastIndex = 0;
-  while ((match = FURIGANA_PATTERN.exec(str)) !== null) {
+  MARKUP_PATTERN.lastIndex = 0;
+  while ((match = MARKUP_PATTERN.exec(str)) !== null) {
     const plain = str.slice(lastIndex, match.index);
     html += escapeHtml(plain);
 
-    const base = match[1];
-    const reading = match[2];
-    html += `<ruby>${escapeHtml(base)}<rt>${escapeHtml(reading)}</rt></ruby>`;
+    const [, base, reading, underlined] = match;
+    html += base !== undefined
+      ? `<ruby>${escapeHtml(base)}<rt>${escapeHtml(reading)}</rt></ruby>`
+      : `<u>${escapeHtml(underlined)}</u>`;
 
     lastIndex = match.index + match[0].length;
   }

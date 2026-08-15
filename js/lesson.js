@@ -14,8 +14,9 @@ import { navigate, getCurrentRoute, isRouteActive } from './router.js';
 import { renderFurigana, setFurigana, getFurigana } from './furigana.js';
 import { askText } from './gemini.js';
 import { renderTutor } from './tutor.js';
-import { getQuestionClassification, getLessonImages } from './store.js';
+import { getQuestionClassification, getLessonImages, getVietnameseExplanation } from './store.js';
 import { questionTypeInfo } from './question-types.js';
+import { hydrateLessonAudio } from './lesson-audio.js';
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (char) => ({
@@ -225,7 +226,11 @@ function renderQuestionItem(question, lessonId, questionIndex) {
 }
 
 function renderKanji(lessonId, content) {
-  const cards = (Array.isArray(content.kanji) ? content.kanji : []).map((item) => `
+  // Vietnamese explanations (data/book/kanji.vietnamese.json) are one string
+  // per kanji card, in kanji[] order followed by reviewKanji[] order — the
+  // exact same flattening scripts/generate-vietnamese-explanations.mjs uses.
+  const kanjiList = Array.isArray(content.kanji) ? content.kanji : [];
+  const cards = kanjiList.map((item, index) => `
     <article class="kanji-item">
       <div class="kanji-char">${wordButton(item?.char || '', [item?.on, item?.kun].filter(Boolean).join(' / '))}</div>
       <div class="kanji-readings" lang="ja">
@@ -233,6 +238,7 @@ function renderKanji(lessonId, content) {
         ${item?.kun ? `<span class="kanji-kun">訓: ${escapeHtml(item.kun)}</span>` : ''}
         ${Number.isFinite(Number(item?.strokes)) ? `<span>${escapeHtml(item.strokes)} nét</span>` : ''}
       </div>
+      ${(() => { const vi = getVietnameseExplanation(lessonId, index); return vi ? `<p class="kanji-vi">${escapeHtml(vi)}</p>` : ''; })()}
       <ul class="kanji-word-list">
         ${(Array.isArray(item?.words) ? item.words : []).map((word) => `<li>${wordButton(word?.jp || '', word?.reading || '')}<span class="book-meaning" lang="en">${escapeHtml(word?.en || '')}</span></li>`).join('')}
       </ul>
@@ -249,26 +255,39 @@ function renderKanji(lessonId, content) {
 }
 
 function renderVocabulary(lessonId, content) {
+  // Vietnamese explanations (data/book/vocabulary.vietnamese.json) are one
+  // string per word, flattened across every section's words[] in order —
+  // the exact same flattening scripts/generate-vietnamese-explanations.mjs
+  // uses — so the index counter runs across sections, not per-section.
+  let wordIndex = 0;
   const sections = (Array.isArray(content.sections) ? content.sections : []).map((section) => `
     <section class="vocab-book-section">
       ${section?.heading ? `<h3 class="subheading" lang="ja">${renderFurigana(section.heading)}</h3>` : ''}
       <div class="vocab-list">
-        ${(Array.isArray(section?.words) ? section.words : []).map((word) => `
+        ${(Array.isArray(section?.words) ? section.words : []).map((word) => {
+          const vi = getVietnameseExplanation(lessonId, wordIndex);
+          wordIndex += 1;
+          return `
           <article class="vocab-item">
             <div class="vocab-word">${wordButton(word?.jp || '', word?.reading || '')}</div>
             <div class="vocab-meaning" lang="en">${escapeHtml(word?.en || '')}</div>
+            ${vi ? `<div class="vocab-meaning-vi">${escapeHtml(vi)}</div>` : ''}
             ${word?.note ? `<div class="lesson-notes" lang="en">${escapeHtml(word.note)}</div>` : ''}
-          </article>`).join('')}
+          </article>`;
+        }).join('')}
       </div>
     </section>`).join('');
   return `<section class="content-section vocab-section"><h2 class="section-heading">Từ vựng</h2>${renderImagesSection(lessonId)}${sections}${renderQuestions(content.practice, lessonId, '練習 · Luyện tập')}</section>`;
 }
 
 function renderGrammar(lessonId, content) {
-  const patterns = (Array.isArray(content.patterns) ? content.patterns : []).map((pattern) => `
+  // Vietnamese explanations (data/book/grammar.vietnamese.json) are one
+  // string per pattern, in patterns[] order.
+  const patterns = (Array.isArray(content.patterns) ? content.patterns : []).map((pattern, index) => `
     <article class="grammar-point">
       <h3 class="grammar-title" lang="ja">${renderGrammarNotation(pattern?.form || '')}</h3>
       ${pattern?.meaningEn ? `<p class="grammar-meaning" lang="en">${escapeHtml(pattern.meaningEn)}</p>` : ''}
+      ${(() => { const vi = getVietnameseExplanation(lessonId, index); return vi ? `<p class="grammar-meaning-vi">${escapeHtml(vi)}</p>` : ''; })()}
       ${pattern?.connection ? `<p class="grammar-formation"><strong>Kết nối:</strong> <span lang="ja">${renderGrammarNotation(pattern.connection)}</span></p>` : ''}
       ${(Array.isArray(pattern?.examples) ? pattern.examples : []).map((example) => `
         <div class="example-box">
@@ -373,10 +392,10 @@ function renderListening(lessonId, content) {
     ? `<div class="lesson-audio-list">${audioTracks.map((track) => `
         <figure class="lesson-audio-track">
           <figcaption>${escapeHtml(track?.label || 'Audio')}</figcaption>
-          <audio controls preload="metadata" src="${escapeHtml(track?.src || '')}">Trình duyệt không hỗ trợ phát âm thanh.</audio>
+          <audio controls preload="metadata" data-lesson-audio-key="${escapeHtml(track?.src || '')}">Trình duyệt không hỗ trợ phát âm thanh.</audio>
         </figure>`).join('')}</div>`
     : content.audio
-      ? `<audio class="lesson-audio" controls preload="metadata" src="${escapeHtml(content.audio)}">Trình duyệt không hỗ trợ phát âm thanh.</audio>`
+      ? `<audio class="lesson-audio" controls preload="metadata" data-lesson-audio-key="${escapeHtml(content.audio)}">Trình duyệt không hỗ trợ phát âm thanh.</audio>`
       : '<p class="text-muted">Bản ghi bài tập của bài này chưa có trong bộ nguồn cục bộ.</p>';
   const coverageMarkup = coverage
     ? `<p class="audio-coverage audio-coverage--${escapeHtml(coverage.status || 'missing')}" role="status">Audio bài tập: ${escapeHtml(coverage.present ?? 0)}/${escapeHtml(coverage.required ?? 0)} track cục bộ${Number(coverage.missing) > 0 ? ` · thiếu ${escapeHtml(coverage.missing)}` : ' · đủ bộ'}.</p>`
@@ -385,7 +404,7 @@ function renderListening(lessonId, content) {
     ? `<details class="lesson-audio-intros"><summary>Audio giới thiệu chương (${introTracks.length})</summary>${introTracks.map((track) => `
         <figure class="lesson-audio-track">
           <figcaption>${escapeHtml(track?.label || 'Intro')}</figcaption>
-          <audio controls preload="metadata" src="${escapeHtml(track?.src || '')}">Trình duyệt không hỗ trợ phát âm thanh.</audio>
+          <audio controls preload="metadata" data-lesson-audio-key="${escapeHtml(track?.src || '')}">Trình duyệt không hỗ trợ phát âm thanh.</audio>
         </figure>`).join('')}</details>`
     : '';
   return `
@@ -565,6 +584,7 @@ export function renderLesson(root, id) {
       return;
     }
     root.innerHTML = pageHtml(found, id, getBookContent(id));
+    void hydrateLessonAudio(root);
   };
 
   // Shared popup lifecycle for both tap-a-word (definition) and tap-a-sentence

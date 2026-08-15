@@ -1,4 +1,10 @@
-# N2_web — BUILD SPEC (authoritative contract for all coding agents)
+# N2_web — BUILD SPEC (HISTORICAL — superseded, do not treat as authoritative)
+
+> **Stale as of 2026-08.** This describes an early version of the app (11 JS files, GitHub Pages
+> deployment, client-held Gemini API key, an older font set). The current app has 21+ JS files, a
+> Supabase backend (Postgres + Edge Functions + Storage), deploys to Vercel, and routes all Gemini
+> calls through server-side Edge Functions — none of which is reflected below. Kept for historical
+> context only; read the actual `js/*.js` files and `README.md` for the current architecture.
 
 This is a **vanilla ES-modules SPA** (no framework, no build step) deployed on GitHub Pages.
 Every file below is loaded over http (GitHub Pages / `python -m http.server`). Use **relative** paths only.

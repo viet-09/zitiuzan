@@ -1,4 +1,10 @@
-# N2_web — MASTER FEATURE PLAN (v2, book-based)
+# N2_web — MASTER FEATURE PLAN (v2, book-based) — SHIPPED, kept as historical record
+
+> **All of R1–R7 below are implemented and live.** This is no longer a forward-looking plan — treat
+> it as a record of decisions made on 2026-08-06, not current instructions. Notably: the pet is no
+> longer a chibi SVG (cat/dog/dragon) — it went through a fox/rabbit chibi-SVG redesign and is now a
+> small animated emoji (see `js/pet.js`); the app deploys to Vercel, not GitHub Pages. For current
+> architecture, read `js/*.js` and `README.md` directly.
 
 Authoritative plan for the next build round. All sub-agents read this + the referenced specs
 (`EXTRACT_SPEC.md` for book schema, `DESIGN_TYPO.md` for the Typography-First look, `BUILD_SPEC.md` for module contracts).

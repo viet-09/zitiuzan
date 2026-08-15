@@ -859,6 +859,12 @@ body.furigana-off rt {
     font-style: italic;
 }
 
+.grammar-meaning-vi {
+    color: var(--text-primary);
+    margin: -4px 0 10px;
+    font-size: 0.92rem;
+}
+
 .grammar-formation {
     margin-bottom: 10px;
 }
@@ -926,6 +932,12 @@ body.furigana-off rt {
 
 .vocab-meaning {
     color: var(--text-muted);
+    font-size: 14px;
+    margin-bottom: 6px;
+}
+
+.vocab-meaning-vi {
+    color: var(--text-primary);
     font-size: 14px;
     margin-bottom: 6px;
 }
@@ -1188,6 +1200,10 @@ body.furigana-off rt {
     font-weight: 600;
     font-size: 16px;
     margin-bottom: 12px;
+}
+.quiz-q-text u {
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
 }
 
 .quiz-options {
@@ -2363,6 +2379,24 @@ body.furigana-off rt {
     margin-top: 10px;
 }
 
+.pet-customizer {
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+.pet-customizer__layout {
+    display: grid;
+    grid-template-columns: 110px minmax(0, 1fr);
+    gap: 16px;
+    align-items: center;
+    margin-top: 12px;
+}
+.pet-customizer__preview { width: 100%; display: flex; align-items: center; justify-content: center; }
+.pet-customizer__preview .pet-emoji { font-size: 64px; line-height: 1; }
+.pet-customizer__fields { display: grid; gap: 10px; }
+.pet-customizer__fields label { display: grid; gap: 4px; font-family: var(--font-sans); font-size: 0.8rem; }
+.pet-customizer__fields select { min-height: 44px; border: 1px solid var(--border-dark); background: var(--bg-card); padding: 6px; }
+
 /* Profile */
 .masthead-tools { align-items: center; gap: 10px; flex-wrap: wrap; }
 .profile-mount { display: inline-flex; }
@@ -2541,78 +2575,78 @@ body.furigana-off rt {
 .lesson-audio-intros summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; }
 @keyframes live-pulse { 0%,100% { opacity: .55; transform: scale(.85); } 50% { opacity: 1; transform: scale(1); } }
 
-/* Streak pet */
+/* Streak pet — small always-on corner companion (not embedded in dashboard) */
 .stat-streak { grid-column: span 1; }
-#streak-pet {
-    grid-column: 1 / -1;
-    padding: 18px 20px;
-    border-top: 1px solid var(--border-color);
-}
-.streak-pet-card {
-    position: relative;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(210px, 300px);
-    align-items: center;
-    gap: 10px 24px;
-}
-.streak-pet-card__copy { grid-column: 1; }
-.streak-pet-card__eyebrow { font-family: var(--font-sans); font-size: 9px; letter-spacing: 0.09em; font-weight: 700; }
-.streak-pet-card__message { font-size: 0.82rem; color: var(--text-muted); }
-.streak-pet-button { grid-column: 2; grid-row: 1 / span 3; min-height: 180px; padding: 0; border: 1px solid var(--border-color); background: #E9D9D6; cursor: pointer; overflow: hidden; }
-.streak-pet-stage { display: block; width: min(180px, 100%); margin: auto; }
-.streak-pet { width: 100%; height: auto; overflow: visible; }
-.pet-svg__character { transform-origin: 120px 300px; animation: pet-bob 2.8s ease-in-out infinite; }
-.pet-svg__head,
-.pet-svg__body,
-.pet-svg__ear,
-.pet-svg__paw,
-.pet-svg__foot { fill: #F2C9BE; stroke: var(--text-primary); stroke-width: 4; stroke-linejoin: round; }
-.pet--dog .pet-svg__head,
-.pet--dog .pet-svg__body,
-.pet--dog .pet-svg__ear { fill: #EBC79C; }
-.pet--dragon .pet-svg__head,
-.pet--dragon .pet-svg__body,
-.pet--dragon .pet-svg__ear { fill: #B8D8C1; }
-.pet-svg__belly,
-.pet-svg__muzzle,
-.pet-svg__ear-inner { fill: #FCF3E8; }
-.pet-svg__eye { fill: var(--text-primary); transform-origin: center; animation: pet-blink 5s infinite; }
-.pet-svg__eye-shine { fill: #fff; }
-.pet-svg__cheek { fill: #E88984; opacity: .55; }
-.pet-svg__tail,
-.pet-svg__wing,
-.pet-svg__horn { fill: #F2C9BE; stroke: var(--text-primary); stroke-width: 4; fill-rule: evenodd; }
-.pet--dog .pet-svg__tail { fill: #EBC79C; }
-.pet--dragon .pet-svg__tail,
-.pet--dragon .pet-svg__wing,
-.pet--dragon .pet-svg__horn { fill: #B8D8C1; }
-.pet-svg__accessory,
-.pet-svg__crown { fill: var(--accent-red); stroke: var(--text-primary); stroke-width: 3; }
-.pet-svg__aura { fill: #F3C849; opacity: 0; }
-.pet--tier-legendary .pet-svg__aura { opacity: .16; }
-.pet-svg__sparkles { fill: var(--accent-red); }
-.pet-svg__sleep { fill: var(--text-muted); font: 700 24px var(--font-sans); }
-.pet-svg__mouth,
-.pet-svg__eye-closed,
-.pet-svg__whisker,
-.pet-svg__nose,
-.pet-svg__nostril,
-.pet-svg__cheek-scale { fill: none; stroke: var(--text-primary); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
-.pet-svg__nose,
-.pet-svg__nostril { fill: var(--text-primary); }
-.streak-pet-status { grid-column: 1; min-height: 1.4em; font-size: 0.8rem; }
-.streak-pet-customizer { font-family: var(--font-sans); font-size: 0.76rem; }
-.streak-pet-customizer summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; }
-.streak-pet-customizer__fields { display: grid; gap: 8px; }
-.streak-pet-customizer label { display: grid; gap: 4px; }
-.streak-pet-customizer select { min-height: 44px; border: 1px solid var(--border-dark); background: var(--bg-card); padding: 6px; }
-.streak-pet-stage.is-reacting { animation: pet-reaction .55s ease; }
-.streak-pet-stage.is-celebrating { animation: pet-celebrate .7s ease 2; }
 
-@keyframes pet-bob { 0%,100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-5px) rotate(1deg); } }
-@keyframes pet-blink { 0%,45%,49%,100% { transform: scaleY(1); } 47% { transform: scaleY(.08); } }
-@keyframes pet-reaction { 0%,100% { transform: rotate(0); } 35% { transform: rotate(-7deg) scale(1.05); } 70% { transform: rotate(7deg) scale(1.05); } }
+#pet-widget-mount {
+    position: fixed;
+    left: 14px;
+    bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0) + 10px);
+    z-index: 55;
+    width: 84px;
+    height: 84px;
+    pointer-events: none; /* only the button inside is interactive */
+}
+.streak-pet-mount { width: 100%; height: 100%; }
+.pet-widget {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    animation: pet-wander 16s ease-in-out infinite;
+}
+.pet-widget__button {
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 4px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    pointer-events: auto;
+}
+.pet-widget__stage { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
+.pet-emoji { display: block; font-size: 44px; line-height: 1; animation: pet-bob 2.4s ease-in-out infinite; }
+.pet--tier-sleeping .pet-emoji { animation-duration: 3.6s; opacity: .7; }
+.pet--tier-excited .pet-emoji,
+.pet--tier-legendary .pet-emoji { animation-duration: 1.7s; }
+.pet-widget__bubble {
+    position: absolute;
+    left: 50%;
+    bottom: 100%;
+    transform: translate(-50%, 6px);
+    margin: 0 0 6px;
+    max-width: 160px;
+    width: max-content;
+    padding: 6px 10px;
+    border: 1px solid var(--border-dark);
+    border-radius: 12px;
+    background: var(--bg-card);
+    font-family: var(--font-sans);
+    font-size: 11px;
+    line-height: 1.3;
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .18s ease, transform .18s ease;
+}
+.pet-widget__bubble.is-visible { opacity: 1; transform: translate(-50%, 0); }
+
+.pet-widget__stage.is-reacting { animation: pet-reaction .55s ease; }
+.pet-widget__stage.is-celebrating { animation: pet-celebrate .7s ease 2; }
+
+@keyframes pet-bob { 0%,100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-6px) rotate(4deg); } }
+@keyframes pet-reaction { 0%,100% { transform: rotate(0); } 35% { transform: rotate(-12deg) scale(1.1); } 70% { transform: rotate(12deg) scale(1.1); } }
 @keyframes pet-celebrate { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-14px) scale(1.06); } }
+/* Gentle side-to-side wander within the corner, like a pet pacing — the
+   character art is front-facing (not a side-view walk cycle), so movement
+   reads better as "wandering" than a literal walk. No horizontal flip: the
+   bubble is a sibling that rides along, and flipping would mirror its text. */
+@keyframes pet-wander {
+    0%, 8% { transform: translateX(0); }
+    28%, 44% { transform: translateX(38px); }
+    64%, 80% { transform: translateX(-18px); }
+    100% { transform: translateX(0); }
+}
 
 @media (max-width: 600px) {
     .masthead-tools { justify-content: flex-start; }
@@ -2625,10 +2659,8 @@ body.furigana-off rt {
     .week-card { padding: 14px; min-width: 0; }
     .category-block { min-width: 0; }
     .lessons-grid { grid-template-columns: minmax(0, 1fr); }
-    .streak-pet-card { grid-template-columns: 1fr; }
-    .streak-pet-button,
-    .streak-pet-card__copy,
-    .streak-pet-status { grid-column: 1; grid-row: auto; }
+    #pet-widget-mount { width: 64px; height: 64px; left: 10px; }
+    .pet-emoji { font-size: 34px; }
     .exam-tracker-grid { grid-template-columns: repeat(auto-fill, minmax(30px, 1fr)); gap: 4px; }
     .exam-tracker { padding: 8px; margin-bottom: 10px; }
     .exam-tracker-cell { font-size: 10px; }
@@ -2640,9 +2672,9 @@ body.furigana-off rt {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .pet-svg__character,
-    .pet-svg__eye,
-    .streak-pet-stage { animation: none !important; }
+    .pet-emoji,
+    .pet-widget,
+    .pet-widget__stage { animation: none !important; }
 }
 
 /* --- Question classification badges ------------------------------------ */

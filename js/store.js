@@ -64,14 +64,17 @@ export function resetBookContent() {
   _bookById.clear();
   _classificationById.clear();
   _imagesById.clear();
+  _vietnameseById.clear();
 }
 
 // ---------------------------------------------------------------------------
-// Enrichment (classification.json + images.json) — read-only in-memory caches.
+// Enrichment (classification.json + images.json + vietnamese.json) —
+// read-only in-memory caches.
 // ---------------------------------------------------------------------------
 
 const _classificationById = new Map();
 const _imagesById = new Map();
+const _vietnameseById = new Map();
 
 export function setQuestionClassification(lessonId, entries) {
   if (typeof lessonId !== 'string' || !lessonId) return;
@@ -96,6 +99,23 @@ export function setLessonImages(lessonId, entries) {
 /** @returns {Array<{src:string, kind?:string, captionVi?:string}>|null} */
 export function getLessonImages(lessonId) {
   return _imagesById.get(String(lessonId || '')) || null;
+}
+
+/** entries: string[], one Vietnamese explanation per item, in the exact same
+ * order the lesson's own primary array (kanji[]+reviewKanji[], flattened
+ * sections[].words[], or patterns[]) is iterated in — see js/lesson.js's
+ * renderKanji/renderVocabulary/renderGrammar for the matching iteration. */
+export function setVietnameseExplanations(lessonId, entries) {
+  if (typeof lessonId !== 'string' || !lessonId) return;
+  if (Array.isArray(entries)) _vietnameseById.set(lessonId, entries);
+}
+
+/** @returns {string|null} the Vietnamese explanation for the item at `index`
+ * (in the same flattened order used when the enrichment file was generated). */
+export function getVietnameseExplanation(lessonId, index) {
+  const list = _vietnameseById.get(String(lessonId || ''));
+  const value = Array.isArray(list) ? list[index] : null;
+  return typeof value === 'string' && value ? value : null;
 }
 
 /**
@@ -128,10 +148,6 @@ export function getBookContent(id) {
   return _bookById.get(String(id || '')) || null;
 }
 
-export function getBookContentCount() {
-  return _bookById.size;
-}
-
 /**
  * Search every category/week for a lesson id.
  * @returns {{lesson:object, category:object, week:object}|null}
@@ -151,35 +167,6 @@ export function findLesson(id) {
   } catch (err) {
     return null;
   }
-}
-
-/**
- * Flatten every lesson across every category/week.
- * @returns {Array<object>} lesson + categoryId, categoryName, week
- */
-export function allLessons() {
-  const out = [];
-  try {
-    if (!_lessons || !Array.isArray(_lessons.categories)) return out;
-    for (const category of _lessons.categories) {
-      if (!category || !Array.isArray(category.weeks)) continue;
-      for (const week of category.weeks) {
-        if (!week || !Array.isArray(week.lessons)) continue;
-        for (const lesson of week.lessons) {
-          if (!lesson) continue;
-          out.push({
-            ...lesson,
-            categoryId: category.id,
-            categoryName: category.name,
-            week: week.week,
-          });
-        }
-      }
-    }
-  } catch (err) {
-    return out;
-  }
-  return out;
 }
 
 /**
@@ -312,39 +299,6 @@ export function writeStreak(value) {
     lastDate: typeof value?.lastDate === 'string' ? value.lastDate : '',
   };
   writeJSON(STORAGE.streak, safe);
-}
-
-// ---------------------------------------------------------------------------
-// Per-lesson AI-generated content cache
-// ---------------------------------------------------------------------------
-
-function readContentMap() {
-  const map = readJSON(STORAGE.content, {});
-  return map && typeof map === 'object' ? map : {};
-}
-
-export function getContent(id) {
-  try {
-    const map = readContentMap();
-    return map[id] ?? null;
-  } catch (err) {
-    return null;
-  }
-}
-
-export function setContent(id, obj) {
-  try {
-    const map = readContentMap();
-    map[id] = obj;
-    writeJSON(STORAGE.content, map);
-  } catch (err) {
-    // ignore
-  }
-}
-
-/** Replace the entire AI content cache. Used by sync layer. */
-export function writeContentMapExternal(map) {
-  writeJSON(STORAGE.content, map && typeof map === 'object' ? map : {});
 }
 
 // ---------------------------------------------------------------------------

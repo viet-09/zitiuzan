@@ -1,7 +1,8 @@
 // js/app.js — application bootstrap
 // Loads lesson data, wires the header/nav controls, and starts the hash router.
 
-import { setLessons, resetBookContent, mergeBookContent, setTutorContext, setQuestionClassification, setLessonImages } from './store.js';
+import { setLessons, resetBookContent, mergeBookContent, setTutorContext, setQuestionClassification, setLessonImages, setVietnameseExplanations, getStreak } from './store.js';
+import { mountPet } from './pet.js';
 import { initRouter, navigate } from './router.js';
 import { initFuriganaToggle } from './furigana.js';
 import { openSettings } from './gemini.js';
@@ -72,6 +73,14 @@ function wireAccountButton() {
     paint();
 }
 
+/** Mounted once, globally — a small always-on corner companion rather than
+ * a per-route dashboard card (js/dashboard.js no longer manages this). */
+let petController = null;
+function wirePetWidget() {
+    const streak = Number((getStreak() || {}).streak) || 0;
+    petController = mountPet('#pet-widget-mount', { streak });
+}
+
 async function loadLessons() {
     try {
         const res = await fetch('data/lessons.json');
@@ -131,6 +140,10 @@ async function loadEnrichment(categories) {
                     for (const [lessonId, list] of Object.entries(data)) {
                         if (Array.isArray(list)) setLessonImages(lessonId, list);
                     }
+                } else if (suffix === 'vietnamese.json' && data && typeof data === 'object') {
+                    for (const [lessonId, list] of Object.entries(data)) {
+                        if (Array.isArray(list)) setVietnameseExplanations(lessonId, list);
+                    }
                 }
             } catch (_err) {
                 // enrichment is optional; skip silently
@@ -150,6 +163,7 @@ async function bootstrap() {
     wireSettingsButton();
     wireBottomNav();
     wireAccountButton();
+    wirePetWidget();
     // First-visit choice is now gated explicitly below (sign-in vs. offline
     // name/avatar prompt), so mountProfile never auto-opens on its own.
     const profileController = mountProfile('#profile-mount', { promptOnFirstVisit: false });
@@ -180,6 +194,7 @@ async function bootstrap() {
                 if (migrated) console.info('[sync] localStorage migrated to Supabase');
                 await maybeSeedProfileFromGoogle(authedUser);
                 await pullFromCloud(authedUser.id);
+                petController?.update({ streak: Number((getStreak() || {}).streak) || 0 });
             } catch (err) {
                 console.warn('[sync] bootstrap sync failed:', err);
             }

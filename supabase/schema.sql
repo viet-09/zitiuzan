@@ -304,6 +304,14 @@ insert into storage.buckets (id, name, public)
 values ('exam-audio', 'exam-audio', false)
 on conflict (id) do nothing;
 
+-- Private bucket for book listening-lesson CD audio (same rationale as
+-- exam-audio above — owned CD-rip source under N2_somatome/, never
+-- public/git). The lesson-audio-url Edge Function mints short-lived signed
+-- URLs with the service-role key; see js/lesson-audio.js for the client side.
+insert into storage.buckets (id, name, public)
+values ('lesson-audio', 'lesson-audio', false)
+on conflict (id) do nothing;
+
 -- ---------------------------------------------------------------------------
 -- 12. exam_attempts — mock JLPT exam history + AI review + retest quiz.
 -- Insert-only from the server: the exam-review Edge Function computes the

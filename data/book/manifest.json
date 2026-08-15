@@ -64,7 +64,11 @@
         "k8d7"
       ],
       "complete": true,
-      "enrichmentFiles": ["classification.json", "images.json"]
+      "enrichmentFiles": [
+        "classification.json",
+        "images.json",
+        "vietnamese.json"
+      ]
     },
     "vocabulary": {
       "file": "vocabulary.json",
@@ -128,7 +132,11 @@
         "v8d7"
       ],
       "complete": true,
-      "enrichmentFiles": ["classification.json", "images.json"]
+      "enrichmentFiles": [
+        "classification.json",
+        "images.json",
+        "vietnamese.json"
+      ]
     },
     "grammar": {
       "file": "grammar.json",
@@ -192,7 +200,11 @@
         "g8d7"
       ],
       "complete": true,
-      "enrichmentFiles": ["classification.json", "images.json"]
+      "enrichmentFiles": [
+        "classification.json",
+        "images.json",
+        "vietnamese.json"
+      ]
     },
     "reading": {
       "file": "reading.json",
@@ -242,7 +254,10 @@
         "r6d7"
       ],
       "complete": true,
-      "enrichmentFiles": ["classification.json", "images.json"]
+      "enrichmentFiles": [
+        "classification.json",
+        "images.json"
+      ]
     },
     "listening": {
       "file": "listening.json",
@@ -273,7 +288,10 @@
         "l5d1"
       ],
       "complete": true,
-      "enrichmentFiles": ["classification.json", "images.json"]
+      "enrichmentFiles": [
+        "classification.json",
+        "images.json"
+      ]
     }
   }
 }

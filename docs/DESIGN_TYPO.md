@@ -26,7 +26,7 @@ MUST remove presentational inline `style="..."` from `js/tutor.js` and `js/voice
   --paper-2:#EEE9DD;            /* subtle inset panel */
   --text-primary:#141210;      /* ink */
   --text-muted:#6C665B;        /* warm grey ink */
-  --accent-red:#E4322B;        /* 朱 vermillion — the single vivid accent (name kept) */
+  --accent-red:#C52620;        /* 朱 vermillion — the single vivid accent (name kept) */
   --accent-red-bg:#FBE9E6;     /* vermillion wash */
   --accent-gold:#141210;       /* repurposed to ink (used by old focus outlines/tts active) */
   --border-color:#E3DCCB;      /* hairline */
@@ -35,8 +35,8 @@ MUST remove presentational inline `style="..."` from `js/tutor.js` and `js/voice
   --accent-green:#1E7A4D; --accent-green-bg:#E9F1EA; --accent-green-border:#9DBCA6;
 
   /* category accents (tasteful color; hooked via [data-cat]/[data-cat-id]) */
-  --cat-grammar:#E4322B; --cat-vocabulary:#1F5FD0; --cat-kanji:#7A3CC0;
-  --cat-reading:#1E7A4D; --cat-listening:#C2751A;
+  --cat-grammar:#C52620; --cat-vocabulary:#1F5FD0; --cat-kanji:#7A3CC0;
+  --cat-reading:#1E7A4D; --cat-listening:#8A4B08;
 
   --font-display:'Fraunces','Zen Kaku Gothic New',Georgia,serif;
   --font-serif:'Fraunces','Zen Kaku Gothic New',Georgia,serif;   /* body/reading */

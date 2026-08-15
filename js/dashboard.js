@@ -3,12 +3,10 @@
 import { getLessons, countProgress, isDone, toggleDone, getStreak, writeStreak } from './store.js';
 import { renderFurigana } from './furigana.js';
 import { navigate } from './router.js';
-import { mountPet } from './pet.js';
 import { currentUser } from './supabase.js';
 import { pushProgressToggle, pushTouchStreak, pushScore } from './sync.js';
 import { LESSON_COMPLETE_SCORE } from './config.js';
-
-let petController = null;
+import { announceLessonCompleted } from './pet.js';
 
 const dashboardState = {
   activeCategory: 'all',
@@ -87,19 +85,12 @@ export function renderDashboard(root) {
   bindEvents(data);
   return {
     preserveScroll: restoreDashboardPosition(root),
-    cleanup() {
-      petController?.destroy();
-      petController = null;
-    },
   };
 }
 
 function renderStats() {
   const statsEl = document.getElementById('dash-stats');
   if (!statsEl) return;
-
-  petController?.destroy();
-  petController = null;
 
   const progress = countProgress() || { total: 0, done: 0 };
   const total = Number(progress.total) || 0;
@@ -121,10 +112,7 @@ function renderStats() {
       <div class="stat-value">${streak} ngày</div>
       <div class="stat-label">Chuỗi học</div>
     </div>
-    <div id="streak-pet" class="stats-pet-row" data-streak="${streak}"></div>
   `;
-
-  petController = mountPet('#streak-pet', { streak, showControls: true });
   window.dispatchEvent(new CustomEvent('n2:stats-rendered', { detail: { streak } }));
 }
 
@@ -287,9 +275,7 @@ function bindEvents(data) {
     const categoryId = item.closest('.category-block')?.getAttribute('data-cat-id') || '';
     syncLessonCompletion(id, categoryId, done);
     if (done) {
-      window.dispatchEvent(new CustomEvent('n2:lesson-complete', {
-        detail: { id, done, streak: Number((getStreak() || {}).streak) || 0 },
-      }));
+      announceLessonCompleted({ id, done, streak: Number((getStreak() || {}).streak) || 0 });
     }
   });
 }

@@ -139,20 +139,6 @@ export function saveProfile(value) {
   return { ...profile };
 }
 
-export function resetProfile() {
-  memoryProfile = { ...DEFAULT_PROFILE };
-  if (typeof localStorage !== 'undefined') {
-    try {
-      localStorage.removeItem(PROFILE_STORAGE_KEY);
-      storageAvailable = true;
-    } catch (error) {
-      storageAvailable = false;
-    }
-  }
-  dispatchProfileUpdated(memoryProfile, storageAvailable);
-  return { ...memoryProfile };
-}
-
 export function hasSeenProfilePrompt() {
   if (typeof localStorage === 'undefined') return false;
   try {
