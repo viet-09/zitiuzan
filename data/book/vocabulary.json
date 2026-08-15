@@ -1695,7 +1695,8 @@
           "建",
           "築"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "私の家の（ ）を電車が走っています。",
@@ -1705,7 +1706,8 @@
           "この辺り",
           "真ん中"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "（ ）の新しい冷蔵庫に買い換えたら、電気代が安くなった。",
@@ -1715,7 +1717,8 @@
           "節約",
           "再利用"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "銀行で家賃を振り込んだ。（ ）が高かった。",
@@ -1725,7 +1728,8 @@
           "家賃",
           "手数料"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "逃げていた銀行強盗がやっと（ ）。",
@@ -1735,7 +1739,8 @@
           "引っかかった",
           "処分した"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "そのごみは、リサイクルの（ ）になるので、可燃ごみには捨てないでください。",
@@ -1745,7 +1750,8 @@
           "再利用",
           "不燃"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "熱が出て汗を（ ）ので、下着を着替えた。",
@@ -1755,7 +1761,8 @@
           "当てた",
           "かいた"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "外食は高つくので、私は（ ）しています。",
@@ -1765,7 +1772,8 @@
           "炊事",
           "一人住まい"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "大きな段ボールは（ ）として出してください。",
@@ -1775,7 +1783,8 @@
           "分別",
           "洗い物"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "酔ったサラリーマンが、通りで（ ）いる。",
@@ -1785,7 +1794,8 @@
           "もぐって",
           "あばれて"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "人を訪問して、お茶などを出してもらったときに言う言葉。",
@@ -1795,7 +1805,8 @@
           "おかまいなく。",
           "おかげさまで。"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "怒ったときなどに大声を出す。",
@@ -1805,7 +1816,8 @@
           "いじめる",
           "どなる"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "必要な程度をこえてお金をかけること。",
@@ -1815,7 +1827,8 @@
           "赤字",
           "余裕"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "液体が穴のあいた容器などから外へ出てしまう。",
@@ -1825,7 +1838,8 @@
           "もぐる",
           "はぶく"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "チラシやポスターなどを壁から取り除く。",
@@ -1835,7 +1849,8 @@
           "はがす",
           "こぼす"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "もう着られなくなったスーツを捨てた。",
@@ -1845,7 +1860,8 @@
           "節約した",
           "省いた"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "子どもじゃないのだから、そんなことはやめなさい。",
@@ -1855,7 +1871,8 @@
           "よしなさい",
           "つりなさい"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "その人はサングラスを取ったら、やさしい目をしていた。",
@@ -1865,7 +1882,8 @@
           "引き出したら",
           "あびたら"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "ビールの缶などは洗ってから不燃ごみに出してください。",
@@ -1875,7 +1893,8 @@
           "すすいで",
           "こぼす"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "今年の正月は家でのんびり過ごした。",
@@ -1885,7 +1904,8 @@
           "ぜいたくに",
           "つまらなく"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       }
     ]
   },
@@ -3395,7 +3415,8 @@
           "選択",
           "消去"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "大阪支社から( )してきました、田中と申します。",
@@ -3405,7 +3426,8 @@
           "通勤",
           "転勤"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "その会社情報をインターネットで( )した。",
@@ -3415,7 +3437,8 @@
           "挿入",
           "採用"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "不景気で、ボーナスを( )のはなかなか難しい。",
@@ -3425,7 +3448,8 @@
           "支給する",
           "つなぐ"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "古くなったファイルを( )した。",
@@ -3435,7 +3459,8 @@
           "拡大",
           "作成"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "細かいことをもう少し( )説明してください。",
@@ -3445,7 +3470,8 @@
           "抽象的に",
           "具体的に"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "その件に関しては明日( )ましょう。",
@@ -3455,7 +3481,8 @@
           "取り次ぎ",
           "打ち合わせ"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "会議で意見を( )困った。",
@@ -3465,7 +3492,8 @@
           "なまけられて",
           "つながれて"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "歌を歌い続けることが彼女の( )です。",
@@ -3475,7 +3503,8 @@
           "歌いがい",
           "しがい"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "まだ来月のスケジュールを( )いない。",
@@ -3485,7 +3514,8 @@
           "ずれて",
           "こなして"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "問題2 説明に最も合う言葉を、1・2・3・4から一つ選びなさい。よくないところを直して正しくすること。",
@@ -3495,7 +3525,8 @@
           "選択",
           "挿入"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "ひとつのところに集める。",
@@ -3505,7 +3536,8 @@
           "もどす",
           "寄せる"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "必要がないものとして取り除く。",
@@ -3515,7 +3547,8 @@
           "そろえる",
           "こなす"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "あるものにつりあっていて適当である様子。",
@@ -3525,7 +3558,8 @@
           "ふさわしい",
           "やりがいがある"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "パソコンが突然動かなくなってしまうこと。",
@@ -3535,7 +3569,8 @@
           "カーソル",
           "ペースト"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "問題3 ____の言葉に意味が最も近いものを、1・2・3・4から一つ選びなさい。交通費が払われないので、そのバイトを断った。",
@@ -3555,7 +3590,8 @@
           "受信",
           "接続"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "インターネットで得た画像を文書にはり付けた。",
@@ -3565,7 +3601,8 @@
           "ペーストした",
           "保存した"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "コピー用紙がもうすぐなくなるから、買っておこう。",
@@ -3575,7 +3612,8 @@
           "もどす",
           "こなす"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "忙しくしてお昼ご飯を食べる間もなかった。",
@@ -3585,7 +3623,8 @@
           "気",
           "休暇"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       }
     ]
   },
@@ -3900,7 +3939,8 @@
           "a. あつかましい",
           "b. くどい"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "子どものくせに (a. 無邪気な b. 生意気な) ことを言うな。",
@@ -3908,7 +3948,8 @@
           "a. 無邪気な",
           "b. 生意気な"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "田中さんの奥さんはいつも (a. 器用な b. 上品な) 服を着ている。",
@@ -3916,7 +3957,8 @@
           "a. 器用な",
           "b. 上品な"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "甘やかされて育った子どもは (a. わがままな b. あわれな) ことが多い。",
@@ -3924,7 +3966,8 @@
           "a. わがままな",
           "b. あわれな"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "(a. そそっかしい b. 気が小さい) 彼女は、いつも何か忘れ物をする。",
@@ -3932,7 +3975,8 @@
           "a. そそっかしい",
           "b. 気が小さい"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "セールスマンに、ほしくない化粧品を (a. 下品に b. 強引に) 買わされた。",
@@ -3940,7 +3984,8 @@
           "a. 下品に",
           "b. 強引に"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "この子はとても ( ), だれにでも話しかけるんですよ。",
@@ -3950,7 +3995,8 @@
           "3 たのしくて",
           "4 人なつっこくて"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "彼女のアイデアはとても ( ) ですね。",
@@ -3960,7 +4006,8 @@
           "3 センスがいい",
           "4 センスが高い"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       }
     ]
   },
@@ -5352,7 +5399,8 @@
           "くっつけて",
           "もたれて"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "そのチームは（ ）ところで優勝を逃した。",
@@ -5362,7 +5410,8 @@
           "申し訳ない",
           "おしい"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "タイヤが雨で（ ）壁にぶつかってしまった。",
@@ -5372,7 +5421,8 @@
           "ねじれて",
           "またいで"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "いつまでも親を（ ）いけません。",
@@ -5382,7 +5432,8 @@
           "恵まれては",
           "たよりにしては"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "親友にまで（ ）、もうだれも信用できなくなった。",
@@ -5392,7 +5443,8 @@
           "やつつけられて",
           "さからわれて"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "（ ）返事をしないで、いやならいやとはっきり言ってください。",
@@ -5402,7 +5454,8 @@
           "ふさわしい",
           "ありふれた"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "彼はいつもたばこを（ ）新聞を読んでいる。",
@@ -5412,7 +5465,8 @@
           "はさんで",
           "くわえて"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "彼はいつも笑っているとても（ ）な人です。",
@@ -5422,7 +5476,8 @@
           "快適な",
           "ひきょうな"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "肺の検査で（ ）を撮った。",
@@ -5432,7 +5487,8 @@
           "健康診断",
           "医師の診察"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "彼は人のタバコをもらってばかりいる（ ）人だ。",
@@ -5442,7 +5498,8 @@
           "さわやかな",
           "ずうずうしい"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "寄りかかる。",
@@ -5452,7 +5509,8 @@
           "もたれる",
           "ねじる"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "暗い気持ちになる。",
@@ -5462,7 +5520,8 @@
           "申し訳ない",
           "面倒くさい"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "昔を思い出して親しみを持つ。",
@@ -5472,7 +5531,8 @@
           "あこがれる",
           "ありがたい"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "悪く言う。",
@@ -5482,7 +5542,8 @@
           "けなす",
           "うらぎる"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "意見が合わなくて争ったりする。",
@@ -5492,7 +5553,8 @@
           "いじめる",
           "もめる"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "彼女の耳元で「愛してるよ」とそっと言った。",
@@ -5502,7 +5564,8 @@
           "おがんだ",
           "ちかった"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "面倒な問題が起きた。十分に考えながら解決していかなければならない。",
@@ -5512,7 +5575,8 @@
           "みっともない",
           "やっかいな"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "今日は客がたくさん来て、忙しい一日だった。",
@@ -5522,7 +5586,8 @@
           "あわただしい",
           "おだやかな"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "おいしいけれど、毎日食べているといやになる。",
@@ -5532,7 +5597,8 @@
           "あわてる",
           "あせる"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "歯が痛かったが、がまんして仕事を続けた。",
@@ -5542,7 +5608,8 @@
           "ふざけて",
           "こらえて"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       }
     ]
   },
@@ -6901,7 +6968,8 @@
           "せいぜい",
           "近々"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "時間がたつにつれて、痛みは（ ）消えていった。",
@@ -6911,7 +6979,8 @@
           "わりに",
           "なお"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "（ ）わが社は新製品を開発することに成功した。",
@@ -6921,7 +6990,8 @@
           "いつか",
           "もしかすると"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "あのタレントは事件以来、（ ）テレビに出なくなった。",
@@ -6931,7 +7001,8 @@
           "別に",
           "いっさい"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "料理の前に（ ）ビールを頼みましょう。",
@@ -6941,7 +7012,8 @@
           "たった今",
           "思わず"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "明日から（ ）オリンピックが開幕します。",
@@ -6951,7 +7023,8 @@
           "たびたび",
           "すっと"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "がんこな彼は、（ ）やると決めたら、どんなことがあってもやめることはない。",
@@ -6961,7 +7034,8 @@
           "いったん",
           "さっそく"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "人気のマンションは発売と同時に（ ）売り切れてしまった。",
@@ -6971,7 +7045,8 @@
           "とっくに",
           "ようやく"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "ほかの人に見つからないように、田中さんに（ ）手紙を渡した。",
@@ -6981,7 +7056,8 @@
           "こっそり",
           "じっくり"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "試合は（ ）始まります。",
@@ -6991,7 +7067,8 @@
           "まもなく",
           "しきりに"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "たくさんつまっている様子。",
@@ -7001,7 +7078,8 @@
           "ぎっしり",
           "おおいに出"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "同じようなことを何度もくり返す様子。",
@@ -7011,7 +7089,8 @@
           "にわかに",
           "ただちに"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "少し、ちょっとという意味。",
@@ -7021,7 +7100,8 @@
           "多少",
           "わりあいに"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "たくさん、いっぱいという意味。",
@@ -7031,7 +7111,8 @@
           "より",
           "いちだんと"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "かたく心に決めて物事を行う様子。",
@@ -7041,7 +7122,8 @@
           "思い切って",
           "思い切り"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "あの事故からもうすぐ1年がたつ。",
@@ -7051,7 +7133,8 @@
           "ほんの",
           "まもなく"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "言ってはいけないと思っていたのに、思わず本当のことを言ってしまった。",
@@ -7061,7 +7144,8 @@
           "実に",
           "あいにく"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "車にはまだガソリンがたっぷり入っています。",
@@ -7071,7 +7155,8 @@
           "多少",
           "十分に"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "あんまりおいしくなかったし、高かったし、もうそのレストランには行かない。",
@@ -7081,7 +7166,8 @@
           "あくまでも",
           "どうせ"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "彼女はずいぶん前に離婚してしまったよ。",
@@ -7091,7 +7177,8 @@
           "いったん",
           "どうやら"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       }
     ]
   },
@@ -8716,7 +8803,8 @@
           "作者",
           "人間"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "2 この部分は、インターネットから( )して書きました。",
@@ -8726,7 +8814,8 @@
           "引用",
           "通用"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "3 庭であやしい( )がする。",
@@ -8736,7 +8825,8 @@
           "話し手",
           "物音"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "4 年をとると、( )がなくなってくるものだ。",
@@ -8746,7 +8836,8 @@
           "体力",
           "人手"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "5 緊張せずに( )な気持ちで演技してください。",
@@ -8756,7 +8847,8 @@
           "集中",
           "本気"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "6 株価の変動は我が社に( )な影響をもたらした。",
@@ -8766,7 +8858,8 @@
           "強引",
           "重大"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "7 すりや詐欺に遭わないよう、( )してください。",
@@ -8776,7 +8869,8 @@
           "合図",
           "手当て"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "8 フィルターは、1ヵ月を( )に、交換してください。",
@@ -8786,7 +8880,8 @@
           "発生",
           "使用"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "9 試合が近いので、練習を( )しよう。",
@@ -8796,7 +8891,8 @@
           "集合",
           "強化"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "10 医者が足りなくて、けが人の( )ができない。",
@@ -8806,7 +8902,8 @@
           "作業",
           "用心"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "問題2 説明に最も合う言葉を、1・2・3・4から一つ選びなさい。11 耳の聞こえない人のための会話方法。",
@@ -8816,7 +8913,8 @@
           "発言",
           "手話"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "12 小説などを書く人。",
@@ -8826,7 +8924,8 @@
           "読書家",
           "作家"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "13 真ん中。",
@@ -8836,7 +8935,8 @@
           "年中",
           "集中"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "14 別々の二つ以上のグループなどが一つにまとまること、また一つにまとめること。",
@@ -8846,7 +8946,8 @@
           "会合",
           "合計"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "15 世の中にない物を初めて作り出すこと。",
@@ -8856,7 +8957,8 @@
           "発明",
           "発行"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "問題3 ____の言葉に意味が最も近いものを、1・2・3・4から一つ選びなさい。16 彼女の決勝での演技はすばらしかった。",
@@ -8876,7 +8978,8 @@
           "多金",
           "会計"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "18 田中さんに強引に誘われて、カラオケに行った。",
@@ -8886,7 +8989,8 @@
           "気持ちよく",
           "むりに"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "19 昨日、日中はかなり蒸し暑かった。",
@@ -8896,7 +9000,8 @@
           "昼間",
           "午後12時ごろ"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "20 ナイフで切った指の治療をしてもらった。",
@@ -9088,7 +9193,8 @@
           "a. ゼミ",
           "b. プロ"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "② インフルエンザの（a. ウイルス b. ワクチン）が不足している。",
@@ -9096,7 +9202,8 @@
           "a. ウイルス",
           "b. ワクチン"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "③ 緑黄色野菜には（a. ビタミン b. ビニール）が多い。",
@@ -9104,7 +9211,8 @@
           "a. ビタミン",
           "b. ビニール"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "④ 太陽（a. アレルギー b. エネルギー）を利用して発電する。",
@@ -9112,7 +9220,8 @@
           "a. アレルギー",
           "b. エネルギー"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "⑤ 朝の電車は（a. ホーム b. ラッシュ）で大変混んでいる。",
@@ -9120,7 +9229,8 @@
           "a. ホーム",
           "b. ラッシュ"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "⑥「本日は、この問題を（a. ホーム b. テーマ）に講義します。」",
@@ -9128,7 +9238,8 @@
           "a. ホーム",
           "b. テーマ"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "⑦ 明日の12時に面会の（ ）をとった。\n1 アポ\n2 ミス\n3 アマ\n4 レジ",
@@ -9138,7 +9249,8 @@
           "3 アマ",
           "4 レジ"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "⑧ 電車は（ ）で動いておりません。\n1 ミス\n2 スト\n3 イラスト\n4 ラッシュ",
@@ -9148,7 +9260,8 @@
           "3 イラスト",
           "4 ラッシュ"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       }
     ]
   },
@@ -10625,7 +10738,8 @@
           "新たに",
           "どけて"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "2 兄は（ ）関係の会社に勤めています。",
@@ -10635,7 +10749,8 @@
           "ビジネス",
           "プロ"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "3 私は、卵に（ ）があるので、卵の入ったものは食べないようにしています。",
@@ -10645,7 +10760,8 @@
           "オーバー",
           "アレルギー"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "4 彼女の部屋があまりに汚くて（ ）しまった。",
@@ -10655,7 +10771,8 @@
           "あきらめて",
           "あきられて"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "5 大丈夫、この症状は（ ）風邪ですからしばらくすれば治りますよ。",
@@ -10665,7 +10782,8 @@
           "意外に",
           "案外"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "6 クレジットカードの（ ）をためて商品券をもらった。",
@@ -10675,7 +10793,8 @@
           "サービス",
           "アポイント"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "7 彼の世界記録が、10年ぶりに（ ）。",
@@ -10685,7 +10804,8 @@
           "ちぎられた",
           "改められた"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "8 これは（ ）行われた会議で決定したことです。",
@@ -10695,7 +10815,8 @@
           "第一に",
           "先に"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "9 パソコンが（ ）に感染してしまい、データが全部なくなってしまった。",
@@ -10705,7 +10826,8 @@
           "インフルエンザ",
           "傷"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "10 通行のじゃまになるので、このいすをちょっと（ ）ください。",
@@ -10715,7 +10837,8 @@
           "埋めて",
           "どけて"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "11 人の手によって作られること。",
@@ -10725,7 +10848,8 @@
           "人工",
           "タイプ"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "12 物事を進める速さ。",
@@ -10735,7 +10859,8 @@
           "ラッシュ",
           "テンポ"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "13 スーパーなどで料金を支払うところ。",
@@ -10745,7 +10870,8 @@
           "オフ",
           "コーナー"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "14 指で破って細かくする。",
@@ -10755,7 +10881,8 @@
           "しゃぶる",
           "こぼれる"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "15 数量や時間が限度を超えること。",
@@ -10765,7 +10892,8 @@
           "オーバー",
           "インフレ"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "16 以前、この辺りに公園があった。",
@@ -10775,7 +10903,8 @@
           "先に",
           "真っ先に"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "17 人の物を許可を得ないで使わないでください。",
@@ -10785,7 +10914,8 @@
           "意外に",
           "勝手に"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "18 今日の試験は予想と違って難しかった。",
@@ -10795,7 +10925,8 @@
           "案外",
           "余計に"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "19 今日の予定を、明日に移動した。",
@@ -10805,7 +10936,8 @@
           "うめた",
           "もらした"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "20 彼女は入社したあくる年に結婚した。",
@@ -10815,7 +10947,8 @@
           "次の年",
           "ある年"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       }
     ]
   },
@@ -11010,7 +11143,8 @@
           "a.切れた",
           "b.つかない"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "② これと同じような問題が出ると思ったのに、予想が (a.つかなかった b.当たらなかった)。",
@@ -11018,7 +11152,8 @@
           "a.つかなかった",
           "b.当たらなかった"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "③ オリンピックまであと一週間 (a.を切った b.ついた)。",
@@ -11026,7 +11161,8 @@
           "a.を切った",
           "b.ついた"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "④ 2位とはずいぶん差を (a.切って b.つけて)、優勝した。",
@@ -11034,7 +11170,8 @@
           "a.切って",
           "b.つけて"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "⑤ アイロンでズボンに折り目を (a.つけよう b.当てよう)。",
@@ -11042,7 +11179,8 @@
           "a.つけよう",
           "b.当てよう"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "⑥ 畳の上に長い間座っていたら、しびれが (a.ついた b.切れた)。",
@@ -11050,7 +11188,8 @@
           "a.ついた",
           "b.切れた"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "⑦ 私の身長は170センチ ( ) 少し ( )。",
@@ -11060,7 +11199,8 @@
           "3 を/切ります",
           "4 に/切ります"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "⑧ 彼に結婚を申し込まれているが、なかなか決心が ( )。",
@@ -11070,7 +11210,8 @@
           "3 きりない",
           "4 きれない"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       }
     ]
   },
@@ -12631,7 +12772,8 @@
           "非",
           "未"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "大学の入学( )を払い込んだ。",
@@ -12641,7 +12783,8 @@
           "代",
           "賃"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "時間( )労働とは、言いかえると「残業」である。",
@@ -12651,7 +12794,8 @@
           "超",
           "後"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "平和な世の中になることは( )人類共通の夢です。",
@@ -12661,7 +12805,8 @@
           "全",
           "合"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "観客はフルートの( )演奏に耳を傾けた。",
@@ -12671,7 +12816,8 @@
           "有",
           "超"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "問題2 ( )に入れるのに最もよいものを、1・2・3・4から一つ選びなさい。6 彼女は一流大学を出ているせいか、プライドが( )。",
@@ -12681,7 +12827,8 @@
           "高い",
           "多い"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "彼とは大学以来だから、会うのは20年( )だ。",
@@ -12691,7 +12838,8 @@
           "ごと",
           "ぶり"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "許可証の再( )はできませんので、なくさないようにご注意ください。",
@@ -12701,7 +12849,8 @@
           "生産",
           "発行"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "( )気持ちでOKと言ったが、引き受けなければよかった。",
@@ -12711,7 +12860,8 @@
           "高い",
           "低い"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "これ、賞味期限が( )いるけれど、大丈夫かなあ。",
@@ -12721,7 +12871,8 @@
           "かけて",
           "取れて"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "問題3 説明に最も合う言葉を、1・2・3・4から一つ選びなさい。11 物を見るときの目の様子。",
@@ -12731,7 +12882,8 @@
           "目づかい",
           "目あたり"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "知識や習慣などが自分自身のものとなる。",
@@ -12741,7 +12893,8 @@
           "気につく",
           "身につく"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "意志や感情を伝えるための体の動き。",
@@ -12751,7 +12904,8 @@
           "身づかい",
           "体づかい"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "人が突然、感情的になって怒り出したりする。",
@@ -12761,7 +12915,8 @@
           "トレる",
           "ツケる"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "季節が変化するちょうどその時。",
@@ -12771,7 +12926,8 @@
           "季節の変化時",
           "季節の変化間"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "問題4 _____の言葉に意味が最も近いものを、1・2・3・4から一つ選びなさい。16 飛行機は1時間おきに飛んでいます。",
@@ -12791,7 +12947,8 @@
           "高級な",
           "豪華な"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "模擬試験の結果から予測すると、合格は間違いないだろう。",
@@ -12801,7 +12958,8 @@
           "合計を出す",
           "決心を示す"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "薬の効果がなくなったのか、また歯が痛みだした。",
@@ -12811,7 +12969,8 @@
           "きれた",
           "すんだ"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "学生のころはお金がなくて、つらい毎日だった。",
@@ -12821,7 +12980,8 @@
           "きつい",
           "つまらない"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       }
     ]
   },
@@ -13739,7 +13899,8 @@
           "a. {手|て}がかかる",
           "b. {足|あし}がない"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "② この{机|つくえ}は、{少|すこ}し{手|て}を（a. {入|い}れれば　b. かせば）、{十分|じゅうぶん}に{使|つか}えます。",
@@ -13747,7 +13908,8 @@
           "a. {入|い}れれば",
           "b. かせば"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "③ ３{時間並|じかんなら}んで、やっと（a. {手|て}が{空|あ}いた　b. {手|て}に{入|い}れた）。",
@@ -13755,7 +13917,8 @@
           "a. {手|て}が{空|あ}いた",
           "b. {手|て}に{入|い}れた"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "④ あの{歯医者|はいしゃ}はとても（a. {腕|うで}　b. {手|て}）が{いいという評判|いいというひょうばん}だ。",
@@ -13763,7 +13926,8 @@
           "a. {腕|うで}",
           "b. {手|て}"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "⑤ {明日|あした}からまた{学校|がっこう}だと{思|おも}うと（a. {気|き}にかかる　b. {気|き}が{重|おも}い）。",
@@ -13771,7 +13935,8 @@
           "a. {気|き}にかかる",
           "b. {気|き}が{重|おも}い"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "⑥ せっかくここまで{来|き}たんだから、もう{少|すこ}し{足|あし}を（a. {伸|の}ばして　b. {使|つか}って）{京都|きょうと}まで{行|い}こうよ。",
@@ -13779,7 +13944,8 @@
           "a. {伸|の}ばして",
           "b. {使|つか}って"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "⑦ {今度|こんど}の{仕事|しごと}はあまり（　　　）。",
@@ -13789,7 +13955,8 @@
           "3　{気|き}が{進|すす}まない",
           "4　{気|き}が{合|あ}わない"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "⑧ {働|はたら}くのもいいけど、{健康|けんこう}にも（　　　）ようにしてください。",
@@ -13799,7 +13966,8 @@
           "3　{手|て}にかかる",
           "4　{気|き}にかかる"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       }
     ]
   },
@@ -14271,7 +14439,8 @@
           "a. 行き来",
           "b. 行き帰り"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "② {音量|おんりょう}の（a. {出|だ}し{入|い}れ　b. {上|あ}げ{下|さ}げ）はこのボタンで{行|おこな}います。",
@@ -14279,7 +14448,8 @@
           "a. 出し入れ",
           "b. 上げ下げ"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "③ {手術|しゅじゅつ}をする{前|まえ}に、とりあえず{薬|くすり}を{飲|の}んで（a. {少|すこ}し{様子|ようす}をみましょう　b. {試|ため}しにやってみよう）。",
@@ -14287,7 +14457,8 @@
           "a. 少し様子をみましょう",
           "b. 試しにやってみよう"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "④ {娘|むすめ}が（a. いつもお{世話|せわ}になっています　b. お{互|たが}い{様|さま}です）。",
@@ -14295,7 +14466,8 @@
           "a. いつもお世話になっています",
           "b. お互い様です"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "⑤ （a. {残念|ざんねん}だけど　b. {悪|わる}いけど）、お{茶|ちゃ}、{入|い}れてくれる？",
@@ -14303,7 +14475,8 @@
           "a. 残念だけど",
           "b. 悪いけど"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       }
     ]
   },
@@ -14320,7 +14493,8 @@
           "つめられる",
           "なおされる"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "残念ながら、当店ではその商品は取り（　）おりません。",
@@ -14330,7 +14504,8 @@
           "組んで",
           "扱って"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "リフォームをして、日当たりの悪いリビングに光を（　）入れた。",
@@ -14340,7 +14515,8 @@
           "取り",
           "持ち"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "新商品の売れ（　）がすばらしく、会社の{業績|ぎょうせき}は上向いた。",
@@ -14350,7 +14526,8 @@
           "上げ",
           "出し"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "ドライブに出かけたが、忘れ物をして途中で家に（　）返した。",
@@ -14360,7 +14537,8 @@
           "乗り",
           "引き"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "{幼稚園|ようちえん}へ行く前の子どもは一番（　）。",
@@ -14370,7 +14548,8 @@
           "手にまわります",
           "手がかかります"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "プレゼントをもらって喜んでいる子どもの{姿|すがた}が、目に（　）。",
@@ -14380,7 +14559,8 @@
           "かかる",
           "うかぶ"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "15歳でオリンピックへ出るとは、（　）ものだ。",
@@ -14390,7 +14570,8 @@
           "当たり前",
           "顔が広い"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "あなたは、私がそう言ったというけれど、私はそんなこと言った（　）はない。",
@@ -14400,7 +14581,8 @@
           "思い",
           "覚え"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "うちには（　）がないから、そんな高いものは買えません。",
@@ -14410,7 +14592,8 @@
           "余裕",
           "金額"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "自分の{批判|ひはん}をされて、聞くのがつらい。",
@@ -14420,7 +14603,8 @@
           "耳が痛い",
           "耳がかたい"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "細かいことにも気を配る。",
@@ -14430,7 +14614,8 @@
           "こだわる",
           "いける"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "運がいい。",
@@ -14440,7 +14625,8 @@
           "かいている",
           "ついている"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "人に見つからないようにこっそりする。",
@@ -14450,7 +14636,8 @@
           "足がない",
           "目がない"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "きちんとしていて、特に変なところがない様子。",
@@ -14460,7 +14647,8 @@
           "もったいない",
           "当たり前"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "キャンセルしたチケット代を<u>返してもらった</u>。",
@@ -14470,7 +14658,8 @@
           "引き返した",
           "立てかえた"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "彼は<u>言葉づかいが悪い</u>けれど、やさしい人だ。",
@@ -14480,7 +14669,8 @@
           "口が悪い",
           "口がない"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "彼女は、<u>料理がうまくなった</u>。",
@@ -14490,7 +14680,8 @@
           "料理の腕をあげた",
           "料理の顔をあげた"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "時間が空いたので、集会に<u>少しだけ参加した</u>。",
@@ -14500,7 +14691,8 @@
           "気が進んだ",
           "気がきいた"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "重いのでちょっと<u>手伝ってくれますか</u>。",
@@ -14510,7 +14702,8 @@
           "顔を出して",
           "首を回して"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       }
     ]
   }

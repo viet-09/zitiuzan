@@ -71,7 +71,8 @@
           "a. っぽくて",
           "b. {気味|ぎみ}で"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "② この{時計|とけい}は20{年使|ねんつか}っているが、このごろ{遅|おく}れ (a. っぽい b. がち) だ。",
@@ -79,7 +80,8 @@
           "a. っぽい",
           "b. がち"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "③ {二人|ふたり}は{親|した}し (a. げ b. がち) に{話|はな}している。",
@@ -87,7 +89,8 @@
           "a. げ",
           "b. がち"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "④ {風邪|かぜ} (a. {気味|ぎみ}で b. がちで)、{熱|ねつ} (a. {気味|ぎみ}だ b. っぽい)。",
@@ -95,7 +98,8 @@
           "a. {気味|ぎみ}で / a. {気味|ぎみ}だ",
           "b. がちで / b. っぽい"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "⑤ {母|はは}は (a. {忘れ|わす} b. {忘れる|わすれる}) っぽくなった。",
@@ -103,7 +107,8 @@
           "a. {忘れ|わす}",
           "b. {忘れる|わすれる}"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "⑥ {彼|かれ}は{両親|りょうしん}を ＿＿ ＿＿ ＿＿ ＿＿ だ。 (Chỗ trống thứ 1 (đầu tiên))",
@@ -287,7 +292,8 @@
           "ものですから",
           "からですもの"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "⑤ {高|たか}いんです（a. もの　b. ものなら）、{買|か}えません。",
@@ -455,7 +461,8 @@
           "a. もとより",
           "b. ともかく"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "② {旅行|りょこう}する{時間|じかん}は（a. もとより b. ともかく）お{金|かね}もない。",
@@ -463,7 +470,8 @@
           "a. もとより",
           "b. ともかく"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "③ ハンバーガーはトマト（a. ぬきで b. ぬきでは）お{願|ねが}いします。",
@@ -471,7 +479,8 @@
           "a. ぬきで",
           "b. ぬきでは"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "④ この{計画|けいかく}は{彼|かれ}を（a. ぬきで b. ぬきに）しては、{進|すす}められない。",
@@ -479,7 +488,8 @@
           "a. ぬきで",
           "b. ぬきに"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "⑤ {明日|あした}の{天気|てんき}はどうだろう。{雨|あめ}は（a. まだしも b. ぬきにして）{雪|ゆき}は{困|こま}る。",
@@ -487,7 +497,8 @@
           "a. まだしも",
           "b. ぬきにして"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "⑥ この{家具|かぐ}、＿＿ ＿＿ ＿＿ ＿＿。 (Chỗ trống thứ 1 (đầu tiên))",
@@ -643,7 +654,8 @@
           "a. 心配に",
           "b. 心配で"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "② 一人じゃ（　）くてしょうがない。",
@@ -651,7 +663,8 @@
           "a. さびし",
           "b. さびしい"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "③ 外の音が（　）ならない。",
@@ -659,7 +672,8 @@
           "a. 気になって",
           "b. 気になっては"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "④ ゲームで負けて、（　）くてたまらない。",
@@ -667,7 +681,8 @@
           "a. くやし",
           "b. くやしい"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "⑤ 外国で生活したとき、不安（　）ならなかった。",
@@ -675,7 +690,8 @@
           "a. で",
           "b. では"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "⑥ セールスの ＿＿ ＿＿ ＿＿ ＿＿ かなわない。 (Chỗ trống thứ 1 (đầu tiên))",
@@ -831,7 +847,8 @@
           "a. ずには",
           "b. ないでは"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "② テレビは（a. {見|み}る　b. {見|み}ない）ことはないが、{1日|にち}に{1時間|じかん}ぐらいだ。",
@@ -839,7 +856,8 @@
           "a. 見る",
           "b. 見ない"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "③ {肉|にく}はあまり{好|す}きではないが、{食|た}べない（a. こともない　b. こともある）。",
@@ -847,7 +865,8 @@
           "a. こともない",
           "b. こともある"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "④ おかしくて、{笑|わ}わずには（a. いられる　b. いられない）。",
@@ -855,7 +874,8 @@
           "a. いられる",
           "b. いられない"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "⑤ {行|い}きたくないが、{行|い}こうと{思|お}えば（a. {行|い}ける　b. {行|い}けない）こともない。",
@@ -863,7 +883,8 @@
           "a. 行ける",
           "b. 行けない"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "⑥ たくさんは{無理|むり}だが、{1日|にち}に ＿＿＿ ＿＿＿ ＿＿＿ ＿＿＿ ない。 (Chỗ trống thứ 1 (đầu tiên))",
@@ -1019,7 +1040,8 @@
           "a. {持|も}た",
           "b. {持|も}ち"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "② {先輩|せんぱい}に [ ] ばかりはいられない。{自分|じぶん}でできるようにならないと。",
@@ -1027,7 +1049,8 @@
           "a. 聞く",
           "b. 聞いて"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "③ {風|かぜ}が{強|つよ}くて、{立|た}って [ ] ほどです。",
@@ -1035,7 +1058,8 @@
           "a. ならない",
           "b. いられない"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "④ {法律|ほうりつ}を [ ] ならない。",
@@ -1043,7 +1067,8 @@
           "a. {犯|お}せば",
           "b. {犯|お}しては"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "⑤ そっちへ{行|い}っちゃだめ。{動|うご}かないで。どうして、じっと [ ]。",
@@ -1051,7 +1076,8 @@
           "a. してんの",
           "b. してらんないの"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "⑥ {僕|ぼく}は、{他人|たにん}に{迷惑|めいわく}を ＿＿ ＿＿ ＿＿ ＿＿ 。 (Chỗ trống thứ 1 (đầu tiên))",
@@ -1610,7 +1636,8 @@
           "a",
           "b"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "② {心|こころ}から{信|し}じ（a. きって　b. かけて）いた{人|ひと}にだまされた。",
@@ -1618,7 +1645,8 @@
           "a. きって",
           "b. かけて"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "③ {彼|かれ}がそんなことを{言|い}うなんて、あり（a. えない　b. うない）。",
@@ -1626,7 +1654,8 @@
           "a. えない",
           "b. うない"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "④ そういう{問題|もんだい}は、{起|お}こり（a. える　b. うる）だろう。",
@@ -1634,7 +1663,8 @@
           "a. える",
           "b. うる"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "⑤ そんなことはあなたに{言|い}われるまでもなく、わかり（a. きった　b. かけた）ことだ。",
@@ -1642,7 +1672,8 @@
           "a. きった",
           "b. かけた"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "⑥ {使い|つか} ＿＿ ＿＿ ＿＿ ＿＿ {夢|ゆめ}を{見た|み}。 (Chỗ trống thứ 1 (đầu tiên))",
@@ -1810,7 +1841,8 @@
           "a. なうちに",
           "b. のうちに"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "② {女性|じょせい}（a. かぎり　b. にかぎり）、ランチにデザートがついています。",
@@ -1834,7 +1866,8 @@
           "a. 知る",
           "b. 知らない"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "⑤ {日本人|にほんじん}に（a. {限|かぎ}らず　b. {限|かぎ}って）、どの{国|くに}の{人|ひと}も{自分|じぶん}の{国|くに}の{政治|せいじ}には{不満|ふまん}があると{思|お}う。",

@@ -3332,7 +3332,8 @@
           "照明",
           "調整"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "② 私は家族や友人に＿＿＿られて生きています。",
@@ -3340,7 +3341,8 @@
           "数え",
           "支え"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "③ この日本語の＿＿＿は英語で何と言いますか。",
@@ -3348,7 +3350,8 @@
           "言語",
           "表現"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "④ 銀行にお金を＿＿＿。",
@@ -3356,7 +3359,8 @@
           "預ける",
           "預かる"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "① 漢字の＿＿＿のテストで100点を取った。",
@@ -3364,7 +3368,8 @@
           "聞き取り",
           "書き取り"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "② 「五百円＿＿＿はお使いになれません。」",
@@ -3372,7 +3377,8 @@
           "通貨",
           "硬貨"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "③ ＿＿＿を消しゴムで消して書き{直|なお}す。",
@@ -3380,7 +3386,8 @@
           "違い",
           "間違い"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "④ 電話番号を＿＿＿ください。",
@@ -3388,7 +3395,8 @@
           "お確かめ",
           "お認め"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       }
     ],
     "reviewKanji": []
@@ -3742,7 +3750,8 @@
           "冷やして",
           "冷えて"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "この辺は (a. 緑 b. 紅) が多くて静かできれいですね。",
@@ -3750,7 +3759,8 @@
           "緑",
           "紅"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "キャッシュバックというのは (a. 返事 b. 返金) のことです。",
@@ -3758,7 +3768,8 @@
           "返事",
           "返金"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "この自動販売機は硬貨だけでなく千円 (a. 玉 b. 札) も使える。",
@@ -3766,7 +3777,8 @@
           "玉",
           "札"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "「18歳 (a. 以下 b. 未満)」には18歳は入りません。",
@@ -3774,7 +3786,8 @@
           "以下",
           "未満"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "(a. 小児 b. 幼児) 科の医者の数が足りないそうです。",
@@ -3782,7 +3795,8 @@
           "小児",
           "幼児"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "(a. 集団 b. 団体) 旅行は安いが、自由に行動できない。",
@@ -3790,7 +3804,8 @@
           "集団",
           "団体"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "冬sの登山は危険に (a. 老いている b. 満ちている)。",
@@ -3798,7 +3813,8 @@
           "老いている",
           "満ちている"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       }
     ],
     "reviewKanji": []
@@ -4567,7 +4583,8 @@
           "保留",
           "停留"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "② 大事な手紙やお金を郵便 (a. 書留 b. 貯金) で送る。",
@@ -4575,7 +4592,8 @@
           "書留",
           "貯金"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "③ 家を買ったので毎月のローン※の (a. 温帯 b. 返済) がたいへんだ。",
@@ -4583,7 +4601,8 @@
           "温帯",
           "返済"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "④ もうすぐ受験なので、{神社|じんじゃ}で (a. お守り b. お伝え) を買った。",
@@ -4591,7 +4610,8 @@
           "お守り",
           "お伝え"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "① 車も人も、信号を (a. 保ち b. 守り) ましょう。",
@@ -4599,7 +4619,8 @@
           "保ち",
           "守り"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "② {携帯|けいたい}電話の電話番号が (a. 変え b. 変わり) ましたのでお知らせします。",
@@ -4607,7 +4628,8 @@
           "変え",
           "変わり"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "③ 選考の{結果|けっか}、オリンピックに出場する選手が (a. 選んだ b. 決まった)。",
@@ -4615,7 +4637,8 @@
           "選んだ",
           "決まった"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "④ メールを (a. 規定 b. 新規) 作成する。",
@@ -4623,7 +4646,8 @@
           "規定",
           "新規"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       }
     ],
     "reviewKanji": []
@@ -4952,7 +4976,8 @@
           "現像",
           "映像"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "コピー機の調子が悪いので（a. 修理 b. 編集）に来てください。",
@@ -4960,7 +4985,8 @@
           "修理",
           "編集"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "この部屋はエアコン（a. 機能 b. 完備）です。",
@@ -4968,7 +4994,8 @@
           "機能",
           "完備"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "アドレスを（a. 登録 b. 登場）する。",
@@ -4976,7 +5003,8 @@
           "登録",
           "登場"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "ここに受け取りの（a. 認め印 b. 目印）をお願いします。",
@@ -4984,7 +5012,8 @@
           "認め印",
           "目印"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "タイトルは（a. 中央 b. 拡大）に、日付と名前は右に書きます。",
@@ -4992,7 +5021,8 @@
           "中央",
           "拡大"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "ここにある書類を（a. 書式 b. 分類）してファイルしてください。",
@@ -5000,7 +5030,8 @@
           "書式",
           "分類"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "作成したファイルを（a. 保存 b. 生存）する。",
@@ -5008,7 +5039,8 @@
           "保存",
           "生存"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       }
     ],
     "reviewKanji": []
@@ -5097,7 +5129,8 @@
           "きのう",
           "かのう"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "切符の払い戻しをする。",
@@ -5107,7 +5140,8 @@
           "はらいおろし",
           "はらいのこし"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "この印は取り消しを表しています。",
@@ -5117,7 +5151,8 @@
           "おもて",
           "いんさつ"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "部屋の中央にテーブルがあります。",
@@ -5127,7 +5162,8 @@
           "ちゅうえい",
           "まんなか"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "このごろ、幼い子どもの事故が増えている。",
@@ -5137,7 +5173,8 @@
           "おさない",
           "ようさい"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "印刷して拡大コピーしてください。",
@@ -5147,7 +5184,8 @@
           "とくだい",
           "そうだい"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "文字を選択して変換する。",
@@ -5157,7 +5195,8 @@
           "へんさい",
           "へんかん"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "この時期は湿度が高い。",
@@ -5167,7 +5206,8 @@
           "ひつど",
           "いつど"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "団地のベランダに布団がほしてある。",
@@ -5177,7 +5217,8 @@
           "ふとん",
           "まくら"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "コピー用紙の枚数を数える。",
@@ -5197,7 +5238,8 @@
           "完了",
           "未了"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "その件はまだ話し合いが済んでいないのでほりゅうです。",
@@ -5207,7 +5249,8 @@
           "保湿",
           "保温"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "日本では年末に大そうじをします。",
@@ -5217,7 +5260,8 @@
           "掃除",
           "洗濯"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "このへんもずいぶん道路がせいびされてきました。",
@@ -5227,7 +5271,8 @@
           "準備",
           "整備"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "今年のもくひょうをたてる。",
@@ -5237,7 +5282,8 @@
           "木標",
           "木表"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "この本は上中下の3（ ）から成っている。",
@@ -5247,7 +5293,8 @@
           "件",
           "枚"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "カップで米の分（ ）を量る。",
@@ -5257,7 +5304,8 @@
           "類",
           "量"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "日本（ ）のあいさつやマナーを覚える。",
@@ -5267,7 +5315,8 @@
           "玉",
           "式"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "メールといっしょに画（ ）を送信する。",
@@ -5277,7 +5326,8 @@
           "像",
           "表"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "短（ ）小説を読む。",
@@ -5287,7 +5337,8 @@
           "期",
           "数"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "今朝、地震で（ ）電になりました。",
@@ -5297,7 +5348,8 @@
           "不",
           "満"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "日本ではどこにでも自動22（ ）機がある。20歳23（ ）の人に禁止されているものも24（ ）に買えるのが25（ ）だと外国人はよく言う。",
@@ -5309,7 +5361,8 @@
           "じゆう",
           "おさない"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       }
     ],
     "reviewKanji": []
@@ -5698,7 +5751,8 @@
           "a.現在",
           "b.現代"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "(a.細かい b.細い) お金が要るんですが、両替してくれませんか。",
@@ -5706,7 +5760,8 @@
           "a.細かい",
           "b.細い"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "(a.金額 b.金利)が低いときに、お金を借りたほうがいいですね。",
@@ -5714,7 +5769,8 @@
           "a.金額",
           "b.金利"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "読んだ本の内容を(a.要約 b.要点)する。",
@@ -5722,7 +5778,8 @@
           "a.要約",
           "b.要点"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "手紙のあて名にはふつう「(a.様 b.殿)」を使います。",
@@ -5730,7 +5787,8 @@
           "a.様",
           "b.殿"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "その信号を右に(a.曲げて b.曲がって)ください。",
@@ -5738,7 +5796,8 @@
           "a.曲げて",
           "b.曲がって"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "コンビニでも(a.払い込み b.飛び込み)ができるので便利だ。",
@@ -5746,7 +5805,8 @@
           "a.払い込み",
           "b.飛び込み"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "ごみの(a.収集 b.吸収)は月・水・金です。",
@@ -5754,7 +5814,8 @@
           "a.収集",
           "b.吸収"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       }
     ],
     "reviewKanji": []
@@ -6107,7 +6168,8 @@
           "週休",
           "連休"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "「会議に使いますから、この(a. 衣類 b. 書類)をコピーしてください。」",
@@ -6115,7 +6177,8 @@
           "衣類",
           "書類"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "教科書*や参考書、(a. その他 b. 他方) 必要な本を買う。 *教科書: textbook 教科书 ",
@@ -6123,7 +6186,8 @@
           "その他",
           "他方"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "品物が入荷しましたら、電話で (a. ご連絡 b. お届け) します。",
@@ -6131,7 +6195,8 @@
           "ご連絡",
           "お届け"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "「山の(a. 頂上 b. 頂点)でお弁当にしましょう。」",
@@ -6139,7 +6204,8 @@
           "頂上",
           "頂点"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "「今お配りしたプリントに作業の(a. 分担 b. 復習)が書いてあります。」",
@@ -6147,7 +6213,8 @@
           "分担",
           "復習"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "アイスクリームは冷蔵庫の(a. 冷蔵庫 b. 冷凍室)に入れます。",
@@ -6155,7 +6222,8 @@
           "冷蔵庫",
           "冷凍室"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "A = B とは、 A は B と(a. 等しい b. 当たる)という意味です。",
@@ -6163,7 +6231,8 @@
           "等しい",
           "当たる"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       }
     ],
     "reviewKanji": []
@@ -6547,7 +6616,8 @@
           "効く",
           "聞く"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "外国の人たちと (a. 交流 b. 交換) するのは楽しいです。",
@@ -6555,7 +6625,8 @@
           "交流",
           "交換"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "今までに一度も負けたことのない (a. 相手 b. 相当) に負けてしまった。",
@@ -6563,7 +6634,8 @@
           "相手",
           "相当"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "卵10個入りパック百円! お一人様1パック (a. 参り b. 限り)!",
@@ -6571,7 +6643,8 @@
           "参り",
           "限り"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "子どもの勉強のことは (a. 担任 b. 責任) の先生にお任せしています。",
@@ -6579,7 +6652,8 @@
           "担任",
           "責任"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "この薬を飲んでください。1週間 (a. 経験 b. 経過) をみましょう。",
@@ -6587,7 +6661,8 @@
           "経験",
           "経過"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "仕事の量的多過ぎる。社員の (a. 負担 b. 担当) を軽くしなければならない。",
@@ -6595,7 +6670,8 @@
           "負担",
           "担当"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "このカードは全店 (a. 共通 b. 通過) でお使いになれます。",
@@ -6603,7 +6679,8 @@
           "共通",
           "通過"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       }
     ],
     "reviewKanji": []
@@ -7384,7 +7461,8 @@
           "a. 練習",
           "b. 訓練"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "「届かないので(a. 延期 b. 延長)コードを持ってきてください。」※コード : cord 软线 ",
@@ -7392,7 +7470,8 @@
           "a. 延期",
           "b. 延長"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "「あ!(a. 火事 b. 地震)だ!揺れてる!」※揺れる : shake 揺动, 揺摆 ",
@@ -7400,7 +7479,8 @@
           "a. 火事",
           "b. 地震"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "材料がやわらかくなったら、さとうを(a. 加えます b. 凍えます)。",
@@ -7408,7 +7488,8 @@
           "a. 加えます",
           "b. 凍えます"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "(a. 迷信 b. 迷惑)メールが何通も届いて困っている。",
@@ -7416,7 +7497,8 @@
           "a. 迷信",
           "b. 迷惑"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "(a. 平日 b. 平成)のこの時間は道路が込んでいる。",
@@ -7424,7 +7506,8 @@
           "a. 平日",
           "b. 平成"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "「(a. 駐車 b. 禁煙)お断り」",
@@ -7432,7 +7515,8 @@
           "a. 駐車",
           "b. 禁煙"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "大学に入学(a. 願書 b. 明細)を郵送する。",
@@ -7440,7 +7524,8 @@
           "a. 願書",
           "b. 明細"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       }
     ],
     "reviewKanji": []
@@ -7794,7 +7879,8 @@
           "a. 開封",
           "b. 同封"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "最近、全国（a. 各位 b. 各地）で異常な事件が起こっている。",
@@ -7802,7 +7888,8 @@
           "a. 各位",
           "b. 各地"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "朝、（a. 果物 b. 貨物）を食えると体にいいそうだ。",
@@ -7810,7 +7897,8 @@
           "a. 果物",
           "b. 貨物"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "運動靴のひもがほどけそうですよ。しっかり（a. 結んで b. 積んで）。",
@@ -7818,7 +7906,8 @@
           "a. 結んで",
           "b. 積んで"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "会社の経理（a. 事務 b. 任務）を担当しています。",
@@ -7826,7 +7915,8 @@
           "a. 事務",
           "b. 任務"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "旅券事務所でパスポートの（a. 延期 b. 更新）をする。",
@@ -7834,7 +7924,8 @@
           "a. 延期",
           "b. 更新"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "女子更衣室は2階に（a. 移り b. 写り）ました。",
@@ -7842,7 +7933,8 @@
           "a. 移り",
           "b. 写り"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "引っ越した家の（a. 周り b. 配り）は緑が多い。",
@@ -7850,7 +7942,8 @@
           "a. 周り",
           "b. 配り"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       }
     ],
     "reviewKanji": []
@@ -8183,7 +8276,8 @@
           "しょうひんけん",
           "ゆうこう"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       }
     ],
     "reviewKanji": []
@@ -8532,7 +8626,8 @@
           "a. 望み",
           "b. 頼み"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "② 来日する友人を空港の（a. 出発 b. 到着）ロビーで待つ。",
@@ -8540,7 +8635,8 @@
           "a. 出発",
           "b. 到着"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "③ 商品の配送を（a. 依頼 b. 願い）する。",
@@ -8548,7 +8644,8 @@
           "a. 依頼",
           "b. 願い"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "④ 市民が駅前に立ち（a. 署名 b. 照明）を集める活動を始めた。",
@@ -8556,7 +8653,8 @@
           "a. 署名",
           "b. 照明"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "① 日本では結婚すると夫の（a. 性 b. 姓）になる女の人が多い。",
@@ -8564,7 +8662,8 @@
           "a. 性",
           "b. 姓"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "② 朝夕の（a. 通勤 b. 出勤）ラッシュ時は電車が満員になる。",
@@ -8572,7 +8671,8 @@
           "a. 通勤",
           "b. 出勤"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "③ お客様に迷子のお知らせを（a. 申します b. 申し上げます）。",
@@ -8580,7 +8680,8 @@
           "a. 申します",
           "b. 申し上げます"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "④ パスポートの（a. 申請 b. 再生）をする。",
@@ -8588,7 +8689,8 @@
           "a. 申請",
           "b. 再生"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       }
     ],
     "reviewKanji": []
@@ -8932,7 +9034,8 @@
           "自治体",
           "自治会"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "短所、つまり (a. 利点 b. 欠点) はだれにでもあるだろう。",
@@ -8940,7 +9043,8 @@
           "利点",
           "欠点"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "(a. 未婚 b. 再婚) というのはもう一度結婚することです。",
@@ -8948,7 +9052,8 @@
           "未婚",
           "再婚"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "結婚式の (a. 委任状 b. 招待状) に返事を書く。",
@@ -8956,7 +9061,8 @@
           "委任状",
           "招待状"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "梅雨明けの暑い時に、日本では (a. 暑中見舞い b. 年賀状) を出す。",
@@ -8964,7 +9070,8 @@
           "暑中見舞い",
           "年賀状"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "5月5日は「こどもの日」、(a. 祝日 b. 平日) です。",
@@ -8972,7 +9079,8 @@
           "祝日",
           "平日"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "明日は北海道へ (a. 出張 b. 主張) だ。",
@@ -8980,7 +9088,8 @@
           "出張",
           "主張"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "りんごを送ってもらったので (a. お祝い b. お礼) の手紙を出す。",
@@ -8988,7 +9097,8 @@
           "お祝い",
           "お礼"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       }
     ],
     "reviewKanji": []
@@ -9327,7 +9437,8 @@
           "伸びて",
           "伸ばして"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "この道路は（a. 追い越し b. 引っ越し）禁止です。",
@@ -9335,7 +9446,8 @@
           "追い越し",
           "引っ越し"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "この川は（a. 浅い b. 細い）ので、子どもたちが遊ぶのにちょうどいい。",
@@ -9343,7 +9455,8 @@
           "浅い",
           "細い"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "P.S. というのは（a. 追伸 b. 返信）のことです。",
@@ -9351,7 +9464,8 @@
           "追伸",
           "返信"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "年の（a. 慣れ b. 暮れ）にお世話になった人にお礼をする習慣がある。",
@@ -9359,7 +9473,8 @@
           "慣れ",
           "暮れ"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "（a. 健康 b. 生活）保険証を持ってきてください。",
@@ -9367,7 +9482,8 @@
           "健康",
           "生活"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "私はいつも食事の前に（a. お祈り b. お祝い）をします。",
@@ -9375,7 +9491,8 @@
           "お祈り",
           "お祝い"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "（a. 活発な b. 健全な）議論をする。",
@@ -9383,7 +9500,8 @@
           "活発な",
           "健全な"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       }
     ],
     "reviewKanji": []
@@ -11947,7 +12065,8 @@
           "a. 軟弱",
           "b. 柔軟"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "猫を抱いたら、服に猫の (a. 毛 b. 糸) がたくさんついてしまった。",
@@ -11955,7 +12074,8 @@
           "a. 毛",
           "b. 糸"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "この化粧品は肌の弱い方用で、(a. 香料 b. 香辛料) は使用しておりません。",
@@ -11963,7 +12083,8 @@
           "a. 香料",
           "b. 香辛料"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "妹は (a. 茶道 b. 柔道) の選手です。",
@@ -11971,7 +12092,8 @@
           "a. 茶道",
           "b. 柔道"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "その看板は黄色いペンキで (a. 写して b. 塗って) あってよく目立つ。",
@@ -11979,7 +12101,8 @@
           "a. 写して",
           "b. 塗って"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "この風邪薬はお湯に (a. 溶かして b. 溶けて) お飲みください。",
@@ -11987,7 +12110,8 @@
           "a. 溶かして",
           "b. 溶けて"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "子供たちは (a. 泥 b. 肌) だらけになって遊ぶので、洗濯が大変だ。",
@@ -11995,7 +12119,8 @@
           "a. 泥",
           "b. 肌"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "(a. 一諸 b. 一緒) に映画に行きませんか。",
@@ -12003,7 +12128,8 @@
           "a. 一諸",
           "b. 一緒"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       }
     ],
     "reviewKanji": []
@@ -12357,7 +12483,8 @@
           "a.毛布",
           "b.分布"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "この花入れは柱にかかったり、(a.床屋 b.床の間) に置いたりしてください。",
@@ -12365,7 +12492,8 @@
           "a.床屋",
           "b.床の間"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "家に帰る (a.中途 b.途中)、コンビニに寄って、乾電池を買った。",
@@ -12373,7 +12501,8 @@
           "a.中途",
           "b.途中"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "(a.床 b.壁) にカーペットをしく。",
@@ -12381,7 +12510,8 @@
           "a.床",
           "b.壁"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "歯医者で歯を (a.抜いた b.抜けた) ばかりなので具合が悪い。",
@@ -12389,7 +12519,8 @@
           "a.抜いた",
           "b.抜けた"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "髪がぬれたままだと風邪を引くから (a.磨いた b.乾かした) ほうがいいですよ。",
@@ -12397,7 +12528,8 @@
           "a.磨いた",
           "b.乾かした"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "毛糸のセーターを引き出しやタンスにしまう際には、(a.防虫剤 b.殺虫剤) を一緒に入れます。",
@@ -12405,7 +12537,8 @@
           "a.防虫剤",
           "b.殺虫剤"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "歯周病 (a.予防 b.防止) によく効く歯磨きを買う。",
@@ -12413,7 +12546,8 @@
           "a.予防",
           "b.防止"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       }
     ],
     "reviewKanji": []
@@ -12749,7 +12883,8 @@
           "a. 品書き",
           "b. 肩書き"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "神社には（a. 上様 b. 神様）が、寺には仏様がいらっしゃいます。",
@@ -12757,7 +12892,8 @@
           "a. 上様",
           "b. 神様"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "この腰掛けは高さが（a. 調節 b. 調子）できます。",
@@ -12765,7 +12901,8 @@
           "a. 調節",
           "b. 調子"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "虫に（a. 抜かれて b. 刺されて）かゆい。",
@@ -12773,7 +12910,8 @@
           "a. 抜かれて",
           "b. 刺されて"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "（a. 汁 b. 汗）をかいたのでシャワーを浴びたい。",
@@ -12781,7 +12919,8 @@
           "a. 汁",
           "b. 汗"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "医師に相談したら（a. 的確な b. 快適な）助言をしてくれた。",
@@ -12789,7 +12928,8 @@
           "a. 的確な",
           "b. 快適な"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "指を（a. 折って b. 祈って）数を数える。",
@@ -12797,7 +12937,8 @@
           "a. 折って",
           "b. 祈って"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "この洗濯機には（a. 乾電 b. 乾燥）機能も付いています。",
@@ -12805,7 +12946,8 @@
           "a. 乾電",
           "b. 乾燥"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       }
     ],
     "reviewKanji": []
@@ -13131,7 +13273,8 @@
           "製造",
           "改造"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "この試合の (a. 費用 b. 賞金) の額は1位と2位とでは全然違う。",
@@ -13139,7 +13282,8 @@
           "費用",
           "賞金"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "「(a. 身長 b. 身体) と体重をここに記入してください。」",
@@ -13147,7 +13291,8 @@
           "身長",
           "身体"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "この電車は (a. 車庫 b. 金庫) に入りますので、ご乗車になれません。",
@@ -13155,7 +13300,8 @@
           "車庫",
           "金庫"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "「開封後はなるべく早く (a. お召し上がり b. お召しになって) ください。」",
@@ -13163,7 +13309,8 @@
           "お召し上がり",
           "お召しになって"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "「この町の発展と繁栄を願って、(a. 一杯 b. 乾杯) !」",
@@ -13171,7 +13318,8 @@
           "一杯",
           "乾杯"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "「(a. 年末 b. 年未) 年始は休業とさせていただきます。」",
@@ -13187,7 +13335,8 @@
           "粉末",
           "花粉"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       }
     ],
     "reviewKanji": []
@@ -14358,7 +14507,8 @@
           "均等",
           "平均"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "「広告が事実と異なり、(a. 心得 b. 納得) がいかない場合はこちらにご連絡を。」",
@@ -14366,7 +14516,8 @@
           "心得",
           "納得"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "「〇〇ランドの入場者数がすでに百万人を (a. 超え b. 告げ) ました。」",
@@ -14374,7 +14525,8 @@
           "超え",
           "告げ"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "世界で最も (a. 定価 b. 物価) の高い都市はどこでしょう。",
@@ -14382,7 +14534,8 @@
           "定価",
           "物価"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "子供を (a. 対象 b. 対照) としたテレビ番組を制作する。",
@@ -14390,7 +14543,8 @@
           "対象",
           "対照"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "コレステロールの (a. 数値 b. 価値) が上がっているので注意してください。",
@@ -14398,7 +14552,8 @@
           "数値",
           "価値"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "(a. 靴下 b. 雨靴) は無いが、ぬれてもいい靴ならある。",
@@ -14406,7 +14561,8 @@
           "靴下",
           "雨靴"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "この番組は〇〇食品の (a. 提供 b. 現象) でお送りしました。",
@@ -14414,7 +14570,8 @@
           "提供",
           "現象"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       }
     ],
     "reviewKanji": []
@@ -14798,7 +14955,8 @@
           "a. 詰めて",
           "b. 固めて"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "その作業は（a. 純粋 b. 単純）だが、ミスをすると危険だ。",
@@ -14806,7 +14964,8 @@
           "a. 純粋",
           "b. 単純"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "商品を使ったり作ったりして見せて売ることを（a. 実演 b. 演習）販売という。",
@@ -14814,7 +14973,8 @@
           "a. 実演",
           "b. 演習"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "年に2回、住民による地域の（a. 雑草 b. 除草）作業が行われる。",
@@ -14822,7 +14982,8 @@
           "a. 雑草",
           "b. 除草"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "事故（a. 処置 b. 処理）中の道路に、まだ車の破片が散らばっている。",
@@ -14830,7 +14991,8 @@
           "a. 処置",
           "b. 処理"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "贈り物の包装はサービスカウンターで（a. 承ります b. 預かります）。",
@@ -14838,7 +15000,8 @@
           "a. 承ります",
           "b. 預かります"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "省エネというのはエネルギーを（a. 省略 b. 節約）することです。",
@@ -14846,7 +15009,8 @@
           "a. 省略",
           "b. 節約"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "全国の珍しいお菓子を集めた（a. 展示 b. 発展）会が開かれた。",
@@ -14854,7 +15018,8 @@
           "a. 展示",
           "b. 発展"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       }
     ],
     "reviewKanji": []
@@ -15213,7 +15378,8 @@
           "家",
           "宿"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "冬季オリンピック選手の帰国を空港で（a. 出迎える b. 迎えに行く）。",
@@ -15221,7 +15387,8 @@
           "出迎える",
           "迎えに行く"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "この町は自然に囲まれた緑（a. 豊かな b. 富む）ところです。",
@@ -15229,7 +15396,8 @@
           "豊かな",
           "富む"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "明日から（a. 1泊 b. 1晩）2日の旅行に行きます。",
@@ -15237,7 +15405,8 @@
           "1泊",
           "1晩"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "様々な（a. 方角 b. 角度）からアプローチして問題を解決する。",
@@ -15245,7 +15414,8 @@
           "方角",
           "角度"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "居間と食堂を合わせて12（a. 畳 b. 置）です。",
@@ -15253,7 +15423,8 @@
           "畳",
           "置"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "私は大学で（a. 新築 b. 建築）の勉強をしています。",
@@ -15261,7 +15432,8 @@
           "新築",
           "建築"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "お金が必要になったので、定期預金を（a. 解約 b. 解決）する。",
@@ -15269,7 +15441,8 @@
           "解約",
           "解決"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       }
     ],
     "reviewKanji": []
@@ -15618,7 +15791,8 @@
           "坂",
           "役"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "市役所は (a. 警察 b. 診察) 署の向かいにあります。",
@@ -15626,7 +15800,8 @@
           "警察",
           "診察"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "日本の科学 (a. 技術 b. 手術) を学ぶために来ました。",
@@ -15634,7 +15809,8 @@
           "技術",
           "手術"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "あのお相撲さんは (a. 現役 b. 役目) を引退して解説者になるそうだ。",
@@ -15642,7 +15818,8 @@
           "現役",
           "役目"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "湖の (a. 岸 b. 谷) に白鳥がたくさんいるのが見える。",
@@ -15650,7 +15827,8 @@
           "岸",
           "谷"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "日本 (a. 半島 b. 列島) を北から南まで旅行してみたい。",
@@ -15658,7 +15836,8 @@
           "半島",
           "列島"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "この公園の中に、お (a. 城 b. 湾) や植物園があります。",
@@ -15666,7 +15845,8 @@
           "城",
           "湾"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "(a. 渓谷 b. 海岸) には波で打ち寄せられたごみが落ちていた。",
@@ -15674,7 +15854,8 @@
           "渓谷",
           "海岸"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       }
     ],
     "reviewKanji": []
@@ -16529,7 +16710,8 @@
           "うむ",
           "ゆうぶ"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "料理の手間を省くために電子レンジを活用する。",
@@ -16539,7 +16721,8 @@
           "いだく",
           "ほどく"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "入居者を募集しています。",
@@ -16549,7 +16732,8 @@
           "いりいしゃ",
           "にゅうきょしゃ"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "駅から徒歩3分のところに住んでいます。",
@@ -16559,7 +16743,8 @@
           "とほ",
           "そほ"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "富を得ることが幸せとは限らない。",
@@ -16569,7 +16754,8 @@
           "える",
           "おる"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "この辺りに財布が落ちていませんでしたか。",
@@ -16579,7 +16765,8 @@
           "まわり",
           "あたり"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "木綿のシャツを着る。",
@@ -16589,7 +16776,8 @@
           "もめん",
           "こわた"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "長い髪はゴムで束ねてください。",
@@ -16599,7 +16787,8 @@
           "そこねて",
           "そくねて"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "放置自転車は市が処分します。",
@@ -16609,7 +16798,8 @@
           "きょぶん",
           "ちょぶん"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "燃えている家の中にいた子供は無事助け出された。",
@@ -16619,7 +16809,8 @@
           "みごと",
           "ぶじ"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "私のふるさとは自然がゆたかです。",
@@ -16629,7 +16820,8 @@
           "財か",
           "泉か"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "手がすべって、おさらを割ってしまった。",
@@ -16639,7 +16831,8 @@
           "甘",
           "宝"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "今日は牛肉がお買いどくです。",
@@ -16649,7 +16842,8 @@
           "得",
           "読"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "日本でいちばん大きいみずうみはどこにありますか。",
@@ -16659,7 +16853,8 @@
           "湾",
           "岸"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "1位の選手には賞金がおくられます。",
@@ -16669,7 +16864,8 @@
           "層られ",
           "贈られ"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "乾電池のプラスとマイナスの（ ）をつなぐと電気が流れます。",
@@ -16679,7 +16875,8 @@
           "曲",
           "極"
         ],
-        "answerIndex": -1
+        "answerIndex": 3,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "6（ ）一間にバストイレ付きの部屋をさがしています。",
@@ -16689,7 +16886,8 @@
           "部",
           "屋"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "24色の絵の（ ）を買った。",
@@ -16699,7 +16897,8 @@
           "筆",
           "画"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "美術館に国宝（ ）を見に行ってきました。すばらしかったです。",
@@ -16709,7 +16908,8 @@
           "芸",
           "財"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "新聞の朝（ ）を読む。",
@@ -16719,7 +16919,8 @@
           "組",
           "編"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "この図書は（ ）館にあります。",
@@ -16729,7 +16930,8 @@
           "支",
           "旧"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "（ ）エネのため、使わない電気のコンセントは抜いてあります。",
@@ -16739,7 +16941,8 @@
           "省",
           "消"
         ],
-        "answerIndex": -1
+        "answerIndex": 2,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "「超おいしい」とか「超きれい」という言い方がありますが、これは俗語です。新幹線のことを超（ ）と言ったり、とても安いものを超（ ）、とても込んでいることを超（ ）と言うのは正しい使い方です。",
@@ -16751,7 +16954,8 @@
           "はやい",
           "いっぱい"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       }
     ],
     "reviewKanji": []
@@ -17535,7 +17739,8 @@
           "a. 探す",
           "b. 探る"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "地域全体で子供たちを(a. 育ち b. 育て)ましょう。",
@@ -17543,7 +17748,8 @@
           "a. 育ち",
           "b. 育て"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "多くの駅では、禁煙になって(a. 灰 b. 灰皿)がなくなった。",
@@ -17551,7 +17757,8 @@
           "a. 灰",
           "b. 灰皿"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "朝早くから(a. 校庭 b. 家庭)を走っているのは運動部の生徒です。",
@@ -17559,7 +17766,8 @@
           "a. 校庭",
           "b. 家庭"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "(a. 公共 b. 公園)の場では互いにルールを守ろう。",
@@ -17567,7 +17775,8 @@
           "a. 公共",
           "b. 公園"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "歩行者は横断歩道を(a. 渡し b. 渡り)ましょう。",
@@ -17575,7 +17784,8 @@
           "a. 渡し",
           "b. 渡り"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "この店ではたくさんの(a. 種類 b. 書類)の花の種を売っている。",
@@ -17583,7 +17793,8 @@
           "a. 種類",
           "b. 書類"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "人気のある劇団の(a. 講演 b. 公演)を見に行く。",
@@ -17591,7 +17802,8 @@
           "a. 講演",
           "b. 公演"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       }
     ],
     "reviewKanji": []
@@ -17935,7 +18147,8 @@
           "a.蒸し",
           "b.干し"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "猫が家の（a.屋根 b.羽根）の上を歩いている。",
@@ -17943,7 +18156,8 @@
           "a.屋根",
           "b.羽根"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "（a.酒屋 b.居酒屋）で新入社員の歓迎会をする。",
@@ -17951,7 +18165,8 @@
           "a.酒屋",
           "b.居酒屋"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "海辺で拾った（a.貝 b.具）でアクセサリーを作る。",
@@ -17959,7 +18174,8 @@
           "a.貝",
           "b.具"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "この価格に消費税は（a.込まれて b.含まれて）おりません。",
@@ -17967,7 +18183,8 @@
           "a.込まれて",
           "b.含まれて"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "ガスより（a.炭 b.材）で焼いたほうが、肉も魚もおいしい。",
@@ -17975,7 +18192,8 @@
           "a.炭",
           "b.材"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "貝を濃い塩水にしばらくつけておいて（a.砂 b.脂）を抜く。",
@@ -17983,7 +18201,8 @@
           "a.砂",
           "b.脂"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "（a.干物 b.植物）を育てる。",
@@ -17991,7 +18210,8 @@
           "a.干物",
           "b.植物"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       }
     ],
     "reviewKanji": []
@@ -18370,7 +18590,8 @@
           "a. 仮免許",
           "b. 仮採用"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "③ 兄は新聞（a. 筆者 b. 記者）です。",
@@ -18378,7 +18599,8 @@
           "a. 筆者",
           "b. 記者"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "④ ノートは（a. 机 b. 筆）の引き出しに入っています。",
@@ -18704,7 +18926,8 @@
           "風船",
           "造船"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "船便は遅いから (a. 航空 b. 空港) 便でお願いします。",
@@ -18712,7 +18935,8 @@
           "航空",
           "空港"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "(a. 陸上 b. 大陸) の気候は降水量※が少ない。※降水量 precipitation 降雨量 ",
@@ -18720,7 +18944,8 @@
           "陸上",
           "大陸"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "火事や事故などに備えて (a. 損害 b. 公害) 保険に入る。",
@@ -18728,7 +18953,8 @@
           "損害",
           "公害"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "現金 (a. 郵送 b. 輸送) 車が事故を起こした。",
@@ -18736,7 +18962,8 @@
           "郵送",
           "輸送"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "昼休みで飲食店はどこも (a. 混雑 b. 混乱) している。",
@@ -18744,7 +18971,8 @@
           "混雑",
           "混乱"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "(a. 理想 b. 感想) と現実にはギャップ※がある。※ギャップ: a gap (观念 ... 等的) 差距 ",
@@ -18752,7 +18980,8 @@
           "理想",
           "感想"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "人身事故でダイヤが (a. 乱れて b. 混じって) います。",
@@ -18760,7 +18989,8 @@
           "乱れて",
           "混じって"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       }
     ],
     "reviewKanji": []
@@ -18994,7 +19224,8 @@
           "a. 卒業",
           "b. 卒業"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "② 今日は良いお天気に (a. 恵まれて b. 晴れて) 春のような陽気でした。",
@@ -19002,7 +19233,8 @@
           "a. 恵まれて",
           "b. 晴れて"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "③ 疲れたときはちょっと休んだほうが (a. 利率 b. 能率) が上がる。",
@@ -19010,7 +19242,8 @@
           "a. 利率",
           "b. 能率"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "④ メガネが湯気で (a. 曇って b. 雲って) 何も見えない。",
@@ -19018,7 +19251,8 @@
           "a. 曇って",
           "b. 雲って"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "⑤ 昔の人は、便利な機械がない代わりに (a. 知恵 b. 予想) を使って生活した。",
@@ -19026,7 +19260,8 @@
           "a. 知恵",
           "b. 予想"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "⑥ 都心のマンションから郊外の (a. 一戸建て b. 家庭) に引っ越した。",
@@ -19034,7 +19269,8 @@
           "a. 一戸建て",
           "b. 家庭"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       }
     ],
     "reviewKanji": []
@@ -19774,7 +20010,8 @@
           "a. 捕る",
           "b. 捕まる"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "相手は(a. 電話 b. 電波)の届かない所にいるか、電源を切っている。",
@@ -19782,7 +20019,8 @@
           "a. 電話",
           "b. 電波"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "盗みの(a. 疑い b. 疑問)をかけられる。",
@@ -19790,7 +20028,8 @@
           "a. 疑い",
           "b. 疑問"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "店長は(a. 絶えず b. 絶えて)客や店員に気を配らねばならない。",
@@ -19798,7 +20037,8 @@
           "a. 絶えず",
           "b. 絶えて"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "この健康補助食品はカルシウムを(a. 絶つ b. 補う)のに最適です。",
@@ -19806,7 +20046,8 @@
           "a. 絶つ",
           "b. 補う"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "男が酒を飲んで居酒屋で(a. 逃げて b. 暴れて)います。",
@@ -19814,7 +20055,8 @@
           "a. 逃げて",
           "b. 暴れて"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "私には支持(a. 政党 b. 政府)はないが、支持する候補者はいる。",
@@ -19822,7 +20064,8 @@
           "a. 政党",
           "b. 政府"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "昨夜、都心でガス(a. 爆発 b. 暴走)がありました。",
@@ -19830,7 +20073,8 @@
           "a. 爆発",
           "b. 暴走"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       }
     ],
     "reviewKanji": []
@@ -21246,7 +21490,8 @@
           "a. 評価",
           "b. 評判"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "人間だから、(a. 賢い b. 勇ましい)人でも判断を誤ることがある。",
@@ -21254,7 +21499,8 @@
           "a. 賢い",
           "b. 勇ましい"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "(a. 敬語 b. 敬意)を正しく使うのはなかなか難しい。",
@@ -21262,7 +21508,8 @@
           "a. 敬語",
           "b. 敬意"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "大臣の発言を国民は(a. 批評 b. 批判)的に受けとめた。",
@@ -21270,7 +21517,8 @@
           "a. 批評",
           "b. 批判"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "その帽子、あなたによく(a. 似て b. 似合って)いますよ。",
@@ -21278,7 +21526,8 @@
           "a. 似て",
           "b. 似合って"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "朝早く目が(a. 覚めた b. 覚ました)のに、起きられなかった。",
@@ -21286,7 +21535,8 @@
           "a. 覚めた",
           "b. 覚ました"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "あの娘さんは有名な武士の(a. 祖先 b. 子孫)だそうです。",
@@ -21294,7 +21544,8 @@
           "a. 祖先",
           "b. 子孫"
         ],
-        "answerIndex": -1
+        "answerIndex": 1,
+        "answerSource": "ai-solved"
       },
       {
         "prompt": "(a. 犯人 b. 判人)の顔や服装を覚えていますか。",
@@ -21302,7 +21553,8 @@
           "a. 犯人",
           "b. 判人"
         ],
-        "answerIndex": -1
+        "answerIndex": 0,
+        "answerSource": "ai-solved"
       }
     ],
     "reviewKanji": []
