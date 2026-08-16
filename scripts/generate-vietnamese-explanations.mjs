@@ -1,9 +1,14 @@
 #!/usr/bin/env node
 
 // Generates Vietnamese explanations for kanji/vocabulary/grammar book
-// content via Gemini, grounded on the same source Somatome PDF the original
-// extraction used (same upload-once-reuse-per-lesson pattern as
-// scripts/classify-questions.mjs). Output: data/book/<category>.vietnamese.json
+// content via Gemini. Text-only (no PDF grounding) — an earlier version
+// attached the source Somatome PDF for extra context, but a lesson's own
+// {word, reading, English meaning} is already everything needed for a
+// meaning+usage gloss, and the PDF attachment turned out to occasionally
+// cause a whole lesson's response to fail validation across every item
+// simultaneously (repro'd on lesson v2d5: 3 separate attempts, 3 different
+// key-pool orderings, all 0/31 — the exact same prompt with the PDF
+// dropped succeeded on the first try). Output: data/book/<category>.vietnamese.json
 // — one string per item, in the exact order js/lesson.js's
 // renderKanji/renderVocabulary/renderGrammar iterate the lesson's own arrays
 // (kanji[] only — NOT reviewKanji[], which is an answer-free recall quiz and
@@ -16,7 +21,7 @@
 //   GEMINI_API_KEY=... node scripts/generate-vietnamese-explanations.mjs --category kanji --limit k1d1,k1d2
 //   GEMINI_API_KEY=... node scripts/generate-vietnamese-explanations.mjs --category kanji --dry-run
 
-import { readFileSync, writeFileSync, statSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadGeminiKeyPool, createGeminiKeyRotator, GeminiKeyError } from './lib/gemini-key-pool.mjs';
@@ -38,7 +43,6 @@ console.log(`Using a pool of ${KEY_POOL.length} Gemini API key(s).`);
 // model with its own quota bucket and was still available.
 const MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
 const GEN_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
-const UPLOAD_BASE = 'https://generativelanguage.googleapis.com/upload/v1beta/files';
 
 const args = process.argv.slice(2);
 const dryRun = args.includes('--dry-run');
@@ -48,15 +52,18 @@ function argValue(flag) {
 }
 const category = argValue('--category');
 const limitList = argValue('--limit') ? argValue('--limit').split(',') : null;
-const pdfDir = argValue('--pdf-dir') || join(ROOT, 'N2_somatome');
 
-const BOOKS = {
-  kanji: '49. Somatome N2 Kanji.pdf',
-  vocabulary: '50. Somatome N2 Goi.pdf',
-  grammar: '51. Somatome N2 Bunpo.pdf',
+const CATEGORIES = new Set(['kanji', 'vocabulary', 'grammar']);
+
+// kanji/vocabulary return two separate fields (meaning/usage — see
+// TWO_FIELD_CATEGORIES below) that the client joins as `${meaning}\n★
+// ${usage}`; grammar keeps a single combined string.
+const MAX_CHARS = {
+  kanji: { meaning: 60, usage: 90 },
+  vocabulary: { meaning: 60, usage: 90 },
+  grammar: 160,
 };
-
-const MAX_CHARS = { kanji: 150, vocabulary: 150, grammar: 160 };
+const TWO_FIELD_CATEGORIES = new Set(['kanji', 'vocabulary']);
 
 // IMPORTANT: these instruction strings must themselves be written in fully
 // accented Vietnamese — an earlier unaccented-ASCII version of this prompt
@@ -73,11 +80,28 @@ const DIACRITICS_REMINDER = 'LUÔN viết bằng tiếng Việt có đầy đủ
 // two clauses, meaning then usage context, never a standalone narrative.
 const NO_EXAMPLE_SENTENCE_RULE = 'TUYỆT ĐỐI KHÔNG viết thành một câu văn kể chuyện/tình huống cụ thể (không có chủ ngữ hành động như "tôi", "anh ấy", "công ty này...") — chỉ nêu nghĩa và ngữ cảnh dùng ở dạng giải thích từ điển.';
 
+// IMPORTANT: a later version asked for the literal prefixes "Nghĩa:"/"Dùng
+// khi:" baked into one string — the client renders these as two separate
+// lines itself (meaning, then a ★-prefixed usage line), so the labels were
+// redundant chrome and got dropped in favor of two clean, unlabeled fields.
+const NO_LABEL_RULE = 'KHÔNG được viết các nhãn như "Nghĩa:", "Dùng khi:", "Dùng để" ở đầu câu trả lời — chỉ trả về đúng nội dung nghĩa/hoàn cảnh dùng, không có tiền tố nào.';
+
 const INSTRUCTIONS = {
-  kanji: (max) => `Bạn là gia sư tiếng Nhật N2 người Việt. Với mỗi chữ Hán dưới đây (kèm âm on/kun và một ví dụ từ vựng), viết đúng theo cấu trúc "Nghĩa: <nghĩa cốt lõi của chữ Hán>. Dùng khi: <hoàn cảnh/loại từ thường dùng chữ này>." bằng tiếng Việt tự nhiên, ngắn gọn (tối đa ${max} ký tự) — không chỉ dịch từng chữ nghĩa tiếng Anh đã cho. ${NO_EXAMPLE_SENTENCE_RULE} ${DIACRITICS_REMINDER}`,
-  vocabulary: (max) => `Bạn là gia sư tiếng Nhật N2 người Việt. Với mỗi từ vựng dưới đây (kèm cách đọc và nghĩa tiếng Anh), viết đúng theo cấu trúc "Nghĩa: <nghĩa cốt lõi của từ>. Dùng khi: <hoàn cảnh/tình huống dùng từ này>." bằng tiếng Việt tự nhiên, ngắn gọn (tối đa ${max} ký tự), phù hợp văn cảnh N2 — không chỉ dịch từng chữ nghĩa tiếng Anh đã cho. ${NO_EXAMPLE_SENTENCE_RULE} ${DIACRITICS_REMINDER}`,
+  kanji: (max) => `Bạn là gia sư tiếng Nhật N2 người Việt. Với mỗi chữ Hán dưới đây (kèm âm on/kun và một ví dụ từ vựng), trả về hai phần bằng tiếng Việt tự nhiên: "meaning" là nghĩa cốt lõi của chữ Hán (tối đa ${max.meaning} ký tự), và "usage" là hoàn cảnh/loại từ thường dùng chữ này (tối đa ${max.usage} ký tự) — không chỉ dịch từng chữ nghĩa tiếng Anh đã cho. ${NO_LABEL_RULE} ${NO_EXAMPLE_SENTENCE_RULE} ${DIACRITICS_REMINDER}`,
+  vocabulary: (max) => `Bạn là gia sư tiếng Nhật N2 người Việt. Với mỗi từ vựng dưới đây (kèm cách đọc và nghĩa tiếng Anh), trả về hai phần bằng tiếng Việt tự nhiên: "meaning" là nghĩa cốt lõi của từ (tối đa ${max.meaning} ký tự), và "usage" là hoàn cảnh/tình huống dùng từ này (tối đa ${max.usage} ký tự), phù hợp văn cảnh N2 — không chỉ dịch từng chữ nghĩa tiếng Anh đã cho. ${NO_LABEL_RULE} ${NO_EXAMPLE_SENTENCE_RULE} ${DIACRITICS_REMINDER}`,
   grammar: (max) => `Bạn là gia sư tiếng Nhật N2 người Việt. Với mỗi mẫu ngữ pháp dưới đây (kèm nghĩa tiếng Anh), viết MỘT câu giải thích ý nghĩa và cách dùng bằng tiếng Việt, ngắn gọn (tối đa ${max} ký tự), để người học phân biệt được với các mẫu tương tự. ${DIACRITICS_REMINDER}`,
 };
+
+// Despite DIACRITICS_REMINDER, the model occasionally still returns a
+// stray item with zero accents (observed nondeterministically, not tied to
+// any one key) — reject those individually rather than writing broken
+// Vietnamese; the lesson stays gapped and gets picked up by a re-run
+// (generate-vietnamese-explanations.mjs skips nothing, so re-running
+// --limit on just the still-gapped lessons converges quickly).
+const HAS_VIETNAMESE_DIACRITIC = /[àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ]/i;
+function hasDiacritics(text) {
+  return HAS_VIETNAMESE_DIACRITIC.test(text);
+}
 
 function plainText(s) {
   return String(s || '').replace(/\{([^{}|]+)\|([^{}]*)\}/g, '$1').trim();
@@ -110,62 +134,6 @@ function flattenItems(category, lesson) {
   return [];
 }
 
-async function uploadPdf(filePath, key) {
-  const displayName = filePath.split(/[\\/]/).pop();
-  const numBytes = statSync(filePath).size;
-  const startRes = await fetch(`${UPLOAD_BASE}?key=${encodeURIComponent(key)}`, {
-    method: 'POST',
-    headers: {
-      'X-Goog-Upload-Protocol': 'resumable',
-      'X-Goog-Upload-Command': 'start',
-      'X-Goog-Upload-Header-Content-Length': String(numBytes),
-      'X-Goog-Upload-Header-Content-Type': 'application/pdf',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ file: { displayName } }),
-  });
-  if (!startRes.ok) {
-    const text = await startRes.text();
-    throw new Error(`Upload start failed (${startRes.status}): ${text.slice(0, 300)}`);
-  }
-  const uploadUrl = startRes.headers.get('x-goog-upload-url');
-  if (!uploadUrl) throw new Error('Upload start missing x-goog-upload-url header.');
-  const body = readFileSync(filePath);
-  const uploadRes = await fetch(uploadUrl, {
-    method: 'POST',
-    headers: {
-      'X-Goog-Upload-Offset': '0',
-      'X-Goog-Upload-Command': 'upload, finalize',
-      'Content-Type': 'application/pdf',
-    },
-    body,
-  });
-  if (!uploadRes.ok) {
-    const text = await uploadRes.text();
-    throw new Error(`Upload finalize failed (${uploadRes.status}): ${text.slice(0, 300)}`);
-  }
-  const data = await uploadRes.json();
-  const file = data.file || data;
-  if (!file.name || !file.uri) throw new Error('Upload response missing file.name/uri.');
-  return { name: file.name, uri: file.uri };
-}
-
-async function waitForFileActive(fileUri, fileName, key) {
-  const url = `${fileUri}?key=${encodeURIComponent(key)}`;
-  const deadline = Date.now() + 60_000;
-  while (Date.now() < deadline) {
-    const res = await fetch(url);
-    if (res.ok) {
-      const data = await res.json();
-      const state = data.state || 'UNKNOWN';
-      if (state === 'ACTIVE') return;
-      if (state === 'FAILED') throw new Error(`File processing failed: ${data.name || fileName}`);
-    }
-    await new Promise((r) => setTimeout(r, 1500));
-  }
-  throw new Error(`File ${fileName} did not become ACTIVE within 60s.`);
-}
-
 // Free-tier Gemini quota (20 req/min, generate_content_free_tier_requests)
 // turned out to be shared across EVERYTHING using this key today — 4s
 // spacing alone still 429'd (see scripts/fix_underlined_words.py). Paced
@@ -179,13 +147,28 @@ async function throttle() {
   lastCallAt = Date.now();
 }
 
-async function askVietnamese(fileUri, category, lessonId, lesson, key) {
+async function askVietnamese(category, lessonId, lesson, key) {
   const items = flattenItems(category, lesson);
   if (items.length === 0) return [];
   const max = MAX_CHARS[category];
+  const twoField = TWO_FIELD_CATEGORIES.has(category);
+  const itemSchema = twoField
+    ? {
+        type: 'object',
+        properties: { index: { type: 'integer' }, meaning: { type: 'string' }, usage: { type: 'string' } },
+        required: ['index', 'meaning', 'usage'],
+      }
+    : {
+        type: 'object',
+        properties: { index: { type: 'integer' }, vi: { type: 'string' } },
+        required: ['index', 'vi'],
+      };
+  const jsonShape = twoField
+    ? '{"items": [{"index": 0, "meaning": "...", "usage": "..."}, {"index": 1, ...}, ...]}'
+    : '{"items": [{"index": 0, "vi": "..."}, {"index": 1, ...}, ...]}';
   const prompt = `${INSTRUCTIONS[category](max)}
 
-Trả về JSON duy nhất: {"items": [{"index": 0, "vi": "..."}, {"index": 1, ...}, ...]}
+Trả về JSON duy nhất: ${jsonShape}
 Chính xác ${items.length} phần tử, đúng thứ tự, index bắt đầu từ 0.
 
 DANH SÁCH (lesson ${lessonId}):
@@ -196,28 +179,13 @@ CHỈ trả về JSON thuần, không markdown, không giải thích thêm.`;
   await throttle();
   const url = `${GEN_BASE}/${encodeURIComponent(MODEL)}:generateContent?key=${encodeURIComponent(key)}`;
   const body = {
-    contents: [{
-      role: 'user',
-      parts: [
-        { text: prompt },
-        { file_data: { mime_type: 'application/pdf', file_uri: fileUri } },
-      ],
-    }],
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
     generationConfig: {
       temperature: 0.2,
       responseMimeType: 'application/json',
       responseSchema: {
         type: 'object',
-        properties: {
-          items: {
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: { index: { type: 'integer' }, vi: { type: 'string' } },
-              required: ['index', 'vi'],
-            },
-          },
-        },
+        properties: { items: { type: 'array', items: itemSchema } },
         required: ['items'],
       },
     },
@@ -236,15 +204,25 @@ CHỈ trả về JSON thuần, không markdown, không giải thích thêm.`;
   const out = [];
   for (const item of Array.isArray(parsed?.items) ? parsed.items : []) {
     const idx = Number.isInteger(item?.index) ? item.index : -1;
-    const vi = typeof item?.vi === 'string' ? item.vi.trim().slice(0, max + 40) : '';
-    if (idx >= 0 && idx < items.length && vi) out.push({ index: idx, vi });
+    if (idx < 0 || idx >= items.length) continue;
+    let vi = '';
+    if (twoField) {
+      const meaning = typeof item?.meaning === 'string' ? item.meaning.trim().slice(0, max.meaning + 20) : '';
+      const usage = typeof item?.usage === 'string' ? item.usage.trim().slice(0, max.usage + 20) : '';
+      if (!meaning || !hasDiacritics(meaning) || (usage && !hasDiacritics(usage))) continue;
+      vi = usage ? `${meaning}\n★ ${usage}` : meaning;
+    } else {
+      vi = typeof item?.vi === 'string' ? item.vi.trim().slice(0, max + 40) : '';
+      if (vi && !hasDiacritics(vi)) vi = '';
+    }
+    if (vi) out.push({ index: idx, vi });
   }
   return out;
 }
 
 async function main() {
-  if (!category || !BOOKS[category]) {
-    console.error('Specify --category one of:', Object.keys(BOOKS));
+  if (!category || !CATEGORIES.has(category)) {
+    console.error('Specify --category one of:', [...CATEGORIES]);
     process.exit(1);
   }
   const jsonPath = join(BOOK_DIR, `${category}.json`);
@@ -256,23 +234,6 @@ async function main() {
     process.exit(1);
   }
 
-  const pdfPath = join(pdfDir, BOOKS[category]);
-
-  // The Files API upload is scoped to whichever key created it, so a
-  // generateContent call using a DIFFERENT key can't reference it — upload
-  // (once) under each key lazily, the first time the rotator actually picks
-  // that key, rather than assuming a single upload works for the whole pool.
-  const fileByKey = new Map();
-  async function ensureUploadedFor(key) {
-    if (fileByKey.has(key)) return fileByKey.get(key);
-    console.log(`Uploading ${BOOKS[category]} (key ...${key.slice(-6)})...`);
-    const { uri, name } = await uploadPdf(pdfPath, key);
-    await waitForFileActive(uri, name, key);
-    console.log(`Uploaded as ${name}`);
-    fileByKey.set(key, uri);
-    return uri;
-  }
-
   const outPath = join(BOOK_DIR, `${category}.vietnamese.json`);
   let out = {};
   try { out = JSON.parse(readFileSync(outPath, 'utf8')); } catch { /* first run */ }
@@ -282,11 +243,17 @@ async function main() {
     const expected = flattenItems(category, book[lessonId]).length;
     if (expected === 0) { console.log(`${category} ${lessonId}: no items, skipped`); continue; }
     try {
-      const results = await rotator.run(async (key) => {
-        const fileUri = await ensureUploadedFor(key);
-        return askVietnamese(fileUri, category, lessonId, book[lessonId], key);
+      const results = await rotator.run((key) => askVietnamese(category, lessonId, book[lessonId], key));
+      // Start from whatever this lesson already had — but only the parts
+      // that were themselves valid (diacritics intact); a previously-broken
+      // value must NOT survive as a "fallback", or it can never get fixed
+      // by a re-run — and only overwrite indices this run actually produced
+      // a valid result for, so a fresh rejection doesn't wipe a good value.
+      const existing = Array.isArray(out[lessonId]) ? out[lessonId] : [];
+      const arr = Array.from({ length: expected }, (_, i) => {
+        const value = existing[i];
+        return typeof value === 'string' && hasDiacritics(value) ? value : null;
       });
-      const arr = new Array(expected).fill(null);
       for (const { index, vi } of results) arr[index] = vi;
       const filled = arr.filter(Boolean).length;
       out[lessonId] = arr;

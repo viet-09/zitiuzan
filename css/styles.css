@@ -940,6 +940,7 @@ body.furigana-off rt {
     color: var(--text-primary);
     font-size: 14px;
     margin-bottom: 6px;
+    white-space: pre-line;
 }
 
 /* ---------- Kanji ---------- */
@@ -961,6 +962,13 @@ body.furigana-off rt {
     font-size: 44px;
     line-height: 1;
     margin-bottom: 8px;
+}
+
+.kanji-vi {
+    color: var(--text-primary);
+    font-size: 14px;
+    margin: 4px 0 0;
+    white-space: pre-line;
 }
 
 .kanji-readings {
