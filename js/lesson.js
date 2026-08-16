@@ -161,11 +161,16 @@ function renderQuestions(questions, lessonId, title = '練習') {
     </section>`;
 }
 
-// Grammar book splits practice into 練習I (binary a/b: choose correct form) and
-// 練習II (4-blank: ＿＿ ＿＿ ＿＿ ＿＿ — pick correct order). Each 練習II item
-// is stored as 4 sibling entries with the prompt suffix "(Chỗ trống thứ N …)";
-// we collapse them into one rendered question whose answer is the list of
-// per-blank option indexes.
+// Grammar book splits practice into 練習I (binary a/b: choose correct form)
+// and 練習II (4-blank word order: ＿＿ ＿＿ ＿＿ ＿＿). Each 練習II item is
+// printed as 4 sibling questions, one per blank position, sharing the same
+// sentence + 4 candidate words but each asking independently "what goes at
+// position N" with its own answer — NOT one combined reorder-all-4 puzzle.
+// (An earlier version collapsed these into a single multi-slot widget, but
+// that answered nothing until all 4 slots were filled, and a bug marked the
+// whole thing "answered" after the very first click — silently ignoring
+// every click after that. Rendering each sibling as its own normal
+// single-choice question sidesteps both problems and matches the book.)
 function groupQuestionsBySection(questions) {
   const groups = [];
   let current = { label: '', items: [] };
@@ -173,27 +178,6 @@ function groupQuestionsBySection(questions) {
   for (let i = 0; i < questions.length; i++) {
     const q = questions[i];
     const opts = Array.isArray(q?.options) ? q.options : [];
-    const probe = stripBlankSuffix(q?.prompt || q?.q || '');
-    let k = 1;
-    while (i + k < questions.length
-      && (questions[i + k].options || []).length === opts.length
-      && stripBlankSuffix(questions[i + k].prompt || questions[i + k].q || '') === probe) {
-      k++;
-    }
-    if (k >= 2 && opts.length >= 3) {
-      const collapsed = collapseMultiBlank(questions.slice(i, i + k), i);
-      i += k - 1;
-      const isRoman = /\(a\.|（a\.|a\. +[ぁ-んァ-ン一-龯]/.test(collapsed.prompt);
-      if (isRoman && current.label !== '練習Ⅰ') {
-        pushCurrent();
-        current.label = '練習Ⅰ';
-      } else if (!isRoman && current.label === '練習Ⅰ') {
-        pushCurrent();
-        current.label = '練習Ⅱ';
-      }
-      current.items.push(collapsed);
-      continue;
-    }
     if (opts.length === 2 && current.label !== '練習Ⅰ') {
       pushCurrent();
       current.label = '練習Ⅰ';
@@ -201,63 +185,16 @@ function groupQuestionsBySection(questions) {
       pushCurrent();
       current.label = '練習Ⅱ';
     }
-    current.items.push(q);
+    current.items.push({ ...q, _originalIndex: i });
   }
   pushCurrent();
   return groups;
-}
-
-function stripBlankSuffix(prompt) {
-  // Strip the book's "Chỗ trống thứ N" suffix (single or nested parens).
-  return String(prompt || '')
-    .replace(/\s*[\(（]\s*Chỗ\s*trống\s*thứ\s*\d+(?:\s*[\(（][^()）]*[\)）])?\s*[\)）]\s*$/u, '')
-    .trim();
-}
-
-function collapseMultiBlank(entries, originalIndex) {
-  const first = entries[0];
-  const opts = first.options || [];
-  const basePrompt = stripBlankSuffix(first.prompt || first.q || '');
-  const blankCount = entries.length;
-  const correctFor = entries.map((e) => Number.isInteger(e.answerIndex) ? e.answerIndex : -1);
-  return {
-    prompt: basePrompt,
-    options: opts,
-    blanks: blankCount,
-    answers: correctFor,
-    multiBlank: true,
-    _originalIndex: originalIndex,
-  };
 }
 
 function renderQuestionItem(question, lessonId, questionIndex) {
   const options = Array.isArray(question?.options) ? question.options : [];
   const headerIndex = question?._originalIndex ?? questionIndex;
   const header = renderQuestionHeader(lessonId, headerIndex);
-  if (question?.multiBlank) {
-    const blanks = question.blanks || question.answers.length;
-    const answersAttr = JSON.stringify(question.answers || []);
-    // Book shows options as labelled text lines ("1 候補 2 候補 3 候補 4 候補"),
-    // not as tappable buttons. Render same way; click on an option line fills
-    // the next blank slot (handled in handleMultiBlankQuiz).
-    const optionsHtml = options.map((option, optionIndex) => {
-      const optText = String(option || '');
-      const numbered = /^\s*\d+\s/.test(optText) ? optText : `${optionIndex + 1} ${optText}`;
-      return `<button type="button" class="quiz-option-line" data-action="quiz-option" data-idx="${optionIndex}" lang="ja">${renderFurigana(numbered)}</button>`;
-    }).join('');
-    return `
-      <div class="quiz-question quiz-question-multiblank" data-blanks="${blanks}" data-answers='${escapeHtml(answersAttr)}'>
-        ${header}
-        <div class="quiz-q-text" lang="ja">${renderFurigana(question.prompt)}</div>
-        <div class="quiz-blanks" aria-label="空欄の順番">
-          ${Array.from({ length: blanks }, (_, n) => `<span class="quiz-blank-slot" data-slot="${n}">（${n + 1}）</span>`).join('')}
-        </div>
-        <div class="quiz-options quiz-options-stack">
-          ${optionsHtml}
-        </div>
-        <div class="quiz-explain" role="status" hidden></div>
-      </div>`;
-  }
   const correct = answerIndex(question);
   // Book-style "price tag" for reading questions whose options are amounts
   // of money (e.g. "7,000円" / "8,000円"). Rendered as a row of circular
@@ -523,9 +460,6 @@ function pageHtml(found, lessonId, content) {
 function handleQuiz(button) {
   const container = button.closest('.quiz-question');
   if (!container || container.classList.contains('is-answered')) return;
-  if (container.classList.contains('quiz-question-multiblank')) {
-    return handleMultiBlankQuiz(container, button);
-  }
   container.classList.add('is-answered');
   const correct = Number(container.dataset.correctIdx);
   const selected = Number(button.dataset.idx);
@@ -547,43 +481,6 @@ function handleQuiz(button) {
     status.textContent = correct >= 0 && correctTarget
       ? `Đáp án: ${correctTarget.textContent.trim()}`
       : 'Đáp án của câu này chưa được xác minh.';
-  }
-}
-
-function handleMultiBlankQuiz(container, button) {
-  const blanks = Number(container.dataset.blanks) || 0;
-  const answers = JSON.parse(container.dataset.answers || '[]');
-  const slots = [...container.querySelectorAll('.quiz-blank-slot')];
-  let nextSlot = slots.find((s) => !s.dataset.value);
-  container.classList.add('is-answered');
-  if (!nextSlot) return;
-  const selected = Number(button.dataset.idx);
-  nextSlot.dataset.value = String(selected);
-  nextSlot.textContent = `${selected + 1}`;
-  nextSlot.classList.add('is-filled');
-  const filled = slots.map((s) => Number(s.dataset.value));
-  if (filled.every((v) => Number.isInteger(v))) {
-    const correct = answers.every((a, i) => a === filled[i]);
-    const options = [...container.querySelectorAll('.quiz-option')];
-    options.forEach((option) => {
-      option.disabled = true;
-      const index = Number(option.dataset.idx);
-      const usedIn = filled.reduce((acc, v, i) => (v === index ? acc.concat(i + 1) : acc), []);
-      const isCorrect = answers.includes(index);
-      if (usedIn.length) {
-        option.classList.add(correct ? 'is-correct' : 'is-incorrect');
-        const tag = document.createElement('span');
-        tag.className = 'quiz-option-tag';
-        tag.textContent = `(${usedIn.join(',')})`;
-        option.appendChild(tag);
-      }
-    });
-    const status = container.querySelector('.quiz-explain');
-    if (status) {
-      status.hidden = false;
-      const truth = answers.map((a, i) => `${i + 1}=${a + 1}`).join(' · ');
-      status.textContent = correct ? `Đúng! ${truth}` : `Sai. Đáp án: ${truth}`;
-    }
   }
 }
 
