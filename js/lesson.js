@@ -64,8 +64,61 @@ function ttsButton(text) {
   return `<button type="button" class="tts-btn" data-action="speak" data-jp="${escapeHtml(text)}" aria-label="Nghe phát âm tiếng Nhật">🔊</button>`;
 }
 
+const KANJI_RE = /[一-龯㐀-䶿々]/;
+
+/** Splits `word` into alternating kanji/non-kanji runs and aligns each
+ * kanji run with its slice of `reading`, using the non-kanji runs (which
+ * must appear verbatim in the reading, since kana doesn't change) as
+ * anchors. Wrapping the WHOLE word+reading in one {word|reading} ruby —
+ * the previous behavior — visually misaligns as soon as `word` mixes kanji
+ * with okurigana/particles (e.g. "引っ越しの荷造りをする"): the browser
+ * centers the full reading over the full word as one block instead of
+ * lining up each kanji with just its own reading. Falls back to a single
+ * whole-word ruby if the alignment can't be made to work out (should be
+ * rare — only a real word/reading mismatch would trigger it).
+ */
+function buildFuriganaMarkup(word, reading) {
+  if (!reading || reading === word) return word;
+  const segments = [];
+  let i = 0;
+  while (i < word.length) {
+    const isKanji = KANJI_RE.test(word[i]);
+    let j = i + 1;
+    while (j < word.length && KANJI_RE.test(word[j]) === isKanji) j += 1;
+    segments.push({ text: word.slice(i, j), isKanji });
+    i = j;
+  }
+  if (segments.length === 1) return segments[0].isKanji ? `{${word}|${reading}}` : word;
+
+  const wholeWordFallback = `{${word}|${reading}}`;
+  let readingPos = 0;
+  let out = '';
+  for (let idx = 0; idx < segments.length; idx += 1) {
+    const seg = segments[idx];
+    if (!seg.isKanji) {
+      if (!reading.startsWith(seg.text, readingPos)) return wholeWordFallback;
+      out += seg.text;
+      readingPos += seg.text.length;
+    } else {
+      const nextKana = segments.slice(idx + 1).find((s) => !s.isKanji);
+      let endPos;
+      if (nextKana) {
+        const found = reading.indexOf(nextKana.text, readingPos);
+        if (found === -1) return wholeWordFallback;
+        endPos = found;
+      } else {
+        endPos = reading.length;
+      }
+      const rubyReading = reading.slice(readingPos, endPos);
+      out += rubyReading ? `{${seg.text}|${rubyReading}}` : seg.text;
+      readingPos = endPos;
+    }
+  }
+  return out;
+}
+
 function wordButton(word, reading = '', label = null) {
-  const display = label || (reading && reading !== word ? `{${word}|${reading}}` : word);
+  const display = label || buildFuriganaMarkup(word, reading);
   return `<button type="button" class="explain-word-btn" data-action="explain-word" data-word="${escapeHtml(word)}" data-reading="${escapeHtml(reading)}" lang="ja">${renderFurigana(display)}</button>`;
 }
 
