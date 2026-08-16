@@ -56,7 +56,7 @@ const BOOKS = {
   grammar: '51. Somatome N2 Bunpo.pdf',
 };
 
-const MAX_CHARS = { kanji: 140, vocabulary: 120, grammar: 160 };
+const MAX_CHARS = { kanji: 150, vocabulary: 150, grammar: 160 };
 
 // IMPORTANT: these instruction strings must themselves be written in fully
 // accented Vietnamese — an earlier unaccented-ASCII version of this prompt
@@ -64,9 +64,18 @@ const MAX_CHARS = { kanji: 140, vocabulary: 120, grammar: 160 };
 // diacritics (dấu), which is unusable for a Vietnamese-language app.
 const DIACRITICS_REMINDER = 'LUÔN viết bằng tiếng Việt có đầy đủ dấu (dấu thanh, dấu mũ, dấu móc...) — tuyệt đối KHÔNG được bỏ dấu.';
 
+// IMPORTANT: an earlier version of this prompt just said "viết một câu giải
+// thích" for vocabulary, and the model interpreted that as a full narrative
+// example sentence using the word (e.g. "Các tờ rơi quảng cáo bất động sản
+// thường được phát tận tay người đi đường.") instead of a dictionary-style
+// gloss — the book has no Japanese example sentence for these words at all,
+// so a Vietnamese "translation" of one made no sense. Now explicit: exactly
+// two clauses, meaning then usage context, never a standalone narrative.
+const NO_EXAMPLE_SENTENCE_RULE = 'TUYỆT ĐỐI KHÔNG viết thành một câu văn kể chuyện/tình huống cụ thể (không có chủ ngữ hành động như "tôi", "anh ấy", "công ty này...") — chỉ nêu nghĩa và ngữ cảnh dùng ở dạng giải thích từ điển.';
+
 const INSTRUCTIONS = {
-  kanji: (max) => `Bạn là gia sư tiếng Nhật N2 người Việt. Với mỗi chữ Hán dưới đây (kèm âm on/kun và một ví dụ từ vựng), viết MỘT câu giải thích ngắn gọn bằng tiếng Việt (tối đa ${max} ký tự) nêu nghĩa cốt lõi của chữ Hán, diễn đạt tự nhiên cho người Việt học — không chỉ dịch từng chữ nghĩa tiếng Anh đã cho. ${DIACRITICS_REMINDER}`,
-  vocabulary: (max) => `Bạn là gia sư tiếng Nhật N2 người Việt. Với mỗi từ vựng dưới đây (kèm cách đọc và nghĩa tiếng Anh), viết MỘT câu nghĩa/giải thích bằng tiếng Việt tự nhiên, ngắn gọn (tối đa ${max} ký tự), phù hợp văn cảnh N2 — không chỉ dịch từng chữ nghĩa tiếng Anh đã cho. ${DIACRITICS_REMINDER}`,
+  kanji: (max) => `Bạn là gia sư tiếng Nhật N2 người Việt. Với mỗi chữ Hán dưới đây (kèm âm on/kun và một ví dụ từ vựng), viết đúng theo cấu trúc "Nghĩa: <nghĩa cốt lõi của chữ Hán>. Dùng khi: <hoàn cảnh/loại từ thường dùng chữ này>." bằng tiếng Việt tự nhiên, ngắn gọn (tối đa ${max} ký tự) — không chỉ dịch từng chữ nghĩa tiếng Anh đã cho. ${NO_EXAMPLE_SENTENCE_RULE} ${DIACRITICS_REMINDER}`,
+  vocabulary: (max) => `Bạn là gia sư tiếng Nhật N2 người Việt. Với mỗi từ vựng dưới đây (kèm cách đọc và nghĩa tiếng Anh), viết đúng theo cấu trúc "Nghĩa: <nghĩa cốt lõi của từ>. Dùng khi: <hoàn cảnh/tình huống dùng từ này>." bằng tiếng Việt tự nhiên, ngắn gọn (tối đa ${max} ký tự), phù hợp văn cảnh N2 — không chỉ dịch từng chữ nghĩa tiếng Anh đã cho. ${NO_EXAMPLE_SENTENCE_RULE} ${DIACRITICS_REMINDER}`,
   grammar: (max) => `Bạn là gia sư tiếng Nhật N2 người Việt. Với mỗi mẫu ngữ pháp dưới đây (kèm nghĩa tiếng Anh), viết MỘT câu giải thích ý nghĩa và cách dùng bằng tiếng Việt, ngắn gọn (tối đa ${max} ký tự), để người học phân biệt được với các mẫu tương tự. ${DIACRITICS_REMINDER}`,
 };
 
