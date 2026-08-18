@@ -123,54 +123,61 @@ test('full-body pet stays visible, reacts to touch and keeps its learning quest'
   await dismissAuthGateForComponentChecks(page);
   const petArt = page.locator('#pet-widget-mount .pet-art--fox');
   const petWidget = page.locator('#pet-widget-mount .pet-widget');
-  const petCompanion = page.locator('#pet-widget-mount .pet-widget__companion');
-  const petStage = page.locator('#pet-widget-mount .pet-widget__stage');
+  const petScene = page.locator('#pet-widget-mount [data-pet-scene]');
+  const petCanvas = petScene.locator('canvas');
   await expect(petArt).toBeVisible();
   await expect(petArt).toHaveAttribute('src', './assets/pets/fox-3d.png');
   expect(await petArt.evaluate((image) => image.naturalWidth)).toBeGreaterThan(0);
-  await expect.poll(() => petCompanion.evaluate((element) => getComputedStyle(element).perspective)).not.toBe('none');
-  await expect.poll(() => petStage.evaluate((element) => getComputedStyle(element).transformStyle)).toBe('preserve-3d');
-  await expect.poll(() => petStage.evaluate((element) => getComputedStyle(element).animationName)).toContain('pet-idle-stage-3d');
-  await expect.poll(() => petStage.evaluate((element) => getComputedStyle(element).transform)).toMatch(/^matrix3d\(/);
+  await expect(petScene).toHaveAttribute('data-scene-state', 'ready', { timeout: 10_000 });
+  await expect(petScene).toHaveAttribute('data-renderer', 'three-webgl');
+  await expect(petScene).toHaveAttribute('data-motion', 'idle');
+  await expect(petCanvas).toBeVisible();
+  await expect(petArt).toBeHidden();
+  const idleFrameA = await petCanvas.screenshot();
+  await page.waitForTimeout(420);
+  const idleFrameB = await petCanvas.screenshot();
+  expect(idleFrameA.equals(idleFrameB)).toBe(false);
+  await petCanvas.evaluate((canvas) => { canvas.dataset.instanceCheck = 'stable'; });
 
   await page.getByRole('button', { name: 'Nựng đầu Cáo' }).click();
   await expect(petWidget).toHaveAttribute('data-reaction', 'pat');
-  await expect.poll(() => petStage.evaluate((element) => getComputedStyle(element).animationName)).toContain('pet-pat-stage-3d');
+  await expect(petScene).toHaveAttribute('data-motion', 'pat');
   await expect(page.locator('.pet-widget__bubble')).toContainText(/nựng|thích/i);
 
   await page.getByRole('button', { name: 'Trêu đùa với Cáo' }).click();
   await expect(petWidget).toHaveAttribute('data-reaction', 'tease');
-  await expect.poll(() => petStage.evaluate((element) => getComputedStyle(element).animationName)).toContain('pet-tease-stage-3d');
+  await expect(petScene).toHaveAttribute('data-motion', 'tease');
 
   await page.getByRole('button', { name: 'Đập tay với Cáo' }).click();
   await expect(petWidget).toHaveAttribute('data-reaction', 'highfive');
-  await expect.poll(() => petStage.evaluate((element) => getComputedStyle(element).animationName)).toContain('pet-highfive-stage-3d');
+  await expect(petScene).toHaveAttribute('data-motion', 'highfive');
+  await expect(petCanvas).toHaveAttribute('data-instance-check', 'stable');
+  await expect(petCanvas).toHaveCount(1);
 
   await page.evaluate(() => window.dispatchEvent(new CustomEvent('n2:lesson-complete', {
     detail: { id: 'motion-check', done: true, streak: 0 },
   })));
   await expect(petWidget).toHaveAttribute('data-reaction', 'complete');
-  await expect.poll(() => petStage.evaluate((element) => getComputedStyle(element).animationName)).toContain('pet-celebrate-stage-3d');
+  await expect(petScene).toHaveAttribute('data-motion', 'complete');
 
   await page.getByRole('button', { name: 'Mở nhiệm vụ học của Cáo' }).click();
   const panel = page.getByRole('region', { name: 'Nhiệm vụ của bạn đồng hành' });
   await expect(panel).toBeVisible();
   await expect(panel.getByRole('button', { name: 'Ôn 3 phút' })).toBeVisible();
   await expect(panel).toContainText('lỗi ngữ pháp');
-  await expect(petArt).toBeVisible();
+  await expect(petCanvas).toBeVisible();
   await expect(petWidget).toHaveAttribute('data-reaction', '', { timeout: 3_000 });
-  const sizeBeforeScroll = await petArt.boundingBox();
+  const sizeBeforeScroll = await petScene.boundingBox();
   await page.evaluate(() => window.scrollTo(0, 500));
   await expect(page.locator('#pet-widget-mount')).not.toHaveClass(/is-compact/);
-  const sizeAfterScroll = await petArt.boundingBox();
+  const sizeAfterScroll = await petScene.boundingBox();
   expect(sizeBeforeScroll).not.toBeNull();
   expect(sizeAfterScroll).not.toBeNull();
   expect(Math.abs(sizeAfterScroll.width - sizeBeforeScroll.width)).toBeLessThanOrEqual(0.5);
   expect(Math.abs(sizeAfterScroll.height - sizeBeforeScroll.height)).toBeLessThanOrEqual(0.5);
 
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await expect.poll(() => petStage.evaluate((element) => getComputedStyle(element).animationName)).toBe('none');
-  await expect.poll(() => petArt.evaluate((element) => getComputedStyle(element).animationName)).toBe('none');
+  await expect(petScene).toHaveAttribute('data-motion', 'reduced');
 });
 
 test('mobile dashboard has no horizontal overflow and passes serious axe checks', async ({ page }) => {
