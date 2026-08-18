@@ -122,19 +122,34 @@ test('full-body pet stays visible, reacts to touch and keeps its learning quest'
   await page.goto('/');
   await dismissAuthGateForComponentChecks(page);
   const petArt = page.locator('#pet-widget-mount .pet-art--fox');
+  const petWidget = page.locator('#pet-widget-mount .pet-widget');
+  const petCompanion = page.locator('#pet-widget-mount .pet-widget__companion');
+  const petStage = page.locator('#pet-widget-mount .pet-widget__stage');
   await expect(petArt).toBeVisible();
   await expect(petArt).toHaveAttribute('src', './assets/pets/fox-3d.png');
   expect(await petArt.evaluate((image) => image.naturalWidth)).toBeGreaterThan(0);
+  await expect.poll(() => petCompanion.evaluate((element) => getComputedStyle(element).perspective)).not.toBe('none');
+  await expect.poll(() => petStage.evaluate((element) => getComputedStyle(element).transformStyle)).toBe('preserve-3d');
+  await expect.poll(() => petStage.evaluate((element) => getComputedStyle(element).animationName)).toContain('pet-idle-stage-3d');
 
   await page.getByRole('button', { name: 'Nựng đầu Cáo' }).click();
-  await expect(page.locator('.pet-widget')).toHaveAttribute('data-reaction', 'pat');
+  await expect(petWidget).toHaveAttribute('data-reaction', 'pat');
+  await expect.poll(() => petStage.evaluate((element) => getComputedStyle(element).animationName)).toContain('pet-pat-stage-3d');
   await expect(page.locator('.pet-widget__bubble')).toContainText(/nựng|thích/i);
 
   await page.getByRole('button', { name: 'Trêu đùa với Cáo' }).click();
-  await expect(page.locator('.pet-widget')).toHaveAttribute('data-reaction', 'tease');
+  await expect(petWidget).toHaveAttribute('data-reaction', 'tease');
+  await expect.poll(() => petStage.evaluate((element) => getComputedStyle(element).animationName)).toContain('pet-tease-stage-3d');
 
   await page.getByRole('button', { name: 'Đập tay với Cáo' }).click();
-  await expect(page.locator('.pet-widget')).toHaveAttribute('data-reaction', 'highfive');
+  await expect(petWidget).toHaveAttribute('data-reaction', 'highfive');
+  await expect.poll(() => petStage.evaluate((element) => getComputedStyle(element).animationName)).toContain('pet-highfive-stage-3d');
+
+  await page.evaluate(() => window.dispatchEvent(new CustomEvent('n2:lesson-complete', {
+    detail: { id: 'motion-check', done: true, streak: 0 },
+  })));
+  await expect(petWidget).toHaveAttribute('data-reaction', 'complete');
+  await expect.poll(() => petStage.evaluate((element) => getComputedStyle(element).animationName)).toContain('pet-celebrate-stage-3d');
 
   await page.getByRole('button', { name: 'Mở nhiệm vụ học của Cáo' }).click();
   const panel = page.getByRole('region', { name: 'Nhiệm vụ của bạn đồng hành' });
@@ -142,8 +157,18 @@ test('full-body pet stays visible, reacts to touch and keeps its learning quest'
   await expect(panel.getByRole('button', { name: 'Ôn 3 phút' })).toBeVisible();
   await expect(panel).toContainText('lỗi ngữ pháp');
   await expect(petArt).toBeVisible();
+  const sizeBeforeScroll = await petArt.boundingBox();
   await page.evaluate(() => window.scrollTo(0, 500));
-  await expect(page.locator('#pet-widget-mount')).toHaveClass(/is-compact/);
+  await expect(page.locator('#pet-widget-mount')).not.toHaveClass(/is-compact/);
+  const sizeAfterScroll = await petArt.boundingBox();
+  expect(sizeBeforeScroll).not.toBeNull();
+  expect(sizeAfterScroll).not.toBeNull();
+  expect(Math.abs(sizeAfterScroll.width - sizeBeforeScroll.width)).toBeLessThanOrEqual(0.5);
+  expect(Math.abs(sizeAfterScroll.height - sizeBeforeScroll.height)).toBeLessThanOrEqual(0.5);
+
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await expect.poll(() => petStage.evaluate((element) => getComputedStyle(element).animationName)).toBe('none');
+  await expect.poll(() => petArt.evaluate((element) => getComputedStyle(element).animationName)).toBe('none');
 });
 
 test('mobile dashboard has no horizontal overflow and passes serious axe checks', async ({ page }) => {
