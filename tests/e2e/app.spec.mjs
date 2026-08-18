@@ -45,6 +45,39 @@ test('adaptive dashboard search and lesson review work end to end', async ({ pag
   }
 });
 
+test('book reader keeps every source image inside one continuous page strip', async ({ page }) => {
+  await page.goto('/#/lesson/k1d2');
+  await dismissAuthGateForComponentChecks(page);
+  await page.getByRole('button', { name: 'Xem trang sách' }).click();
+
+  const strip = page.locator('.book-viewer-strip');
+  await expect(strip).toBeVisible();
+  await expect(page.locator('.book-viewer-figure')).toHaveCount(0);
+  await expect(strip.locator('.book-viewer-page')).toHaveCount(4);
+});
+
+test('a due weakness launches a mini-test and updates readiness evidence', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('n2_reviews_v1', JSON.stringify([{
+      key: 'g1d1:q0', lessonId: 'g1d1', categoryId: 'grammar',
+      prompt: 'もう雨は降る（　）。',
+      options: ['ために', 'に違いない'], correctIndex: 1, correctAnswer: 'に違いない',
+      attempts: 2, correctAttempts: 0, lapses: 2, lastResult: 'wrong',
+      lastReviewedAt: '2026-08-17T00:00:00Z', dueAt: '2026-08-17T00:00:00Z',
+    }]));
+  });
+  await page.goto('/');
+  await dismissAuthGateForComponentChecks(page);
+
+  await page.getByRole('button', { name: /Mini-test 1 câu/ }).click();
+  await expect(page).toHaveURL(/#\/review$/);
+  await expect(page.getByRole('heading', { name: 'Mini-test điểm yếu' })).toBeVisible();
+  await page.getByRole('button', { name: 'に違いない' }).click();
+  await page.getByRole('button', { name: 'Xem kết quả' }).click();
+  await expect(page.getByText(/Readiness hiện tại/)).toBeVisible();
+  await expect(page.getByRole('button', { name: /Hỏi gia sư về điểm yếu/ })).toBeVisible();
+});
+
 test('mobile dashboard has no horizontal overflow and passes serious axe checks', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto('/');

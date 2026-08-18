@@ -7,6 +7,7 @@ import {
   buildSearchIndex,
   buildWeaknessProfile,
   calculateReadiness,
+  formatWeaknessContext,
   getDueReviews,
   recordReviewResult,
   searchCurriculum,
@@ -139,4 +140,17 @@ test('mini-test uses answerable weaknesses and keeps the correct option index', 
     correctIndex: 1,
     correctAnswer: 'に違いない',
   });
+});
+
+test('tutor weakness context names the exact prompt and correction without inventing content', () => {
+  const profile = buildWeaknessProfile([{
+    key: 'g1d1:q0', lessonId: 'g1d1', categoryId: 'grammar',
+    prompt: 'もう雨は降る（　）。', correctAnswer: 'に違いない',
+    attempts: 3, correctAttempts: 1, lapses: 2, lastResult: 'wrong', dueAt: '2026-08-18T00:00:00Z',
+  }], { now: new Date('2026-08-18T12:00:00Z') });
+
+  const context = formatWeaknessContext(profile);
+  assert.match(context, /もう雨は降る/);
+  assert.match(context, /に違いない/);
+  assert.match(context, /2 lần sai/);
 });
