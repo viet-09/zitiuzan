@@ -40,7 +40,7 @@ Triển khai production từ thư mục gốc:
 npx vercel --prod
 ```
 
-Sau deploy, kiểm tra `https://zitiuzan.vercel.app/`: CSP, manifest, service worker, guest mode, Google OAuth, hoàn thành bài, leaderboard, audio và Edge Functions.
+Sau deploy, kiểm tra `https://zitiuzan.vercel.app/`: CSP, manifest, service worker, cổng đăng nhập Google bắt buộc, hoàn thành bài, leaderboard, audio và Edge Functions.
 
 ## Rollback
 

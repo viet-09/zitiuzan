@@ -7,9 +7,10 @@ export function createCompletionService({
 }) {
   return {
     async toggle({ lessonId, categoryId }) {
-      const done = toggleLocal(lessonId);
       const user = await getCurrentUser();
-      if (!user) return { done, synced: false };
+      if (!user) return { done: false, synced: false, requiresAuth: true };
+
+      const done = toggleLocal(lessonId);
 
       const mutation = { lessonId, categoryId, done };
       try {

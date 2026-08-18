@@ -1,4 +1,4 @@
-const CACHE_NAME = 'n2-journal-v3';
+const CACHE_NAME = 'n2-journal-v4';
 const APP_SHELL = [
   './',
   './index.html',

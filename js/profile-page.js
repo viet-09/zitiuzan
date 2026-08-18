@@ -7,7 +7,6 @@ import { currentUser, signInWithGoogle, signOut, ready as supabaseReady } from '
 import { getProfile, renderAvatar, openProfileDialog } from './profile.js';
 import { PET_TYPES, getPetPreferences, setPetPreferences, renderPet } from './pet.js';
 import { clearUserScopedStorage } from './account-storage.js';
-import { guestPreference } from './guest-mode.js';
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (ch) => ({
@@ -77,7 +76,6 @@ async function paint(el) {
     btn.disabled = true;
     try {
       await signOut();
-      guestPreference.disable();
       clearUserScopedStorage();
       // Full reload so the mandatory sign-in gate re-runs from a clean state.
       location.hash = '#/';

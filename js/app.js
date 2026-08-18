@@ -23,7 +23,6 @@ import {
 import { openSignInGate } from './auth.js';
 import { onAuthChange, ready as supabaseReady, currentUser } from './supabase.js';
 import { flushCompletionQueue, maybeMigrateLocalData, maybeSeedProfileFromGoogle, pullFromCloud, pushProfile } from './sync.js';
-import { guestPreference } from './guest-mode.js';
 
 function registerServiceWorker() {
     if (!('serviceWorker' in navigator) || location.protocol === 'file:') return;
@@ -162,11 +161,6 @@ async function loadEnrichment(categories) {
     }));
 }
 
-/** Trigger for dialogs opened from bootstrap — the profile button once mounted. */
-function profileButton(profileController) {
-    return profileController?.element?.querySelector('.profile-button') || undefined;
-}
-
 async function bootstrap() {
     registerServiceWorker();
     setCurrentDate();
@@ -175,9 +169,8 @@ async function bootstrap() {
     wireBottomNav();
     wireAccountButton();
     wirePetWidget();
-    // First-visit choice is now gated explicitly below (sign-in vs. offline
-    // name/avatar prompt), so mountProfile never auto-opens on its own.
-    const profileController = mountProfile('#profile-mount', { promptOnFirstVisit: false });
+    // Account setup is handled by the mandatory Google sign-in gate below.
+    mountProfile('#profile-mount', { promptOnFirstVisit: false });
 
     // Auth sync — pull config, enforce the mandatory sign-in gate, listen
     // for sign-in, migrate legacy localStorage once, then pull cloud state
@@ -187,18 +180,19 @@ async function bootstrap() {
         const user = sb ? await currentUser() : null;
 
         if (user) {
-            guestPreference.disable();
             markProfilePromptSeen();
-        } else if (!guestPreference.isEnabled()) {
-            openSignInGate({ trigger: profileButton(profileController) });
+        } else {
+            openSignInGate();
             return;
         }
 
         if (!sb) return;
 
         onAuthChange(async (authedUser) => {
-            if (!authedUser) return;
-            guestPreference.disable();
+            if (!authedUser) {
+                openSignInGate();
+                return;
+            }
             markProfilePromptSeen();
             try {
                 const migrated = await maybeMigrateLocalData();

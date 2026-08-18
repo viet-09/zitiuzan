@@ -332,7 +332,7 @@ function bindEvents(data) {
     renderCategories(data);
   });
 
-  mainEl?.addEventListener('click', (event) => {
+  mainEl?.addEventListener('click', async (event) => {
     const weekButton = event.target.closest('.week-toggle');
     if (weekButton) {
       const card = weekButton.closest('.week-card');
@@ -382,18 +382,18 @@ function bindEvents(data) {
 
     const completionButton = event.target.closest('.complete-btn');
     if (!completionButton) return;
-    const syncPromise = toggleLessonCompletion({
+    const result = await toggleLessonCompletion({
       lessonId: id,
       categoryId: item.closest('.category-block')?.getAttribute('data-cat-id') || '',
     });
-    const done = isDone(id);
+    if (result.requiresAuth) return;
+    const done = result.done;
     item.classList.toggle('completed', done);
     completionButton.setAttribute('aria-pressed', String(done));
     const lessonTitle = item.querySelector('.lesson-title')?.textContent?.trim() || id;
     completionButton.setAttribute('aria-label', `${done ? 'Đánh dấu chưa hoàn thành' : 'Đánh dấu hoàn thành'}: ${lessonTitle}`);
     updateAncestorCounts(item, data);
     renderStats();
-    void syncPromise.finally(renderStats);
     if (done) {
       announceLessonCompleted({ id, done, streak: Number((getStreak() || {}).streak) || 0 });
     }

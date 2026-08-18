@@ -623,7 +623,7 @@ export function renderLesson(root, id) {
     });
   };
 
-  const onClick = (event) => {
+  const onClick = async (event) => {
     const image = event.target.closest('.lesson-image-figure img');
     if (image) {
       if (document.fullscreenElement === image) document.exitFullscreen?.();
@@ -637,7 +637,8 @@ export function renderLesson(root, id) {
     else if (action === 'toggle-furigana') { setFurigana(!getFurigana()); paint(); }
     else if (action === 'toggle-complete') {
       const found = findLesson(id);
-      void toggleLessonCompletion({ lessonId: id, categoryId: found?.category?.id || '' });
+      const result = await toggleLessonCompletion({ lessonId: id, categoryId: found?.category?.id || '' });
+      if (result.requiresAuth) return;
       paint();
     }
     else if (action === 'bookmark') {

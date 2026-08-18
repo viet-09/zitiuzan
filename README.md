@@ -22,7 +22,7 @@ Mở `http://127.0.0.1:8000/`. Không mở bằng `file://`, vì trình duyệt 
 - Giải thích từ/Hán tự ngắn bằng tiếng Việt, lưu cache cục bộ.
 - Hồ sơ tên/avatar (avatar tải lên chỉ lưu cục bộ, không đồng bộ) và thú cưng streak cat/dog/dragon.
 - Gemini Live: mic PCM16 16 kHz, audio 24 kHz, barge-in, phụ đề và transcript; tự chuyển sang ghi-rồi-gửi nếu Live không dùng được.
-- Google OAuth để đồng bộ tiến độ/streak/điểm và xem bảng xếp hạng; guest mode dùng đầy đủ nội dung cốt lõi trên thiết bị.
+- Google OAuth bắt buộc để học, đồng bộ tiến độ/streak/điểm và xem bảng xếp hạng.
 - PWA cài được và cache nội dung đã học để tiếp tục khi kết nối chập chờn.
 
 Mọi lời gọi Gemini (gia sư, giải thích Hán tự, luyện nói) đi qua Supabase Edge Functions (`gemini-proxy`, `mint-live-token`) — key thật chỉ nằm trong `supabase secrets`, không có trong mã nguồn client. Vì vậy các tính năng AI cần đăng nhập; mở **Cài đặt** chỉ để chọn model, không cần nhập key.

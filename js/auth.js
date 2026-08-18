@@ -1,9 +1,7 @@
 // js/auth.js
-// First-run account choice. Google unlocks cloud sync and rankings, while
-// guest mode keeps the complete core curriculum available on this device.
+// Mandatory Google authentication gate.
 
 import { signInWithGoogle } from './supabase.js';
-import { guestPreference } from './guest-mode.js';
 
 let activeDialog = null;
 let dialogSequence = 0;
@@ -27,9 +25,8 @@ export function openSignInGate(options = {}) {
         <h2 id="${titleId}">Bắt đầu học N2</h2>
       </header>
       <div class="modal-body">
-        <p class="profile-modal__help">Đăng nhập Google để đồng bộ tiến độ và bảng xếp hạng, hoặc dùng thử trên thiết bị này mà không cần tài khoản.</p>
+        <p class="profile-modal__help">Đăng nhập Google để học, đồng bộ tiến độ và tham gia bảng xếp hạng.</p>
         <button type="button" class="auth-pill auth-modal__google" data-gate-action="google">Đăng nhập bằng Google</button>
-        <button type="button" class="tts-btn back-btn auth-modal__guest" data-gate-action="guest">Dùng thử không đăng nhập</button>
         <p class="profile-status" data-gate-status role="status" aria-live="polite"></p>
       </div>
     </section>`;
@@ -49,7 +46,6 @@ export function openSignInGate(options = {}) {
 
   const status = overlay.querySelector('[data-gate-status]');
   const googleBtn = overlay.querySelector('[data-gate-action="google"]');
-  const guestBtn = overlay.querySelector('[data-gate-action="guest"]');
   let closed = false;
 
   function setStatus(message, kind = '') {
@@ -81,12 +77,6 @@ export function openSignInGate(options = {}) {
         googleBtn.disabled = false;
       }
     }
-  });
-
-  guestBtn.addEventListener('click', () => {
-    guestPreference.enable();
-    closeDialog();
-    options.onSkip?.();
   });
 
   activeDialog = { close: closeDialog, element: overlay };
