@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 
 import {
   PET_MEMORY_STORAGE_KEY,
@@ -53,18 +54,21 @@ test('pet preferences, unlocked visuals and memory journal remain local and boun
     petType: 'rabbit', petAccessory: 'pencil',
   });
   const markup = renderPet({ petType: 'rabbit', petAccessory: 'pencil', streak: 7, evolutionId: 'mentor' });
-  assert.match(markup, /<svg[^>]+class="pet-art pet-art--rabbit"/u);
-  assert.match(markup, /data-pet-part="head"/u);
-  assert.match(markup, /data-pet-part="body"/u);
-  assert.match(markup, /data-pet-part="paw"/u);
-  assert.match(markup, /data-pet-part="tail"/u);
+  assert.match(markup, /<img[^>]+class="pet-art pet-art--rabbit"/u);
+  assert.match(markup, /src="\.\/assets\/pets\/rabbit-3d\.png"/u);
+  assert.match(markup, /width="384" height="576"/u);
   assert.match(markup, /pet-accessory--pencil/u);
   assert.doesNotMatch(markup, /🐰|🦊/u);
 
   const fox = renderPet({ petType: 'fox', petAccessory: 'none', streak: 0 });
-  assert.match(fox, /<svg[^>]+class="pet-art pet-art--fox"/u);
-  assert.match(fox, /viewBox="0 0 180 260"/u);
+  assert.match(fox, /<img[^>]+class="pet-art pet-art--fox"/u);
+  assert.match(fox, /src="\.\/assets\/pets\/fox-3d\.png"/u);
   assert.doesNotMatch(fox, /🐰|🦊/u);
+
+  for (const file of ['fox-3d.png', 'rabbit-3d.png']) {
+    const png = fs.readFileSync(new URL(`../assets/pets/${file}`, import.meta.url));
+    assert.ok([4, 6].includes(png[25]), `${file} must use a PNG color type with alpha`);
+  }
   assert.equal(getPetTier(0).id, 'sleeping');
   assert.equal(getPetTier(2).id, 'waking');
   assert.equal(getPetTier(5).id, 'happy');

@@ -123,7 +123,8 @@ test('full-body pet stays visible, reacts to touch and keeps its learning quest'
   await dismissAuthGateForComponentChecks(page);
   const petArt = page.locator('#pet-widget-mount .pet-art--fox');
   await expect(petArt).toBeVisible();
-  await expect(petArt.locator('[data-pet-part="body"]')).toBeVisible();
+  await expect(petArt).toHaveAttribute('src', './assets/pets/fox-3d.png');
+  expect(await petArt.evaluate((image) => image.naturalWidth)).toBeGreaterThan(0);
 
   await page.getByRole('button', { name: 'Nựng đầu Cáo' }).click();
   await expect(page.locator('.pet-widget')).toHaveAttribute('data-reaction', 'pat');
