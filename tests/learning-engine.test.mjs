@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
+  buildNextBestAction,
   buildDailyPlan,
   buildMiniTest,
   buildSearchIndex,
@@ -93,6 +94,73 @@ test('readiness combines completion, review accuracy and mock-exam evidence', ()
     examAttempts: 1,
   });
   assert.equal(readiness.weakestCategory, 'grammar');
+});
+
+test('readiness uses section evidence, reports confidence and 7/30 day trends', () => {
+  const readiness = calculateReadiness({
+    lessons,
+    progress: { k1d1: true, k1d2: true, g1d1: true },
+    reviews: [
+      { categoryId: 'kanji', attempts: 12, correctAttempts: 10 },
+      { categoryId: 'grammar', attempts: 12, correctAttempts: 9 },
+    ],
+    examHistory: [
+      {
+        created_at: '2026-08-17T00:00:00Z',
+        score: {
+          percentage: '80%',
+          bySection: {
+            vocab_grammar: { correct: 16, total: 20 },
+            reading: { correct: 7, total: 10 },
+            listening: { correct: 9, total: 10 },
+          },
+        },
+      },
+      {
+        created_at: '2026-08-08T00:00:00Z',
+        score: { percentage: '60%', bySection: { vocab_grammar: { correct: 12, total: 20 } } },
+      },
+      {
+        created_at: '2026-07-10T00:00:00Z',
+        score: { percentage: '50%', bySection: { vocab_grammar: { correct: 10, total: 20 } } },
+      },
+    ],
+    now: new Date('2026-08-18T00:00:00Z'),
+  });
+
+  assert.ok(readiness.byCategory.kanji > readiness.byCategory.grammar);
+  assert.equal(readiness.evidenceByCategory.kanji.examQuestions, 60);
+  assert.equal(readiness.evidenceByCategory.kanji.confidence, 'medium');
+  assert.equal(readiness.confidence, 'low');
+  assert.ok(readiness.trend.days7.delta > 0);
+  assert.ok(readiness.trend.days30.delta > 0);
+});
+
+test('next best action exposes exactly one useful route without guilt copy', () => {
+  const reviewAction = buildNextBestAction({
+    plan: [{ type: 'review', lessonId: 'g1d1', categoryId: 'grammar', title: '～に違いない' }],
+    weaknessProfile: { total: 3, due: 2 },
+    miniTest: [{ reviewKey: 'g1d1:q0' }],
+  });
+  assert.deepEqual(reviewAction, {
+    type: 'review',
+    title: 'Ôn 2 lỗi đang đến hạn',
+    reason: 'Mini-test dùng đúng các câu bạn từng nhầm.',
+    label: 'Ôn 3 phút',
+    route: '#/review',
+  });
+
+  const lessonAction = buildNextBestAction({
+    plan: [{ type: 'lesson', lessonId: 'k1d2', categoryId: 'kanji', title: '{駅|えき}' }],
+    weaknessProfile: { total: 0, due: 0 },
+    miniTest: [],
+  });
+  assert.equal(lessonAction.route, '#/lesson/k1d2');
+  assert.equal(lessonAction.label, 'Mở bài tiếp theo');
+
+  const restAction = buildNextBestAction({ plan: [], weaknessProfile: {}, miniTest: [] });
+  assert.equal(restAction.type, 'rest');
+  assert.doesNotMatch(`${restAction.title} ${restAction.reason}`, /mất|trễ|phạt|đói|ốm/i);
 });
 
 test('weakness profile ranks due repeated mistakes above mastered items', () => {

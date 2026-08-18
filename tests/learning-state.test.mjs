@@ -66,3 +66,12 @@ test('malformed review and bookmark storage falls back safely', () => {
   assert.deepEqual(learning.getReviews(), []);
   assert.deepEqual(learning.getBookmarks(), []);
 });
+
+test('cloud reviews replace local state through the same defensive store', () => {
+  const storage = createFakeStorage();
+  const learning = createLearningState(storage);
+  const reviews = [{ key: 'k1d1:q0', lastReviewedAt: '2026-08-18T00:00:00Z', lapses: 1 }];
+  assert.deepEqual(learning.replaceReviews(reviews), reviews);
+  assert.deepEqual(learning.getReviews(), reviews);
+  assert.deepEqual(learning.replaceReviews('invalid'), []);
+});

@@ -25,6 +25,9 @@ test('adaptive dashboard search and lesson review work end to end', async ({ pag
   await page.goto('/');
   await dismissAuthGateForComponentChecks(page);
   await expect(page.getByRole('heading', { name: 'Hôm nay học gì?' })).toBeVisible();
+  await expect(page.locator('.daily-plan .plan-item')).toHaveCount(3);
+  await expect(page.locator('.curriculum-browser')).toBeHidden();
+  await page.getByRole('button', { name: 'Xem toàn bộ giáo trình' }).click();
   await expect(page.locator('.lessons-grid:visible')).toHaveCount(5);
   await expect(page.locator('.lesson-item')).toHaveCount(33);
 
@@ -40,9 +43,34 @@ test('adaptive dashboard search and lesson review work end to end', async ({ pag
 
   const quiz = page.locator('.quiz-question').first();
   if (await quiz.count()) {
-    await quiz.locator('[data-action="quiz-option"]').first().click();
+    const correct = Number(await quiz.getAttribute('data-correct-idx'));
+    const options = quiz.locator('[data-action="quiz-option"]');
+    const wrong = correct === 0 ? 1 : 0;
+    await options.nth(wrong).click();
     await expect(quiz).toHaveClass(/is-answered/);
+    await expect(quiz.getByRole('button', { name: 'Hỏi gia sư về lỗi này' })).toBeVisible();
   }
+});
+
+test('lesson outline reports local quiz progress and book modal contains focus', async ({ page }) => {
+  await page.goto('/#/lesson/k1d2');
+  await dismissAuthGateForComponentChecks(page);
+
+  const outline = page.getByRole('navigation', { name: 'Mục lục bài học' });
+  await expect(outline).toBeVisible();
+  await expect(outline.getByText(/0\/\d+ câu/)).toBeVisible();
+
+  const trigger = page.getByRole('button', { name: 'Xem trang sách' });
+  await trigger.click();
+  await expect(page.locator('body')).toHaveClass(/modal-open/);
+  await expect(page.locator('#app')).toHaveAttribute('inert', '');
+  const close = page.getByRole('button', { name: 'Đóng trình đọc sách' });
+  await expect(close).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(close).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.book-viewer-overlay')).toHaveCount(0);
+  await expect(trigger).toBeFocused();
 });
 
 test('book reader keeps every source image inside one continuous page strip', async ({ page }) => {
@@ -69,13 +97,34 @@ test('a due weakness launches a mini-test and updates readiness evidence', async
   await page.goto('/');
   await dismissAuthGateForComponentChecks(page);
 
-  await page.getByRole('button', { name: /Mini-test 1 câu/ }).click();
+  await page.getByRole('button', { name: 'Ôn 3 phút' }).click();
   await expect(page).toHaveURL(/#\/review$/);
   await expect(page.getByRole('heading', { name: 'Mini-test điểm yếu' })).toBeVisible();
   await page.getByRole('button', { name: 'に違いない' }).click();
   await page.getByRole('button', { name: 'Xem kết quả' }).click();
-  await expect(page.getByText(/Readiness hiện tại/)).toBeVisible();
+  await expect(page.getByText(/Mức sẵn sàng hiện tại/)).toBeVisible();
   await expect(page.getByRole('button', { name: /Hỏi gia sư về điểm yếu/ })).toBeVisible();
+});
+
+test('pet opens one calm next-action coach panel and avoids the nav while scrolling', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('n2_reviews_v1', JSON.stringify([{
+      key: 'g1d1:q0', lessonId: 'g1d1', categoryId: 'grammar', prompt: '雨が降る（　）。',
+      options: ['ために', 'に違いない'], correctIndex: 1, correctAnswer: 'に違いない',
+      attempts: 2, correctAttempts: 0, lapses: 2, lastResult: 'wrong',
+      lastReviewedAt: '2026-08-17T00:00:00Z', dueAt: '2026-08-17T00:00:00Z',
+    }]));
+  });
+  await page.goto('/');
+  await dismissAuthGateForComponentChecks(page);
+  const pet = page.getByRole('button', { name: /Mở coach học tập/ });
+  await pet.click();
+  const panel = page.getByRole('region', { name: 'Nhiệm vụ của bạn đồng hành' });
+  await expect(panel).toBeVisible();
+  await expect(panel.getByRole('button', { name: 'Ôn 3 phút' })).toBeVisible();
+  await expect(panel).toContainText('lỗi ngữ pháp');
+  await page.evaluate(() => window.scrollTo(0, 500));
+  await expect(page.locator('#pet-widget-mount')).toHaveClass(/is-compact/);
 });
 
 test('mobile dashboard has no horizontal overflow and passes serious axe checks', async ({ page }) => {
@@ -92,4 +141,13 @@ test('mobile dashboard has no horizontal overflow and passes serious axe checks'
   }));
   const serious = result.violations.filter((item) => ['serious', 'critical'].includes(item.impact));
   expect(serious, serious.map((item) => `${item.id}: ${item.help}`).join('\n')).toEqual([]);
+
+  await page.goto('/#/lesson/k1d2');
+  await dismissAuthGateForComponentChecks(page);
+  await page.getByRole('button', { name: 'Xem trang sách' }).click();
+  const box = await page.locator('.book-viewer-card').boundingBox();
+  expect(box?.x).toBe(0);
+  expect(box?.y).toBe(0);
+  expect(Math.round(box?.width || 0)).toBe(375);
+  expect(Math.round(box?.height || 0)).toBe(812);
 });
