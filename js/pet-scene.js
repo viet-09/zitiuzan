@@ -7,7 +7,6 @@ import {
   Group,
   HemisphereLight,
   Mesh,
-  PCFSoftShadowMap,
   PerspectiveCamera,
   PlaneGeometry,
   Quaternion,
@@ -16,6 +15,7 @@ import {
   SRGBColorSpace,
   Timer,
   Vector3,
+  VSMShadowMap,
   WebGLRenderer,
 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -89,6 +89,7 @@ function addLighting(scene) {
   directional.shadow.bias = -0.00035;
   directional.shadow.normalBias = 0.025;
   directional.shadow.radius = 4;
+  directional.shadow.blurSamples = 16;
   scene.add(directional);
   scene.add(directional.target);
   directional.target.position.set(0, 1.35, 0);
@@ -171,7 +172,7 @@ export function mountPetScene(host, { petType = 'fox', onReady, onError } = {}) 
   renderer.toneMapping = ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.12;
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = PCFSoftShadowMap;
+  renderer.shadowMap.type = VSMShadowMap;
 
   const scene = new Scene();
   const camera = new PerspectiveCamera(28, 1, 0.1, 30);
