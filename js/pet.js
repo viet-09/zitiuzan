@@ -391,10 +391,6 @@ export function mountPet(target, options = {}) {
     setPanelOpen(false, { restoreFocus: true });
   }
 
-  function onScroll() {
-    host.classList.toggle('is-compact', (window.scrollY || 0) > 80);
-  }
-
   function onPreferencesUpdated(event) {
     preferences = getPetPreferences(event.detail);
     render();
@@ -423,12 +419,10 @@ export function mountPet(target, options = {}) {
   mount.addEventListener('click', onClick);
   document.addEventListener('click', onDocumentClick);
   document.addEventListener('keydown', onKeyDown);
-  window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener(PET_UPDATED_EVENT, onPreferencesUpdated);
   window.addEventListener(PET_COMPLETION_EVENT, onLessonCompleted);
   window.addEventListener(PET_CONTEXT_EVENT, onContextUpdated);
   render();
-  onScroll();
 
   return {
     element: mount,
@@ -449,7 +443,6 @@ export function mountPet(target, options = {}) {
       mount.removeEventListener('click', onClick);
       document.removeEventListener('click', onDocumentClick);
       document.removeEventListener('keydown', onKeyDown);
-      window.removeEventListener('scroll', onScroll);
       window.removeEventListener(PET_UPDATED_EVENT, onPreferencesUpdated);
       window.removeEventListener(PET_COMPLETION_EVENT, onLessonCompleted);
       window.removeEventListener(PET_CONTEXT_EVENT, onContextUpdated);

@@ -2349,7 +2349,7 @@ body.furigana-off rt {
     align-items: center;
     margin-top: 12px;
 }
-.pet-customizer__preview { width: 100%; min-height: 236px; display: flex; align-items: center; justify-content: center; }
+.pet-customizer__preview { width: 100%; min-height: 236px; display: flex; align-items: center; justify-content: center; perspective: 520px; perspective-origin: 50% 72%; }
 .pet-customizer__preview .pet-figure { width: 150px; height: 220px; }
 .pet-customizer__fields { display: grid; gap: 10px; }
 .pet-customizer__fields label { display: grid; gap: 4px; font-family: var(--font-sans); font-size: 0.8rem; }
@@ -3339,8 +3339,8 @@ body.modal-open { overflow: hidden; }
 #lesson-practice { scroll-margin-top: 72px; }
 .quiz-inline-coach { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border-dark); color: var(--text-muted); font: 600 .72rem/1.4 var(--font-sans); }
 
-/* Full-body study companion. The SVG remains visible while controls and the
-   learning quest live in separate interaction layers. */
+/* Full-body study companion. A lightweight perspective rig gives the raster
+   characters convincing depth without loading a WebGL scene on study pages. */
 #pet-widget-mount {
     width: 124px;
     height: 184px;
@@ -3353,16 +3353,32 @@ body.modal-open { overflow: hidden; }
 .pet-widget {
     position: relative;
     animation: none;
-    transition: transform .28s cubic-bezier(.22, 1, .36, 1);
+    transform-style: preserve-3d;
 }
-.pet-widget__companion { position: relative; }
+.pet-widget__companion {
+    position: relative;
+    perspective: 520px;
+    perspective-origin: 50% 72%;
+    transform-style: preserve-3d;
+}
 .pet-widget__stage {
     position: absolute;
     inset: 0;
     display: block;
     pointer-events: none;
+    transform: translate3d(0, 0, 0);
+    transform-origin: 50% 88%;
+    transform-style: preserve-3d;
+    animation: pet-idle-stage-3d 4.8s cubic-bezier(.65, 0, .35, 1) infinite;
 }
-.pet-figure { position: relative; display: block; width: 100%; height: 100%; isolation: isolate; }
+.pet-figure {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    isolation: isolate;
+    transform-style: preserve-3d;
+}
 .pet-figure::after {
     content: '';
     position: absolute;
@@ -3374,6 +3390,9 @@ body.modal-open { overflow: hidden; }
     border-radius: 50%;
     background: color-mix(in srgb, var(--text-primary) 17%, transparent);
     filter: blur(3px);
+    transform: translate3d(0, 0, -12px) scaleX(1);
+    transform-origin: center;
+    animation: pet-idle-shadow-3d 4.8s cubic-bezier(.65, 0, .35, 1) infinite;
 }
 .pet-art {
     position: relative;
@@ -3385,8 +3404,11 @@ body.modal-open { overflow: hidden; }
     object-position: center bottom;
     filter: drop-shadow(0 3px 3px color-mix(in srgb, var(--text-primary) 12%, transparent));
     user-select: none;
-    transform-origin: center bottom;
-    animation: pet-soft-idle 4.4s cubic-bezier(.45, 0, .55, 1) infinite;
+    backface-visibility: hidden;
+    transform: translate3d(0, 0, 8px);
+    transform-origin: 50% 86%;
+    transform-style: preserve-3d;
+    animation: pet-idle-body-3d 4.8s cubic-bezier(.65, 0, .35, 1) infinite;
 }
 .pet-accessory {
     position: absolute;
@@ -3543,22 +3565,109 @@ body.modal-open { overflow: hidden; }
 .pet-coach-panel h2 { font: 900 1.2rem/1.1 var(--font-display); }
 .pet-coach-panel h2 + p { margin: 7px 0 13px; color: var(--text-muted); font: 500 .78rem/1.45 var(--font-sans); }
 .pet-coach-panel .complete-modal-btn { width: 100%; }
-#pet-widget-mount.is-compact:not(.is-panel-open) .pet-widget { transform: scale(.78); transform-origin: left bottom; }
 
-.pet-widget[data-reaction='pat'] .pet-art { animation: pet-pat-soft .72s cubic-bezier(.22, 1, .36, 1); }
+.pet-widget[data-reaction='pat'] .pet-widget__stage { animation: pet-pat-stage-3d .76s cubic-bezier(.22, 1, .36, 1); }
+.pet-widget[data-reaction='pat'] .pet-art { animation: pet-pat-body-3d .76s cubic-bezier(.22, 1, .36, 1); }
+.pet-widget[data-reaction='pat'] .pet-figure::after { animation: pet-pat-shadow-3d .76s cubic-bezier(.22, 1, .36, 1); }
 .pet-widget[data-reaction='pat'] .pet-art__hearts { opacity: 1; animation: pet-effect-pop .75s cubic-bezier(.22, 1, .36, 1); }
-.pet-widget[data-reaction='tease'] .pet-widget__stage { animation: pet-tease .72s cubic-bezier(.22, 1, .36, 1); }
-.pet-widget[data-reaction='highfive'] .pet-art { animation: pet-highfive-soft .78s cubic-bezier(.22, 1, .36, 1); }
+.pet-widget[data-reaction='tease'] .pet-widget__stage { animation: pet-tease-stage-3d .78s cubic-bezier(.22, 1, .36, 1); }
+.pet-widget[data-reaction='tease'] .pet-art { animation: pet-tease-body-3d .78s cubic-bezier(.22, 1, .36, 1); }
+.pet-widget[data-reaction='tease'] .pet-figure::after { animation: pet-tease-shadow-3d .78s cubic-bezier(.22, 1, .36, 1); }
+.pet-widget[data-reaction='highfive'] .pet-widget__stage { animation: pet-highfive-stage-3d .82s cubic-bezier(.22, 1, .36, 1); }
+.pet-widget[data-reaction='highfive'] .pet-art { animation: pet-highfive-body-3d .82s cubic-bezier(.22, 1, .36, 1); }
+.pet-widget[data-reaction='highfive'] .pet-figure::after { animation: pet-highfive-shadow-3d .82s cubic-bezier(.22, 1, .36, 1); }
 .pet-widget[data-reaction='highfive'] .pet-art__spark { opacity: 1; animation: pet-effect-pop .7s cubic-bezier(.22, 1, .36, 1); }
-.pet-widget:is([data-reaction='complete'], [data-reaction='tier-up']) .pet-widget__stage { animation: pet-celebrate-full .72s cubic-bezier(.22, 1, .36, 1) 2; }
+.pet-widget:is([data-reaction='complete'], [data-reaction='tier-up']) .pet-widget__stage { animation: pet-celebrate-stage-3d .74s cubic-bezier(.22, 1, .36, 1) 2; }
+.pet-widget:is([data-reaction='complete'], [data-reaction='tier-up']) .pet-art { animation: pet-celebrate-body-3d .74s cubic-bezier(.22, 1, .36, 1) 2; }
+.pet-widget:is([data-reaction='complete'], [data-reaction='tier-up']) .pet-figure::after { animation: pet-celebrate-shadow-3d .74s cubic-bezier(.22, 1, .36, 1) 2; }
 .pet-widget:is([data-reaction='complete'], [data-reaction='tier-up']) :is(.pet-art__hearts, .pet-art__spark) { opacity: 1; animation: pet-effect-pop .72s cubic-bezier(.22, 1, .36, 1) 2; }
+.pet-widget[data-reaction]:not([data-reaction='']) .pet-widget__stage,
+.pet-widget[data-reaction]:not([data-reaction='']) .pet-art,
+.pet-widget[data-reaction]:not([data-reaction='']) .pet-figure::after { will-change: transform, opacity; }
 
-@keyframes pet-soft-idle { 0%, 100% { transform: translateY(0) rotate(-.6deg); } 50% { transform: translateY(-3px) rotate(.7deg); } }
-@keyframes pet-pat-soft { 0%, 100% { transform: translateY(0) scale(1); } 36% { transform: translateY(4px) scale(.97, 1.025); } 70% { transform: translateY(1px) scale(1.015, .99); } }
-@keyframes pet-tease { 0%, 100% { transform: translateX(0) rotate(0); } 28% { transform: translateX(8px) rotate(3deg); } 62% { transform: translateX(-6px) rotate(-2deg); } }
-@keyframes pet-highfive-soft { 0%, 100% { transform: translateY(0) rotate(0) scale(1); } 42% { transform: translateY(-8px) rotate(2deg) scale(1.025); } 68% { transform: translateY(-4px) rotate(-1deg) scale(1.01); } }
-@keyframes pet-effect-pop { 0% { opacity: 0; transform: scale(.45) translateY(8px); } 42% { opacity: 1; transform: scale(1.12) translateY(-3px); } 100% { opacity: 0; transform: scale(1) translateY(-10px); } }
-@keyframes pet-celebrate-full { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-13px) scale(1.04); } }
+@keyframes pet-idle-stage-3d {
+    0%, 100% { transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(-3deg); }
+    28% { transform: translate3d(0, -2px, 7px) rotateX(-1.5deg) rotateY(3.5deg); }
+    52% { transform: translate3d(0, -4px, 11px) rotateX(-2.5deg) rotateY(0deg); }
+    76% { transform: translate3d(0, -2px, 6px) rotateX(-1deg) rotateY(-3.5deg); }
+}
+@keyframes pet-idle-body-3d {
+    0%, 100% { transform: translate3d(0, 0, 8px) rotateZ(-.45deg) scale3d(1, 1, 1); }
+    48% { transform: translate3d(0, -1px, 14px) rotateZ(.45deg) scale3d(1.016, 1.012, 1); }
+}
+@keyframes pet-idle-shadow-3d {
+    0%, 100% { opacity: .78; transform: translate3d(0, 0, -12px) scaleX(1); }
+    52% { opacity: .5; transform: translate3d(0, 1px, -22px) scaleX(.78); }
+}
+@keyframes pet-pat-stage-3d {
+    0%, 100% { transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg); }
+    20% { transform: translate3d(0, 1px, 6px) rotateX(4deg) rotateY(-7deg); }
+    48% { transform: translate3d(2px, 7px, 20px) rotateX(10deg) rotateY(-14deg); }
+    76% { transform: translate3d(-1px, -2px, 9px) rotateX(-2deg) rotateY(4deg); }
+}
+@keyframes pet-pat-body-3d {
+    0%, 100% { transform: translate3d(0, 0, 8px) rotateZ(0deg) scale3d(1, 1, 1); }
+    48% { transform: translate3d(1px, 2px, 18px) rotateZ(-2deg) scale3d(.965, 1.035, 1); }
+    76% { transform: translate3d(-1px, -1px, 12px) rotateZ(1deg) scale3d(1.012, .992, 1); }
+}
+@keyframes pet-pat-shadow-3d {
+    0%, 100% { opacity: .76; transform: translate3d(0, 0, -12px) scaleX(1); }
+    48% { opacity: .88; transform: translate3d(2px, 0, -18px) scaleX(1.15); }
+}
+@keyframes pet-tease-stage-3d {
+    0%, 100% { transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+    18% { transform: translate3d(6px, -2px, 13px) rotateX(-2deg) rotateY(-12deg) rotateZ(2deg); }
+    43% { transform: translate3d(-12px, -5px, 30px) rotateX(-6deg) rotateY(24deg) rotateZ(-3deg); }
+    70% { transform: translate3d(8px, -2px, 15px) rotateX(-2deg) rotateY(-13deg) rotateZ(2deg); }
+}
+@keyframes pet-tease-body-3d {
+    0%, 100% { transform: translate3d(0, 0, 8px) rotateZ(0deg); }
+    43% { transform: translate3d(2px, -1px, 18px) rotateZ(2.5deg) scale3d(1.02, .99, 1); }
+    70% { transform: translate3d(-1px, 0, 12px) rotateZ(-1.5deg); }
+}
+@keyframes pet-tease-shadow-3d {
+    0%, 100% { opacity: .76; transform: translate3d(0, 0, -12px) scaleX(1); }
+    43% { opacity: .48; transform: translate3d(9px, 2px, -26px) scaleX(.72); }
+    70% { opacity: .62; transform: translate3d(-5px, 1px, -18px) scaleX(.86); }
+}
+@keyframes pet-highfive-stage-3d {
+    0%, 100% { transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+    24% { transform: translate3d(0, 3px, -5px) rotateX(5deg) rotateY(3deg); }
+    54% { transform: translate3d(-4px, -12px, 38px) rotateX(-13deg) rotateY(-11deg) rotateZ(-2deg) scale3d(1.045, 1.045, 1); }
+    76% { transform: translate3d(1px, -6px, 19px) rotateX(-5deg) rotateY(4deg) rotateZ(1deg) scale3d(1.015, 1.015, 1); }
+}
+@keyframes pet-highfive-body-3d {
+    0%, 100% { transform: translate3d(0, 0, 8px) rotateZ(0deg); }
+    54% { transform: translate3d(-2px, -2px, 24px) rotateZ(-2.5deg) scale3d(1.025, 1.015, 1); }
+    76% { transform: translate3d(1px, 0, 14px) rotateZ(1deg); }
+}
+@keyframes pet-highfive-shadow-3d {
+    0%, 100% { opacity: .76; transform: translate3d(0, 0, -12px) scaleX(1); }
+    54% { opacity: .34; transform: translate3d(4px, 3px, -30px) scaleX(.62); }
+    76% { opacity: .54; transform: translate3d(-1px, 2px, -20px) scaleX(.82); }
+}
+@keyframes pet-celebrate-stage-3d {
+    0%, 100% { transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale3d(1, 1, 1); }
+    18% { transform: translate3d(0, 4px, 0) rotateX(7deg) rotateY(-7deg) scale3d(.98, .97, 1); }
+    46% { transform: translate3d(0, -16px, 38px) rotateX(-8deg) rotateY(19deg) rotateZ(2deg) scale3d(1.05, 1.05, 1); }
+    70% { transform: translate3d(0, -8px, 20px) rotateX(-3deg) rotateY(-13deg) rotateZ(-2deg) scale3d(1.02, 1.02, 1); }
+    88% { transform: translate3d(0, 2px, 5px) rotateX(3deg) rotateY(4deg) scale3d(.99, 1.01, 1); }
+}
+@keyframes pet-celebrate-body-3d {
+    0%, 100% { transform: translate3d(0, 0, 8px) rotateZ(0deg); }
+    46% { transform: translate3d(0, -2px, 25px) rotateZ(3deg) scale3d(1.025, 1.025, 1); }
+    70% { transform: translate3d(0, 0, 17px) rotateZ(-2deg); }
+}
+@keyframes pet-celebrate-shadow-3d {
+    0%, 100% { opacity: .76; transform: translate3d(0, 0, -12px) scaleX(1); }
+    46% { opacity: .22; transform: translate3d(0, 4px, -36px) scaleX(.52); }
+    88% { opacity: .86; transform: translate3d(0, 0, -14px) scaleX(1.12); }
+}
+@keyframes pet-effect-pop {
+    0% { opacity: 0; transform: translate3d(0, 8px, 0) scale(.45) rotateY(-20deg); }
+    42% { opacity: 1; transform: translate3d(0, -3px, 34px) scale(1.12) rotateY(8deg); }
+    100% { opacity: 0; transform: translate3d(0, -10px, 16px) scale(1) rotateY(0deg); }
+}
 
 @media (max-width: 600px) {
     .pet-customizer__layout { grid-template-columns: minmax(0, 1fr); }

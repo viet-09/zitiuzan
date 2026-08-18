@@ -131,6 +131,7 @@ test('full-body pet stays visible, reacts to touch and keeps its learning quest'
   await expect.poll(() => petCompanion.evaluate((element) => getComputedStyle(element).perspective)).not.toBe('none');
   await expect.poll(() => petStage.evaluate((element) => getComputedStyle(element).transformStyle)).toBe('preserve-3d');
   await expect.poll(() => petStage.evaluate((element) => getComputedStyle(element).animationName)).toContain('pet-idle-stage-3d');
+  await expect.poll(() => petStage.evaluate((element) => getComputedStyle(element).transform)).toMatch(/^matrix3d\(/);
 
   await page.getByRole('button', { name: 'Nựng đầu Cáo' }).click();
   await expect(petWidget).toHaveAttribute('data-reaction', 'pat');
@@ -157,6 +158,7 @@ test('full-body pet stays visible, reacts to touch and keeps its learning quest'
   await expect(panel.getByRole('button', { name: 'Ôn 3 phút' })).toBeVisible();
   await expect(panel).toContainText('lỗi ngữ pháp');
   await expect(petArt).toBeVisible();
+  await expect(petWidget).toHaveAttribute('data-reaction', '', { timeout: 3_000 });
   const sizeBeforeScroll = await petArt.boundingBox();
   await page.evaluate(() => window.scrollTo(0, 500));
   await expect(page.locator('#pet-widget-mount')).not.toHaveClass(/is-compact/);
