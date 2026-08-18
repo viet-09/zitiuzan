@@ -8,7 +8,6 @@ import {
   setTutorContext,
   clearTutorHistory,
   isDone,
-  toggleDone,
 } from './store.js';
 import { navigate, getCurrentRoute, isRouteActive } from './router.js';
 import { renderFurigana, setFurigana, getFurigana } from './furigana.js';
@@ -18,6 +17,7 @@ import { getQuestionClassification, getLessonImages, getVietnameseExplanation } 
 import { questionTypeInfo } from './question-types.js';
 import { hydrateLessonAudio } from './lesson-audio.js';
 import { startLessonTimer } from './study-time.js';
+import { toggleLessonCompletion } from './completion.js';
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (char) => ({
@@ -501,7 +501,7 @@ export function renderLesson(root, id) {
   let tutorModal = null;
   let tutorController = null;
   let tutorTrigger = null;
-  const studyTimer = startLessonTimer();
+  const studyTimer = startLessonTimer(id);
 
   const closePopup = () => {
     if (!popup) return;
@@ -620,7 +620,11 @@ export function renderLesson(root, id) {
     const action = button.dataset.action;
     if (action === 'back') navigate('#/');
     else if (action === 'toggle-furigana') { setFurigana(!getFurigana()); paint(); }
-    else if (action === 'toggle-complete') { toggleDone(id); paint(); }
+    else if (action === 'toggle-complete') {
+      const found = findLesson(id);
+      void toggleLessonCompletion({ lessonId: id, categoryId: found?.category?.id || '' });
+      paint();
+    }
     else if (action === 'view-book') openBookViewer(button);
     else if (action === 'speak') speak(button.dataset.jp || '');
     else if (action === 'quiz-option') handleQuiz(button);

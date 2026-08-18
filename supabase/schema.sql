@@ -49,8 +49,29 @@ create trigger on_auth_user_created
   for each row execute function public.handle_new_user();
 
 -- ---------------------------------------------------------------------------
--- 2. learning_progress — completed lessons per user
+-- 2. curriculum registry + learning_progress
 -- ---------------------------------------------------------------------------
+create table if not exists public.curriculum_lessons (
+  lesson_id   text primary key,
+  category_id text not null check (category_id in ('kanji','vocabulary','grammar','reading','listening'))
+);
+
+insert into public.curriculum_lessons (lesson_id, category_id)
+select prefix || week_no || 'd' || day_no, category_id
+from (values
+  ('k', 'kanji', 8, 7),
+  ('v', 'vocabulary', 8, 7),
+  ('g', 'grammar', 8, 7),
+  ('r', 'reading', 6, 7)
+) as regular(prefix, category_id, max_week, max_day)
+cross join lateral generate_series(1, max_week) as week_no
+cross join lateral generate_series(1, max_day) as day_no
+union all
+select 'l' || week_no || 'd' || day_no, 'listening'
+from (values (1,5), (2,7), (3,5), (4,5), (5,1)) as listening(week_no, max_day)
+cross join lateral generate_series(1, max_day) as day_no
+on conflict (lesson_id) do update set category_id = excluded.category_id;
+
 create table if not exists public.learning_progress (
   user_id      uuid not null references auth.users(id) on delete cascade,
   lesson_id    text not null,
@@ -60,6 +81,29 @@ create table if not exists public.learning_progress (
 );
 create index if not exists learning_progress_user_completed_idx
   on public.learning_progress (user_id, completed_at desc);
+
+-- Normalize legacy rows before adding the curriculum foreign key. Invalid
+-- lesson ids were never reachable in the UI and are removed so they cannot
+-- inflate leaderboard completion.
+update public.learning_progress as progress
+set category_id = curriculum.category_id
+from public.curriculum_lessons as curriculum
+where progress.lesson_id = curriculum.lesson_id
+  and progress.category_id is distinct from curriculum.category_id;
+
+delete from public.learning_progress as progress
+where not exists (
+  select 1 from public.curriculum_lessons as curriculum
+  where curriculum.lesson_id = progress.lesson_id
+);
+
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'learning_progress_curriculum_fk') then
+    alter table public.learning_progress
+      add constraint learning_progress_curriculum_fk
+      foreign key (lesson_id) references public.curriculum_lessons(lesson_id);
+  end if;
+end $$;
 
 -- ---------------------------------------------------------------------------
 -- 3. lesson_content_cache — per-lesson AI explanations (tap-kanji glosses)
@@ -132,7 +176,10 @@ create view public.leaderboard as
     up.streak,
     up.ai_level,
     coalesce(lp.completed_count, 0) as completed_count,
-    round(coalesce(lp.completed_count, 0) * 100.0 / 233)::int as completion_percent,
+    least(100, round(
+      coalesce(lp.completed_count, 0) * 100.0
+      / nullif((select count(*) from public.curriculum_lessons), 0)
+    ))::int as completion_percent,
     up.total_study_ms,
     case when up.study_session_count > 0 then up.total_study_ms / up.study_session_count else 0 end as avg_study_ms,
     row_number() over (
@@ -177,6 +224,83 @@ end;
 $$;
 
 grant execute on function public.record_study_time(integer, boolean) to authenticated;
+
+-- Replace caller-supplied durations with server-timed, single-active-session
+-- heartbeats. The legacy function remains for rollback compatibility but is
+-- no longer executable by browser roles.
+revoke execute on function public.record_study_time(integer, boolean) from public, anon, authenticated;
+
+create table if not exists public.study_sessions (
+  id             uuid primary key default gen_random_uuid(),
+  user_id        uuid not null references auth.users(id) on delete cascade,
+  lesson_id      text not null references public.curriculum_lessons(lesson_id),
+  started_at     timestamptz not null default now(),
+  last_heartbeat timestamptz not null default now(),
+  credited_ms    bigint not null default 0 check (credited_ms >= 0),
+  closed_at      timestamptz
+);
+create index if not exists study_sessions_user_open_idx
+  on public.study_sessions (user_id, last_heartbeat desc) where closed_at is null;
+alter table public.study_sessions enable row level security;
+
+create or replace function public.start_study_session(p_lesson_id text)
+returns uuid
+language plpgsql security definer set search_path = public as $$
+declare
+  v_user uuid := auth.uid();
+  v_id uuid;
+begin
+  if v_user is null then raise exception 'Authentication required'; end if;
+  if not exists (select 1 from public.curriculum_lessons where lesson_id = p_lesson_id) then
+    raise exception 'Unknown lesson id';
+  end if;
+  update public.study_sessions set closed_at = now()
+    where user_id = v_user and closed_at is null;
+  insert into public.study_sessions (user_id, lesson_id)
+    values (v_user, p_lesson_id) returning id into v_id;
+  return v_id;
+end;
+$$;
+
+create or replace function public.heartbeat_study_session(p_session_id uuid, p_close boolean default false)
+returns bigint
+language plpgsql security definer set search_path = public as $$
+declare
+  v_user uuid := auth.uid();
+  v_now timestamptz := clock_timestamp();
+  v_last timestamptz;
+  v_credited bigint;
+  v_delta bigint;
+begin
+  if v_user is null then raise exception 'Authentication required'; end if;
+  select last_heartbeat, credited_ms into v_last, v_credited
+    from public.study_sessions
+    where id = p_session_id and user_id = v_user and closed_at is null
+    for update;
+  if not found then return 0; end if;
+
+  v_delta := greatest(0, least(60000, floor(extract(epoch from (v_now - v_last)) * 1000)::bigint));
+  update public.study_sessions
+    set last_heartbeat = v_now,
+        credited_ms = credited_ms + v_delta,
+        closed_at = case when p_close then v_now else null end
+    where id = p_session_id;
+
+  if v_delta >= 1000 then
+    update public.user_profiles
+      set total_study_ms = total_study_ms + v_delta,
+          study_session_count = study_session_count + case when v_credited = 0 then 1 else 0 end,
+          updated_at = now()
+      where user_id = v_user;
+  end if;
+  return case when v_delta >= 1000 then v_delta else 0 end;
+end;
+$$;
+
+revoke all on function public.start_study_session(text) from public, anon;
+revoke all on function public.heartbeat_study_session(uuid, boolean) from public, anon;
+grant execute on function public.start_study_session(text) to authenticated;
+grant execute on function public.heartbeat_study_session(uuid, boolean) to authenticated;
 
 -- ---------------------------------------------------------------------------
 -- 8. touch_user_streak — atomic day-bump streak (Asia/Tokyo timezone).
@@ -228,6 +352,62 @@ end;
 $$;
 
 grant execute on function public.touch_user_streak(uuid) to authenticated;
+
+-- Atomic, idempotent completion mutation. Direct progress writes are revoked
+-- below so score/streak/progress cannot diverge and unknown lesson ids cannot
+-- be used to game the leaderboard.
+create or replace function public.set_lesson_completion(
+  p_lesson_id text,
+  p_category_id text,
+  p_done boolean
+)
+returns table(done boolean, streak integer, last_date date)
+language plpgsql security definer set search_path = public as $$
+declare
+  v_user uuid := auth.uid();
+  v_changed text;
+  v_streak integer;
+  v_last date;
+begin
+  if v_user is null then raise exception 'Authentication required'; end if;
+  if not exists (
+    select 1 from public.curriculum_lessons
+    where lesson_id = p_lesson_id and category_id = p_category_id
+  ) then
+    raise exception 'Lesson/category is not in the N2 curriculum';
+  end if;
+
+  if p_done then
+    insert into public.learning_progress (user_id, lesson_id, category_id)
+      values (v_user, p_lesson_id, p_category_id)
+      on conflict (user_id, lesson_id) do nothing
+      returning lesson_id into v_changed;
+    if v_changed is not null then
+      update public.user_profiles
+        set total_score = total_score + 10, updated_at = now()
+        where user_id = v_user;
+      select touched.streak, touched.last_date into v_streak, v_last
+        from public.touch_user_streak(v_user) as touched;
+    end if;
+  else
+    delete from public.learning_progress
+      where user_id = v_user and lesson_id = p_lesson_id
+      returning lesson_id into v_changed;
+    if v_changed is not null then
+      update public.user_profiles
+        set total_score = greatest(total_score - 10, 0), updated_at = now()
+        where user_id = v_user;
+    end if;
+  end if;
+
+  select profile.streak, profile.last_study_date into v_streak, v_last
+    from public.user_profiles as profile where profile.user_id = v_user;
+  return query select p_done, coalesce(v_streak, 0), v_last;
+end;
+$$;
+
+revoke all on function public.set_lesson_completion(text, text, boolean) from public, anon;
+grant execute on function public.set_lesson_completion(text, text, boolean) to authenticated;
 
 -- ---------------------------------------------------------------------------
 -- 9. bump_score — atomic score increment, clamped.
@@ -293,6 +473,9 @@ create policy "progress insert self"
   on public.learning_progress for insert with check (auth.uid() = user_id);
 create policy "progress delete self"
   on public.learning_progress for delete using (auth.uid() = user_id);
+
+revoke insert, update, delete on public.learning_progress from anon, authenticated;
+grant select on public.learning_progress to authenticated;
 
 -- Per-row RLS via FOR ALL on the smaller tables
 drop policy if exists "cache self"   on public.lesson_content_cache;

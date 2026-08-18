@@ -22,7 +22,7 @@ import {
 } from './profile.js';
 import { openSignInGate } from './auth.js';
 import { onAuthChange, ready as supabaseReady, currentUser } from './supabase.js';
-import { maybeMigrateLocalData, maybeSeedProfileFromGoogle, pullFromCloud, pushProfile } from './sync.js';
+import { flushCompletionQueue, maybeMigrateLocalData, maybeSeedProfileFromGoogle, pullFromCloud, pushProfile } from './sync.js';
 
 function setCurrentDate() {
     const el = document.getElementById('current-date');
@@ -194,6 +194,7 @@ async function bootstrap() {
                 if (migrated) console.info('[sync] localStorage migrated to Supabase');
                 await maybeSeedProfileFromGoogle(authedUser);
                 await pullFromCloud(authedUser.id);
+                await flushCompletionQueue(authedUser.id);
                 petController?.update({ streak: Number((getStreak() || {}).streak) || 0 });
             } catch (err) {
                 console.warn('[sync] bootstrap sync failed:', err);

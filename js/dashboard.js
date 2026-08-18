@@ -1,12 +1,10 @@
 // js/dashboard.js — dashboard list, progress, accessible completion controls,
 // collapsible units, and return-position restoration.
-import { getLessons, countProgress, isDone, toggleDone, getStreak, writeStreak } from './store.js';
+import { getLessons, countProgress, isDone, getStreak } from './store.js';
 import { renderFurigana } from './furigana.js';
 import { navigate } from './router.js';
-import { currentUser } from './supabase.js';
-import { pushProgressToggle, pushTouchStreak, pushScore } from './sync.js';
-import { LESSON_COMPLETE_SCORE } from './config.js';
 import { announceLessonCompleted } from './pet.js';
+import { toggleLessonCompletion } from './completion.js';
 
 const dashboardState = {
   activeCategory: 'all',
@@ -22,7 +20,6 @@ function escapeHtml(value) {
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
   }[ch]));
 }
-
 function weekKey(categoryId, weekNumber) {
   return `${categoryId}:${weekNumber}`;
 }
@@ -265,42 +262,21 @@ function bindEvents(data) {
 
     const completionButton = event.target.closest('.complete-btn');
     if (!completionButton) return;
-    const done = toggleDone(id);
+    const syncPromise = toggleLessonCompletion({
+      lessonId: id,
+      categoryId: item.closest('.category-block')?.getAttribute('data-cat-id') || '',
+    });
+    const done = isDone(id);
     item.classList.toggle('completed', done);
     completionButton.setAttribute('aria-pressed', String(done));
     const lessonTitle = item.querySelector('.lesson-title')?.textContent?.trim() || id;
     completionButton.setAttribute('aria-label', `${done ? 'Đánh dấu chưa hoàn thành' : 'Đánh dấu hoàn thành'}: ${lessonTitle}`);
     updateAncestorCounts(item);
     renderStats();
-    const categoryId = item.closest('.category-block')?.getAttribute('data-cat-id') || '';
-    syncLessonCompletion(id, categoryId, done);
+    void syncPromise.finally(renderStats);
     if (done) {
       announceLessonCompleted({ id, done, streak: Number((getStreak() || {}).streak) || 0 });
     }
   });
 }
 
-// ---------------------------------------------------------------------------
-// Cloud sync — push progress/score/streak when signed in. No-op offline.
-// ---------------------------------------------------------------------------
-
-/**
- * Push a single lesson toggle to Supabase, award/revoke score, and reconcile
- * the streak against the server's Asia/Tokyo-anchored `touch_user_streak`
- * RPC (the local `touchStreak()` in store.js already ran synchronously so
- * offline use is unaffected — this just keeps the shared leaderboard live).
- */
-async function syncLessonCompletion(lessonId, categoryId, done) {
-  const user = await currentUser();
-  if (!user) return;
-
-  pushProgressToggle(user.id, lessonId, categoryId, done).catch(() => {});
-  pushScore(user.id, done ? LESSON_COMPLETE_SCORE : -LESSON_COMPLETE_SCORE).catch(() => {});
-
-  if (!done) return;
-  const result = await pushTouchStreak(user.id);
-  if (result) {
-    writeStreak(result);
-    renderStats();
-  }
-}

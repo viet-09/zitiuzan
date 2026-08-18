@@ -1,64 +1,59 @@
-// js/study-time.js — tracks real (tab-visible) time spent on a lesson page
-// and periodically flushes it to record_study_time() so the leaderboard's
-// "Tổng giờ học" / "TB mỗi buổi" reflect actual study time, not a guess.
-//
-// One lesson visit = one "session" for averaging purposes: the FIRST flush
-// of a visit is tagged p_new_session=true, every later flush (periodic tick,
-// or the final flush on leaving) only adds duration.
+// Server-timed study sessions. The client only sends heartbeats; credited
+// duration is derived from database timestamps so leaderboard hours cannot be
+// inflated by submitting an arbitrary millisecond value.
 
 import { getClient } from './supabase.js';
 
-const FLUSH_INTERVAL_MS = 30_000;
-const IDLE_CAP_MS = 3 * 60 * 60 * 1000; // matches the server's per-call cap
-const MIN_FLUSH_MS = 3000; // skip near-instant accidental visits
+const HEARTBEAT_INTERVAL_MS = 30_000;
 
-/**
- * Starts tracking active (non-backgrounded) time on the current lesson.
- * Returns `{ flush }` — call `flush()` from the route's cleanup so the
- * final partial segment is recorded when the user navigates away.
- */
-export function startLessonTimer() {
-  let activeSince = document.visibilityState === 'visible' ? Date.now() : null;
-  let pendingMs = 0;
-  let isFirstFlush = true;
+export function startLessonTimer(lessonId) {
+  let sessionPromise = document.visibilityState === 'visible' ? openSession() : null;
   let stopped = false;
 
-  function takeElapsed() {
-    const now = Date.now();
-    if (activeSince != null) {
-      pendingMs += Math.min(now - activeSince, IDLE_CAP_MS);
-      activeSince = now;
+  async function openSession() {
+    try {
+      const sb = await getClient();
+      if (!sb) return null;
+      const { data, error } = await sb.rpc('start_study_session', { p_lesson_id: lessonId });
+      if (error) throw error;
+      return data || null;
+    } catch (error) {
+      console.warn('[study-time] failed to start:', error);
+      return null;
     }
-    const taken = pendingMs;
-    pendingMs = 0;
-    return taken;
+  }
+
+  async function heartbeat(close = false) {
+    const current = sessionPromise;
+    if (!current) return;
+    const sessionId = await current;
+    if (!sessionId) return;
+    try {
+      const sb = await getClient();
+      if (!sb) return;
+      const { error } = await sb.rpc('heartbeat_study_session', {
+        p_session_id: sessionId,
+        p_close: Boolean(close),
+      });
+      if (error) throw error;
+    } catch (error) {
+      console.warn('[study-time] heartbeat failed:', error);
+    }
   }
 
   function onVisibilityChange() {
     if (document.visibilityState === 'visible') {
-      activeSince = Date.now();
-    } else if (activeSince != null) {
-      pendingMs += Math.min(Date.now() - activeSince, IDLE_CAP_MS);
-      activeSince = null;
-    }
-  }
-
-  async function flushNow() {
-    const durationMs = takeElapsed();
-    if (durationMs < MIN_FLUSH_MS) return;
-    const newSession = isFirstFlush;
-    isFirstFlush = false;
-    try {
-      const sb = await getClient();
-      if (!sb) return; // not signed in — nothing to sync
-      await sb.rpc('record_study_time', { p_duration_ms: Math.round(durationMs), p_new_session: newSession });
-    } catch (err) {
-      console.warn('[study-time] failed to record:', err);
+      if (!sessionPromise) sessionPromise = openSession();
+    } else if (sessionPromise) {
+      void heartbeat(true);
+      sessionPromise = null;
     }
   }
 
   document.addEventListener('visibilitychange', onVisibilityChange);
-  const intervalId = setInterval(() => { void flushNow(); }, FLUSH_INTERVAL_MS);
+  const intervalId = setInterval(() => {
+    if (document.visibilityState === 'visible') void heartbeat(false);
+  }, HEARTBEAT_INTERVAL_MS);
 
   function stop() {
     if (stopped) return;
@@ -66,13 +61,10 @@ export function startLessonTimer() {
     document.removeEventListener('visibilitychange', onVisibilityChange);
     window.removeEventListener('pagehide', stop);
     clearInterval(intervalId);
-    void flushNow();
+    void heartbeat(true);
+    sessionPromise = null;
   }
-  // Router cleanup covers in-app navigation away from the lesson; pagehide
-  // covers an outright tab/browser close, where the periodic tick may not
-  // have run recently — best-effort only, the async RPC may not finish
-  // before the page actually unloads.
-  window.addEventListener('pagehide', stop);
 
+  window.addEventListener('pagehide', stop);
   return { flush: stop };
 }

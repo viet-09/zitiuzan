@@ -439,8 +439,8 @@ function validateListeningLesson(value, _id, location) {
       if (requireString(track.label, `${itemLocation}.label`, { nonEmpty: true })) labels.push(track.label);
       if (requireString(track.src, `${itemLocation}.src`, { nonEmpty: true })) {
         sources.push(track.src);
-        if (track.src.includes('..') || track.src.includes('\\') || !track.src.startsWith('N2_somatome/')) {
-          fail('AUDIO_PATH', `${itemLocation}.src`, 'Expected a forward-slash local path under N2_somatome/ with no traversal.');
+        if (!/^cd[12]\/\d{2}\.mp3$/.test(track.src)) {
+          fail('AUDIO_PATH', `${itemLocation}.src`, 'Expected a private lesson-audio storage key such as cd1/02.mp3.');
         }
       }
     });

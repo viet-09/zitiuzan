@@ -12,8 +12,9 @@ import {
   writeStreak,
 } from './store.js';
 import { normalizeProfile, saveProfile } from './profile.js';
+import { migrateLegacyStorage } from './account-storage.js';
 
-const MIGRATION_FLAG_KEY = 'n2_migrated_v1';
+const COMPLETION_QUEUE_KEY = 'n2_completion_queue_v1';
 
 // Map each legacy localStorage key → { table, mapper }.
 // `mapper(legacyValue, userId)` returns the rows to upsert (with user_id set).
@@ -126,31 +127,6 @@ const LEGACY_KEYS = {
   },
 };
 
-/** Read a localStorage key as parsed JSON (null on miss / parse error). */
-function readLegacy(key) {
-  try {
-    const raw = localStorage.getItem(key);
-    if (raw == null) return null;
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
-}
-
-/** Mark migration done for this user and wipe the legacy keys. */
-function finalizeMigration(userId) {
-  try {
-    localStorage.setItem(MIGRATION_FLAG_KEY, userId);
-  } catch {
-    // ignore
-  }
-  for (const key of Object.keys(LEGACY_KEYS)) {
-    try { localStorage.removeItem(key); } catch { /* ignore */ }
-  }
-  // Drop the profile-prompt seen flag so the new authed user gets a fresh prompt.
-  try { localStorage.removeItem('n2_profile_prompt_seen_v2'); } catch { /* ignore */ }
-}
-
 /**
  * One-shot LocalStorage → Supabase migration. Returns true if any data was
  * pushed, false if nothing to do ( no legacy data or already migrated ).
@@ -161,32 +137,64 @@ export async function maybeMigrateLocalData() {
   const user = await currentUser();
   if (!user) return false;
 
-  // Idempotent: skip if we've already migrated for this exact user id.
+  const result = await migrateLegacyStorage({
+    storage: localStorage,
+    userId: user.id,
+    definitions: LEGACY_KEYS,
+    upsert: (table, rows) => sb.from(table).upsert(rows),
+  });
+  return result.migrated;
+}
+
+function readCompletionQueue() {
   try {
-    if (localStorage.getItem(MIGRATION_FLAG_KEY) === user.id) return false;
-  } catch { /* ignore */ }
-
-  let anyMigrated = false;
-
-  for (const [key, def] of Object.entries(LEGACY_KEYS)) {
-    const raw = readLegacy(key);
-    if (raw == null) continue;
-    const rows = def.map(raw, user.id);
-    if (!rows) continue;
-    if (Array.isArray(rows) && rows.length === 0) continue;
-
-    const { error } = Array.isArray(rows)
-      ? await sb.from(def.table).upsert(rows)
-      : await sb.from(def.table).upsert(rows);
-    if (error) {
-      console.warn(`[sync] migrate ${key} → ${def.table} failed:`, error.message);
-      continue;
-    }
-    anyMigrated = true;
+    const parsed = JSON.parse(localStorage.getItem(COMPLETION_QUEUE_KEY) || '[]');
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
   }
+}
 
-  finalizeMigration(user.id);
-  return anyMigrated;
+function writeCompletionQueue(queue) {
+  try { localStorage.setItem(COMPLETION_QUEUE_KEY, JSON.stringify(queue.slice(-100))); } catch { /* best effort */ }
+}
+
+export function queueCompletionMutation(mutation, user) {
+  if (!user?.id || !mutation?.lessonId) return;
+  const queue = readCompletionQueue().filter((item) => !(
+    item.userId === user.id && item.lessonId === mutation.lessonId
+  ));
+  queue.push({ ...mutation, userId: user.id, queuedAt: new Date().toISOString() });
+  writeCompletionQueue(queue);
+}
+
+export async function setLessonCompletionRemote({ lessonId, categoryId, done }) {
+  const sb = await getClient();
+  if (!sb) throw new Error('Supabase unavailable');
+  const { data, error } = await sb.rpc('set_lesson_completion', {
+    p_lesson_id: lessonId,
+    p_category_id: categoryId,
+    p_done: Boolean(done),
+  });
+  if (error) throw error;
+  const row = Array.isArray(data) ? data[0] : data;
+  return row ? { streak: Number(row.streak) || 0, lastDate: row.last_date || '' } : null;
+}
+
+export async function flushCompletionQueue(userId) {
+  if (!userId) return;
+  const queue = readCompletionQueue();
+  const mine = queue.filter((item) => item.userId === userId);
+  const others = queue.filter((item) => item.userId !== userId);
+  const failed = [];
+  for (const item of mine) {
+    try {
+      await setLessonCompletionRemote(item);
+    } catch {
+      failed.push(item);
+    }
+  }
+  writeCompletionQueue([...others, ...failed]);
 }
 
 /**
