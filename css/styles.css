@@ -3371,6 +3371,27 @@ body.modal-open { overflow: hidden; }
     transform-style: preserve-3d;
     animation: pet-idle-stage-3d 4.8s cubic-bezier(.65, 0, .35, 1) infinite;
 }
+.pet-webgl-host {
+    position: absolute;
+    z-index: 2;
+    inset: 0;
+    display: block;
+    overflow: visible;
+    pointer-events: none;
+    contain: strict;
+}
+.pet-webgl-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .28s cubic-bezier(.16, 1, .3, 1);
+}
+.pet-webgl-host.is-three-ready .pet-webgl-canvas { opacity: 1; }
+.pet-widget__stage.is-three-ready { animation: none !important; transform: none; }
+.pet-widget__stage.is-three-ready .pet-art { visibility: hidden; animation: none !important; }
+.pet-widget__stage.is-three-ready .pet-figure::after { visibility: hidden; animation: none !important; }
 .pet-figure {
     position: relative;
     display: block;

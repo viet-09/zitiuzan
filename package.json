@@ -7,6 +7,7 @@
     "test:coverage": "node --test --experimental-test-coverage tests/*.test.mjs",
     "test:e2e": "playwright test",
     "build:vendor": "node scripts/build-vendor.mjs",
+    "build:models": "node scripts/generate-pet-models.mjs",
     "validate:data": "node scripts/validate-book-data.mjs",
     "check": "npm test && npm run validate:data",
     "verify:schema": "node scripts/verify-schema.mjs",
@@ -15,7 +16,8 @@
   "dependencies": {
     "@supabase/supabase-js": "2.112.3",
     "ffmpeg-static": "^5.3.0",
-    "pg": "8.13.3"
+    "pg": "8.13.3",
+    "three": "0.185.1"
   },
   "allowScripts": {
     "ffmpeg-static@5.3.0": true,

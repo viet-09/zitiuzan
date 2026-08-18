@@ -125,7 +125,7 @@ test('full-body pet stays visible, reacts to touch and keeps its learning quest'
   const petWidget = page.locator('#pet-widget-mount .pet-widget');
   const petScene = page.locator('#pet-widget-mount [data-pet-scene]');
   const petCanvas = petScene.locator('canvas');
-  await expect(petArt).toBeVisible();
+  await expect(petArt).toHaveCount(1);
   await expect(petArt).toHaveAttribute('src', './assets/pets/fox-3d.png');
   expect(await petArt.evaluate((image) => image.naturalWidth)).toBeGreaterThan(0);
   await expect(petScene).toHaveAttribute('data-scene-state', 'ready', { timeout: 10_000 });
@@ -178,6 +178,15 @@ test('full-body pet stays visible, reacts to touch and keeps its learning quest'
 
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await expect(petScene).toHaveAttribute('data-motion', 'reduced');
+
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/#/profile');
+  await dismissAuthGateForComponentChecks(page);
+  await page.getByRole('combobox', { name: 'Loài' }).selectOption('rabbit');
+  const rabbitScene = page.locator('#pet-widget-mount [data-pet-scene][data-pet-type="rabbit"]');
+  await expect(rabbitScene).toHaveAttribute('data-scene-state', 'ready', { timeout: 10_000 });
+  await expect(rabbitScene.locator('canvas')).toBeVisible();
+  await page.getByRole('combobox', { name: 'Loài' }).selectOption('fox');
 });
 
 test('mobile dashboard has no horizontal overflow and passes serious axe checks', async ({ page }) => {
@@ -185,6 +194,7 @@ test('mobile dashboard has no horizontal overflow and passes serious axe checks'
   await page.goto('/');
   await dismissAuthGateForComponentChecks(page);
   await expect(page.locator('#learning-hub')).toBeVisible();
+  await expect(page.locator('#pet-widget-mount [data-pet-scene]')).toHaveAttribute('data-scene-state', 'ready', { timeout: 10_000 });
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(1);
 
