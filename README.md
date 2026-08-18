@@ -15,9 +15,10 @@ Mở `http://127.0.0.1:8000/`. Không mở bằng `file://`, vì trình duyệt 
 ## Tính năng
 
 - Dashboard 233 bài theo cấu trúc thật của 5 sách, chỉ render tuần đang học để tải nhanh.
-- Kế hoạch học hôm nay thích ứng theo bài chưa hoàn thành và lỗi đến hạn ôn.
-- Sổ lỗi sai/SRS, tìm kiếm toàn bộ nội dung, lưu bài và chỉ số sẵn sàng theo 5 kỹ năng.
-- Renderer sách với furigana, nghĩa tiếng Anh nguyên bản, bài tập và TTS.
+- Vòng lặp học khép kín: ghi lỗi sai → SRS lên lịch ôn → gia sư bám đúng điểm yếu → mini-test → cập nhật JLPT readiness.
+- Kế hoạch học hôm nay thích ứng theo bài chưa hoàn thành và lỗi đến hạn; readiness giải thích rõ số bài, lượt ôn và đề thi dùng làm bằng chứng.
+- Sổ lỗi sai/SRS, tìm kiếm toàn bộ nội dung và lưu bài.
+- Renderer sách với furigana, nghĩa tiếng Anh nguyên bản, bài tập, TTS và trình xem ảnh dạng một dải trang liên tục.
 - Gia sư Gemini được seed bằng đúng ngữ cảnh của bài đang học.
 - Giải thích từ/Hán tự ngắn bằng tiếng Việt, lưu cache cục bộ.
 - Hồ sơ tên/avatar (avatar tải lên chỉ lưu cục bộ, không đồng bộ) và thú cưng streak cat/dog/dragon.

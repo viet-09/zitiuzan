@@ -13,6 +13,7 @@ import { renderVoice } from './voice.js';
 import { renderLeaderboard } from './leaderboard.js';
 import { renderExam } from './exam.js';
 import { renderProfilePage } from './profile-page.js';
+import { renderReview } from './review.js';
 import {
     mountProfile,
     markProfilePromptSeen,
@@ -243,6 +244,7 @@ async function bootstrap() {
             leaderboard: renderLeaderboard,
             exam: renderExam,
             profile: renderProfilePage,
+            review: renderReview,
         },
         rootEl
     );

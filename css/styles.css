@@ -1357,40 +1357,31 @@ body.furigana-off rt {
 
 .book-viewer-body {
     overflow: auto;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 18px;
-    background: var(--paper-2);
+    padding: 0 clamp(8px, 2vw, 18px) 18px;
+    background: #2b2925;
 }
 
-.book-viewer-figure {
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 6px;
+.book-viewer-strip {
+    margin: 0 auto;
     width: 100%;
-    max-width: 100%;
+    max-width: 900px;
+    background: var(--bg-page);
+    box-shadow: 0 10px 36px rgba(0, 0, 0, .32);
 }
 
-.book-viewer-figure img,
-.book-viewer-stitched {
+.book-viewer-strip .book-viewer-page {
     display: block;
     width: 100%;
     height: auto;
     background: var(--bg-page);
-    border: 1px solid var(--border-color);
-    box-shadow: 0 6px 18px rgba(20, 18, 16, 0.12);
+    border: 0;
+    box-shadow: none;
     cursor: zoom-in;
 }
 
-.book-viewer-page-num {
-    font-size: 12px;
-    color: var(--text-muted);
-    text-align: center;
-}
+.book-viewer-strip .book-viewer-page + .book-viewer-page { margin-top: -1px; }
+.book-viewer-strip:fullscreen { overflow: auto; max-width: none; background: #2b2925; }
+.book-viewer-strip:fullscreen .book-viewer-page { max-width: 1100px; margin-right: auto; margin-left: auto; }
 
 .book-viewer-status {
     padding: 24px;
@@ -2279,6 +2270,19 @@ body.furigana-off rt {
 }
 .tutor-context-banner span { flex: 1; }
 .tutor-context-banner button { width: 44px; height: 44px; border: 0; background: transparent; cursor: pointer; }
+
+.tutor-weakness-banner {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--paper-2);
+    font: 600 .72rem/1.4 var(--font-sans);
+}
+.tutor-weakness-banner strong { color: var(--accent-red); text-transform: uppercase; letter-spacing: .06em; }
+.tutor-weakness-banner span { color: var(--text-muted); text-align: right; }
 
 /* Top-right account avatar — persistent across every page, like a Google
    account icon; opens the dedicated #/profile page. */
@@ -3190,6 +3194,39 @@ body.furigana-off rt {
 .readiness-row progress { width: 100%; height: 7px; accent-color: var(--accent-red); }
 .readiness-row strong { text-align: right; font-variant-numeric: tabular-nums; }
 
+.learning-loop {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    margin: 0 0 20px;
+    padding: 0;
+    border-top: 2px solid var(--border-dark);
+    border-bottom: 1px solid var(--border-dark);
+    list-style: none;
+}
+.learning-loop li { min-width: 0; padding: 12px 10px; border-right: 1px solid var(--border-color); }
+.learning-loop li:last-child { border-right: 0; }
+.learning-loop span,
+.learning-loop strong,
+.learning-loop small { display: block; }
+.learning-loop span { color: var(--accent-red); font: 700 .62rem/1 var(--font-sans); letter-spacing: .1em; }
+.learning-loop strong { margin-top: 8px; font: 700 .72rem/1.2 var(--font-sans); text-transform: uppercase; }
+.learning-loop small { margin-top: 5px; color: var(--text-muted); font: 500 .64rem/1.3 var(--font-sans); }
+
+.weakness-focus {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin: 0 0 18px;
+    padding: 16px 0;
+    border-top: 1px dashed var(--border-dark);
+    border-bottom: 1px dashed var(--border-dark);
+}
+.weakness-focus h3 { margin: 0; font: 900 clamp(1.2rem, 3vw, 1.75rem)/1.1 var(--font-display); }
+.weakness-focus p:last-child { margin: 6px 0 0; color: var(--text-muted); font-size: .9rem; }
+.weakness-focus__actions { display: flex; flex: 0 0 auto; gap: 8px; }
+.readiness-evidence { margin: 10px 0 0; color: var(--text-muted); font: 600 .68rem/1.4 var(--font-sans); }
+
 .plan-item {
     justify-content: space-between;
     gap: 14px;
@@ -3234,10 +3271,35 @@ body.furigana-off rt {
 .bookmark-btn.is-saved { color: #9b6516; }
 .book-viewer-page { content-visibility: auto; contain-intrinsic-size: 900px 1200px; }
 
+/* Adaptive mini-test — one question at a time, using the lesson quiz language. */
+.review-session { width: min(100%, 760px); margin: 0 auto 40px; }
+.review-session__head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px; font: 700 .72rem/1 var(--font-sans); text-transform: uppercase; letter-spacing: .08em; }
+.review-session__progress { width: 100%; height: 6px; margin-bottom: clamp(28px, 6vw, 56px); accent-color: var(--accent-red); }
+.review-question { margin-top: 24px; padding: clamp(18px, 4vw, 32px); border-top: 3px solid var(--border-dark); border-bottom: 1px solid var(--border-dark); background: var(--bg-card); }
+.review-question .quiz-q-text { font: 600 clamp(1.15rem, 3vw, 1.65rem)/1.6 var(--font-serif); }
+.review-next { display: block; margin: 18px 0 0 auto; }
+.review-hint { color: var(--text-muted); font: 600 .72rem/1.4 var(--font-sans); }
+.review-session--empty { padding: clamp(24px, 7vw, 64px) 0; }
+.review-result { padding-top: clamp(18px, 5vw, 44px); }
+.review-result__readiness { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 4px 20px; margin: 28px 0; padding: 18px 0; border-top: 2px solid var(--border-dark); border-bottom: 1px solid var(--border-dark); }
+.review-result__readiness span { font: 700 .75rem/1 var(--font-sans); text-transform: uppercase; letter-spacing: .08em; }
+.review-result__readiness strong { grid-row: span 2; font: 900 clamp(3rem, 10vw, 6rem)/.85 var(--font-display); color: var(--accent-red); }
+.review-result__readiness small { color: var(--text-muted); font: 600 .7rem/1.3 var(--font-sans); }
+.review-result__actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+
 @media (max-width: 720px) {
     .learning-hub-grid { flex-direction: column; }
+    .learning-loop { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .learning-loop li:nth-child(2n) { border-right: 0; }
+    .learning-loop li { border-bottom: 1px solid var(--border-color); }
+    .learning-loop li:nth-last-child(-n + 2) { border-bottom: 0; }
+    .weakness-focus { align-items: stretch; flex-direction: column; }
+    .weakness-focus__actions { width: 100%; }
+    .weakness-focus__actions > * { flex: 1; }
     .learning-tools { align-items: stretch; flex-direction: column; }
     .search-result-grid { grid-template-columns: 1fr; }
     .lesson-item { gap: 6px; }
     .bookmark-btn { flex-basis: 40px; width: 40px; }
+    .tutor-weakness-banner { align-items: flex-start; flex-direction: column; gap: 4px; }
+    .tutor-weakness-banner span { text-align: left; }
 }

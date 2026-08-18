@@ -6,6 +6,7 @@
 
 import { renderFurigana } from './furigana.js';
 import { getClient, currentUser } from './supabase.js';
+import { examHistoryStore } from './exam-history.js';
 
 const SECTION_LABELS = {
   vocab_grammar: '文字・語彙・文法',
@@ -129,6 +130,7 @@ async function loadHistory(token) {
       .limit(10);
     if (token !== mountToken) return;
     state.history = data || [];
+    examHistoryStore.replace(state.history);
   } catch {
     // history is a nice-to-have; ignore failures
   } finally {
@@ -262,6 +264,12 @@ async function submitExam(token, auto = false) {
     const review = await invokeExamFn('exam-review', { level: state.level, sitting: state.sitting, answers });
     if (token !== mountToken) return;
     state.review = review;
+    examHistoryStore.add({
+      id: review.session_id,
+      score: review.score,
+      source_file: state.sitting,
+      created_at: new Date().toISOString(),
+    });
     state.retest = { answers: new Map() };
     state.view = 'score';
   } catch (err) {

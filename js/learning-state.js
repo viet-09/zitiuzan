@@ -31,7 +31,9 @@ export function createLearningState(storage = globalThis.localStorage) {
   return {
     getReviews,
     getDueReviews(now = new Date()) {
-      return getDueReviews(getReviews(), now);
+      return getDueReviews(getReviews().filter((item) => (
+        (Number(item?.lapses) || 0) > 0 || item?.lastResult === 'wrong'
+      )), now);
     },
     recordReview(input) {
       const reviews = getReviews();

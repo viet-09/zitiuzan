@@ -6,6 +6,7 @@
 //   `#/voice`          -> routes.voice(rootEl)
 //   `#/leaderboard`    -> routes.leaderboard(rootEl)
 //   `#/exam`           -> routes.exam(rootEl)
+//   `#/review`         -> routes.review(rootEl)
 // Renderers may return `{ cleanup, preserveScroll }`. Cleanup runs before the next
 // route so microphone/audio and event resources cannot outlive their page.
 
@@ -30,12 +31,13 @@ function parseHash(hash) {
   if (parts[0] === 'leaderboard') return { name: 'leaderboard', params: [] };
   if (parts[0] === 'exam') return { name: 'exam', params: [] };
   if (parts[0] === 'profile') return { name: 'profile', params: [] };
+  if (parts[0] === 'review') return { name: 'review', params: [] };
   return { name: 'dashboard', params: [] };
 }
 
 function updateActiveNav(routeName) {
   try {
-    const activeRoute = routeName === 'lesson' ? 'dashboard' : routeName;
+    const activeRoute = routeName === 'lesson' || routeName === 'review' ? 'dashboard' : routeName;
     document.querySelectorAll('.nav-btn').forEach((btn) => {
       const route = btn.getAttribute('data-route');
       const active = route === activeRoute;
@@ -70,6 +72,7 @@ function updateRouteMetadata(routeName) {
     leaderboard: 'Bảng xếp hạng',
     exam: 'Thi thử',
     profile: 'Hồ sơ cá nhân',
+    review: 'Mini-test điểm yếu',
   };
   const label = labels[routeName] || labels.dashboard;
   document.title = `${label} – 日本語総まとめ N2`;
@@ -106,6 +109,8 @@ function render() {
       result = _routes.exam(_rootEl);
     } else if (name === 'profile' && typeof _routes.profile === 'function') {
       result = _routes.profile(_rootEl);
+    } else if (name === 'review' && typeof _routes.review === 'function') {
+      result = _routes.review(_rootEl);
     } else if (typeof _routes.dashboard === 'function') {
       result = _routes.dashboard(_rootEl);
     }

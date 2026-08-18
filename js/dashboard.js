@@ -15,12 +15,15 @@ import { announceLessonCompleted } from './pet.js';
 import { toggleLessonCompletion } from './completion.js';
 import {
   buildDailyPlan,
+  buildMiniTest,
   buildSearchIndex,
+  buildWeaknessProfile,
   calculateReadiness,
   searchCurriculum,
 } from './learning-engine.js';
 import { learningState } from './learning-state.js';
 import { initialExpandedWeeks } from './dashboard-state.js';
+import { examHistoryStore } from './exam-history.js';
 
 const dashboardState = {
   activeCategory: 'all',
@@ -123,7 +126,9 @@ function renderLearningHub(data) {
   const dueReviews = learningState.getDueReviews();
   const progress = getProgressMap();
   const plan = buildDailyPlan({ lessons: data, progress, reviews, maxItems: 5 });
-  const readiness = calculateReadiness({ lessons: data, progress, reviews, examHistory: [] });
+  const readiness = calculateReadiness({ lessons: data, progress, reviews, examHistory: examHistoryStore.get() });
+  const weaknessProfile = buildWeaknessProfile(reviews, { limit: 3 });
+  const miniTest = buildMiniTest(reviews, { limit: 5 });
   const bookmarks = learningState.getBookmarks().map((lessonId) => {
     const found = findLesson(lessonId);
     return found ? { type: 'bookmark', lessonId, categoryId: found.category.id, title: found.lesson.title } : null;
@@ -140,12 +145,29 @@ function renderLearningHub(data) {
       <div><p class="eyebrow">Lộ trình thích ứng</p><h2 id="learning-hub-title">Hôm nay học gì?</h2></div>
       <div class="readiness-score" aria-label="Mức sẵn sàng thi ${readiness.overall}%"><strong>${readiness.overall}%</strong><span>Sẵn sàng thi</span></div>
     </header>
+    <ol class="learning-loop" aria-label="Vòng lặp học thích ứng">
+      <li><span>01</span><strong>Học bài</strong><small>${readiness.evidence.completedLessons} bài xong</small></li>
+      <li><span>02</span><strong>Ghi lỗi sai</strong><small>${weaknessProfile.total} điểm yếu</small></li>
+      <li><span>03</span><strong>Lên lịch ôn</strong><small>${dueReviews.length} đến hạn</small></li>
+      <li><span>04</span><strong>Gia sư đúng lỗi</strong><small>Cá nhân hóa</small></li>
+      <li><span>05</span><strong>Mini-test</strong><small>${miniTest.length ? `${miniTest.length} câu sẵn sàng` : 'Chờ dữ liệu lỗi'}</small></li>
+      <li><span>06</span><strong>JLPT readiness</strong><small>${readiness.overall}% hiện tại</small></li>
+    </ol>
+    ${weaknessProfile.total ? `
+      <section class="weakness-focus" aria-label="Điểm yếu ưu tiên">
+        <div><p class="eyebrow">Bước tiếp theo</p><h3>${weaknessProfile.due ? `${weaknessProfile.due} lỗi đang đến hạn` : `${weaknessProfile.total} lỗi cần củng cố`}</h3><p>Gia sư và mini-test sẽ dùng đúng các câu bạn từng nhầm.</p></div>
+        <div class="weakness-focus__actions">
+          <button type="button" class="study-btn" data-learning-tutor>Hỏi gia sư</button>
+          ${miniTest.length ? `<button type="button" class="complete-modal-btn" data-learning-review>Mini-test ${miniTest.length} câu</button>` : ''}
+        </div>
+      </section>` : ''}
     <div class="learning-hub-grid">
       <div class="daily-plan" aria-label="Kế hoạch học hôm nay">
         ${plan.length ? plan.map((item) => lessonButton(item)).join('') : '<p class="dash-empty-state">Bạn đã hoàn thành kế hoạch hôm nay 🎉</p>'}
       </div>
       <aside class="readiness-card" aria-label="Mức sẵn sàng theo kỹ năng">${categoryMeters}</aside>
     </div>
+    <p class="readiness-evidence">Dựa trên ${readiness.evidence.completedLessons}/${readiness.evidence.totalLessons} bài · ${readiness.evidence.reviewAttempts} lượt ôn · ${readiness.evidence.examAttempts} đề thi thử.</p>
     <div class="learning-tools">
       <label class="curriculum-search"><span class="sr-only">Tìm trong toàn bộ nội dung N2</span><input type="search" data-learning-search placeholder="Tìm kanji, từ vựng, ngữ pháp…" autocomplete="off"><span aria-hidden="true">⌕</span></label>
       <span class="learning-tool-count">${dueReviews.length} mục đến hạn ôn · ${bookmarks.length} bài đã lưu</span>
@@ -160,6 +182,14 @@ function bindLearningHub(data, hub) {
   const searchIndex = buildSearchIndex(data, getBookContent);
   const results = hub.querySelector('[data-learning-results]');
   hub.addEventListener('click', (event) => {
+    if (event.target.closest('[data-learning-review]')) {
+      navigate('#/review');
+      return;
+    }
+    if (event.target.closest('[data-learning-tutor]')) {
+      navigate('#/tutor');
+      return;
+    }
     const open = event.target.closest('[data-learning-open]');
     if (!open?.dataset.learningOpen) return;
     captureDashboardState();

@@ -15,6 +15,8 @@ import {
 import { getProfile } from './profile.js';
 import { renderFurigana } from './furigana.js';
 import { askText, openSettings } from './gemini.js';
+import { learningState } from './learning-state.js';
+import { buildWeaknessProfile, formatWeaknessContext } from './learning-engine.js';
 
 // How many new chat turns (user+model) pass between background memory refreshes.
 const MEMORY_REFRESH_EVERY = 6;
@@ -28,6 +30,7 @@ let history = [];
 let isLoading = false;
 let errorText = null;
 let lessonContext = null;
+let weaknessProfile = null;
 let mountToken = 0;
 
 function systemPrompt() {
@@ -45,6 +48,11 @@ function systemPrompt() {
 
   if (lessonContext) {
     prompt += `\n\nNgữ cảnh bài học đang mở (nội dung nguồn sách, không được thay thế hoặc bịa thêm):\nDanh mục: ${lessonContext.category || ''}\nTiêu đề: ${lessonContext.title || ''}\nTiêu đề tiếng Anh: ${lessonContext.titleEn || ''}\nDữ liệu: ${lessonContext.content || ''}\nHãy tập trung câu hỏi và giải thích vào đúng bài này.`;
+  }
+
+  const weaknessContext = formatWeaknessContext(weaknessProfile);
+  if (weaknessContext) {
+    prompt += `\n\nHồ sơ điểm yếu được ghi tự động từ các câu người học đã làm (dùng đúng dữ liệu này, không bịa thêm):\n${weaknessContext}\nƯu tiên điểm yếu đang đến hạn và hỏi từng câu ngắn một. Sau mỗi câu, giải thích vì sao đáp án cũ dễ nhầm rồi mới chuyển sang thử thách tiếp theo.`;
   }
 
   return prompt;
@@ -85,6 +93,14 @@ export function renderTutor(root) {
   errorText = null;
   history = getTutorHistory();
   lessonContext = getTutorContext();
+  const reviews = learningState.getReviews();
+  weaknessProfile = buildWeaknessProfile(reviews, {
+    lessonId: lessonContext?.lessonId || '',
+    limit: 5,
+  });
+  if (!weaknessProfile.total && lessonContext?.lessonId) {
+    weaknessProfile = buildWeaknessProfile(reviews, { limit: 5 });
+  }
 
   root.innerHTML = shellTemplate();
   bindShellEvents();
@@ -113,6 +129,7 @@ function shellTemplate() {
     <div class="chat-wrap">
       <h1 class="sr-only" data-route-heading>Gia sư AI</h1>
       ${lessonContext ? `<aside class="tutor-context-banner" aria-label="Ngữ cảnh bài học"><strong>Đang học:</strong> <span lang="ja">${renderFurigana(lessonContext.title || '')}</span><button type="button" id="tutor-context-clear" aria-label="Bỏ ngữ cảnh bài học">×</button></aside>` : ''}
+      ${weaknessProfile?.total ? `<aside class="tutor-weakness-banner" aria-label="Điểm yếu đang ưu tiên"><strong>${weaknessProfile.due || weaknessProfile.total} điểm yếu ưu tiên</strong><span>Gia sư sẽ dùng đúng các lỗi đã ghi, không hỏi ngẫu nhiên.</span></aside>` : ''}
       <div class="chat-toolbar">
         <button type="button" id="tutor-clear-btn" class="chat-clear-btn">
           🗑️ Xóa hội thoại
@@ -175,6 +192,7 @@ function bindShellEvents() {
   contextClearBtn?.addEventListener('click', () => {
     setTutorContext(null);
     lessonContext = null;
+    weaknessProfile = buildWeaknessProfile(learningState.getReviews(), { limit: 5 });
     rootEl.innerHTML = shellTemplate();
     bindShellEvents();
     paintMessages();
@@ -210,9 +228,11 @@ async function fetchFirstChallenge(token = mountToken) {
   setFormDisabled(true);
 
   try {
-    const prompt = lessonContext
-      ? 'Hãy bắt đầu bằng một câu hỏi hoặc thử thách ngắn dựa đúng vào bài học trong ngữ cảnh.'
-      : FIRST_CHALLENGE_PROMPT;
+    const prompt = weaknessProfile?.total
+      ? 'Hãy bắt đầu ngay bằng một câu hỏi ngắn nhắm vào điểm yếu ưu tiên số 1 trong hồ sơ; chưa đưa đáp án trước khi tôi trả lời.'
+      : lessonContext
+        ? 'Hãy bắt đầu bằng một câu hỏi hoặc thử thách ngắn dựa đúng vào bài học trong ngữ cảnh.'
+        : FIRST_CHALLENGE_PROMPT;
     const reply = await askText({ system: systemPrompt(), history: [], user: prompt });
     if (token !== mountToken) return;
     history = [{ role: 'model', text: reply }];

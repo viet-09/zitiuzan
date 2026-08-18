@@ -1,11 +1,11 @@
-const CACHE_NAME = 'n2-journal-v4';
+const CACHE_NAME = 'n2-journal-v5';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './icons/app-icon.svg',
   './css/styles.css',
-  './js/app.js?v=4',
+  './js/app.js?v=5',
   './vendor/supabase.js',
   './data/lessons.json',
 ];

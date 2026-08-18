@@ -19,6 +19,7 @@ import { hydrateLessonAudio } from './lesson-audio.js';
 import { startLessonTimer } from './study-time.js';
 import { toggleLessonCompletion } from './completion.js';
 import { learningState } from './learning-state.js';
+import { buildBookViewerModel, renderBookViewerStrip } from './book-viewer.js';
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (char) => ({
@@ -484,14 +485,21 @@ function handleQuiz(button, lessonId, categoryId) {
       ? `Đáp án: ${correctTarget.textContent.trim()}`
       : 'Đáp án của câu này chưa được xác minh.';
   }
-  if (correct >= 0) {
+  const reviewKey = container.dataset.reviewKey || `${lessonId}:quiz`;
+  const wasCorrect = selected === correct;
+  const alreadyTracked = learningState.getReviews().some((review) => review.key === reviewKey);
+  if (correct >= 0 && (!wasCorrect || alreadyTracked)) {
     learningState.recordReview({
-      key: container.dataset.reviewKey || `${lessonId}:quiz`,
+      key: reviewKey,
       lessonId,
       categoryId,
       prompt: container.querySelector('.quiz-q-text')?.textContent?.trim() || 'Câu hỏi ôn tập',
       correctAnswer: targets[correct]?.textContent?.trim() || '',
-      correct: selected === correct,
+      options: targets.map((target) => target.textContent?.trim() || ''),
+      correctIndex: correct,
+      selectedAnswer: targets[selected]?.textContent?.trim() || '',
+      source: 'lesson',
+      correct: wasCorrect,
       now: new Date(),
     });
   }
@@ -686,17 +694,11 @@ export function renderLesson(root, id) {
   };
 
   const openBookViewer = (trigger) => {
-    const images = getLessonImages(id);
-    const discrete = (images || []).filter((entry) => entry && entry.kind === 'image');
-    const pages = (images || []).filter((entry) => entry && entry.kind === 'page');
-    if (!discrete.length && !pages.length) {
+    const pages = buildBookViewerModel(getLessonImages(id));
+    if (!pages.length) {
       alert('Bài này chưa có ảnh trang sách.');
       return;
     }
-    // Order matters: discrete crops first, then full pages — keeps the
-    // lesson's visuals in reading order. Sort each bucket by `page` if set.
-    const byPage = (a, b) => (a.page ?? 0) - (b.page ?? 0);
-    const ordered = [...pages].sort(byPage).concat([...discrete].sort(byPage));
 
     closeBookViewer();
     bookViewerTrigger = trigger;
@@ -712,11 +714,7 @@ export function renderLesson(root, id) {
           <button type="button" class="modal-close" data-book-viewer-close aria-label="Đóng">×</button>
         </div>
         <div class="modal-body book-viewer-body">
-          ${ordered.map((entry, index) => {
-            const src = entry.src.startsWith('/') ? entry.src : `data/book/${entry.src}`;
-            const page = entry.page != null ? ` — trang ${Number(entry.page) + 1}` : '';
-            return `<figure class="book-viewer-figure"><img class="book-viewer-page" src="${escapeHtml(src)}" alt="Trang sách ${index + 1}${page}" loading="lazy" decoding="async">${page ? `<figcaption class="book-viewer-page-num">${escapeHtml(page.slice(3))}</figcaption>` : ''}</figure>`;
-          }).join('')}
+          ${renderBookViewerStrip(pages)}
         </div>
       </div>`;
     document.body.appendChild(dialog);
@@ -730,7 +728,7 @@ export function renderLesson(root, id) {
       const image = event.target.closest('.book-viewer-page');
       if (!image) return;
       if (document.fullscreenElement) document.exitFullscreen?.();
-      else image.requestFullscreen?.();
+      else image.closest('.book-viewer-strip')?.requestFullscreen?.();
     });
   };
 
