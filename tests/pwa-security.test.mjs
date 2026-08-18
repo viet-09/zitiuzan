@@ -21,12 +21,18 @@ test('the app is installable and registers a service worker', () => {
   assert.match(worker, /data\/lessons\.json/);
 });
 
-test('the boot module is versioned consistently to bypass a stale service-worker cache', () => {
+test('pet motion assets are versioned consistently to bypass a stale service-worker cache', () => {
   const index = read('index.html');
   const worker = read('sw.js');
+  const app = read('js/app.js');
 
-  assert.match(index, /src="js\/app\.js\?v=7"/);
-  assert.match(worker, /'\.\/js\/app\.js\?v=7'/);
+  assert.match(index, /href="css\/styles\.css\?v=8"/);
+  assert.match(index, /src="js\/app\.js\?v=8"/);
+  assert.match(app, /from '\.\/pet\.js\?v=8'/);
+  assert.match(worker, /n2-journal-v8/);
+  assert.match(worker, /'\.\/css\/styles\.css\?v=8'/);
+  assert.match(worker, /'\.\/js\/app\.js\?v=8'/);
+  assert.match(worker, /'\.\/js\/pet\.js\?v=8'/);
 });
 
 test('production CSP needs neither unsafe-eval nor a third-party module CDN', () => {
