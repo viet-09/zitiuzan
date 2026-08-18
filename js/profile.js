@@ -2,6 +2,8 @@
 // Local-only user profile (display name + preset/uploaded avatar) and its UI.
 // Uploaded images are validated in the browser and are never sent over the network.
 
+import { activateModalDialog } from './modal-dialog.js';
+
 export const PROFILE_STORAGE_KEY = 'n2_profile_v2';
 export const PROFILE_PROMPT_KEY = 'n2_profile_prompt_seen_v2';
 export const PROFILE_UPDATED_EVENT = 'n2:profile-updated';
@@ -234,12 +236,6 @@ function resolveTarget(target) {
   return target instanceof Element ? target : null;
 }
 
-function focusableElements(container) {
-  return Array.from(container.querySelectorAll(
-    'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-  )).filter((element) => !element.hidden && element.getAttribute('aria-hidden') !== 'true');
-}
-
 function makePresetChoices(profile, groupName) {
   return PROFILE_PRESETS.map((preset) => {
     const checked = profile.avatarType === 'preset' && profile.avatarData === preset.id;
@@ -318,23 +314,12 @@ export function openProfileDialog(options = {}) {
     </section>`;
 
   document.body.appendChild(overlay);
-  const backgroundState = Array.from(document.body.children)
-    .filter((element) => element !== overlay && element instanceof HTMLElement)
-    .map((element) => ({
-      element,
-      inert: Boolean(element.inert),
-      ariaHidden: element.getAttribute('aria-hidden'),
-    }));
-  backgroundState.forEach(({ element }) => {
-    element.inert = true;
-    element.setAttribute('aria-hidden', 'true');
-  });
-  const card = overlay.querySelector('[role="dialog"]');
   const form = overlay.querySelector('form');
   const nameInput = overlay.querySelector(`#${nameId}`);
   const fileInput = overlay.querySelector(`#${uploadId}`);
   const preview = overlay.querySelector('[data-profile-preview]');
   const status = overlay.querySelector('[data-profile-status]');
+  let modalDialog = null;
   let closed = false;
 
   function setStatus(message, kind = '') {
@@ -355,42 +340,11 @@ export function openProfileDialog(options = {}) {
     if (closed) return;
     closed = true;
     if (markSeen) markProfilePromptSeen();
-    overlay.removeEventListener('keydown', onKeyDown);
-    backgroundState.forEach(({ element, inert, ariaHidden }) => {
-      element.inert = inert;
-      if (ariaHidden === null) element.removeAttribute('aria-hidden');
-      else element.setAttribute('aria-hidden', ariaHidden);
-    });
+    modalDialog?.release();
     overlay.remove();
     activeDialog = null;
-    if (trigger && typeof trigger.focus === 'function' && trigger.isConnected) trigger.focus();
   }
 
-  function onKeyDown(event) {
-    if (event.key === 'Escape') {
-      event.preventDefault();
-      closeDialog(true);
-      return;
-    }
-    if (event.key !== 'Tab') return;
-    const focusable = focusableElements(card);
-    if (focusable.length === 0) {
-      event.preventDefault();
-      card.focus();
-      return;
-    }
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    if (event.shiftKey && document.activeElement === first) {
-      event.preventDefault();
-      last.focus();
-    } else if (!event.shiftKey && document.activeElement === last) {
-      event.preventDefault();
-      first.focus();
-    }
-  }
-
-  overlay.addEventListener('keydown', onKeyDown);
   overlay.addEventListener('click', (event) => {
     const action = event.target.closest('[data-profile-action]')?.getAttribute('data-profile-action');
     if (action === 'close' || action === 'skip') closeDialog(true);
@@ -443,8 +397,12 @@ export function openProfileDialog(options = {}) {
     }
   });
 
+  modalDialog = activateModalDialog(overlay, {
+    trigger,
+    initialFocus: nameInput,
+    onEscape: () => closeDialog(true),
+  });
   activeDialog = { close: () => closeDialog(true), element: overlay };
-  window.setTimeout(() => nameInput?.focus(), 0);
   return activeDialog;
 }
 

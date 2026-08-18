@@ -10,11 +10,15 @@ import {
 import {
   writeProgressMapExternal,
   writeStreak,
+  setSettings,
 } from './store.js';
 import { normalizeProfile, saveProfile } from './profile.js';
 import { migrateLegacyStorage } from './account-storage.js';
+import { learningState } from './learning-state.js';
+import { mergeReviewCollections, reviewFromRow, reviewToRow } from './review-sync.js';
 
 const COMPLETION_QUEUE_KEY = 'n2_completion_queue_v1';
+const REVIEW_QUEUE_KEY = 'n2_review_sync_queue_v1';
 
 // Map each legacy localStorage key → { table, mapper }.
 // `mapper(legacyValue, userId)` returns the rows to upsert (with user_id set).
@@ -70,7 +74,16 @@ const LEGACY_KEYS = {
       // API key intentionally NOT migrated — Edge Function owns AI calls now.
       const patch = { user_id: userId };
       if (typeof value.furigana === 'boolean') patch.furigana = value.furigana;
+      if (typeof value.examTargetDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value.examTargetDate)) {
+        patch.exam_target_date = value.examTargetDate;
+      }
       return Object.keys(patch).length > 1 ? patch : null;
+    },
+  },
+  n2_reviews_v1: {
+    table: 'learning_reviews',
+    map(value, userId) {
+      return Array.isArray(value) ? value.map((review) => reviewToRow(review, userId)).filter((row) => row.review_key && row.lesson_id) : [];
     },
   },
   n2_content_v2: {
@@ -159,6 +172,61 @@ function writeCompletionQueue(queue) {
   try { localStorage.setItem(COMPLETION_QUEUE_KEY, JSON.stringify(queue.slice(-100))); } catch { /* best effort */ }
 }
 
+function readReviewQueue() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(REVIEW_QUEUE_KEY) || '[]');
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeReviewQueue(queue) {
+  try { localStorage.setItem(REVIEW_QUEUE_KEY, JSON.stringify(queue.slice(-1000))); } catch { /* best effort */ }
+}
+
+export function queueReviewMutation(review, userId) {
+  if (!userId || !review?.key) return;
+  const queue = readReviewQueue().filter((item) => !(item.userId === userId && item.review?.key === review.key));
+  queue.push({ userId, review: { ...review }, queuedAt: new Date().toISOString() });
+  writeReviewQueue(queue);
+}
+
+export async function pushReviewRemote(review, userId) {
+  const sb = await getClient();
+  if (!sb || !userId || !review?.key || !review?.lessonId) throw new Error('Review sync unavailable');
+  const row = { ...reviewToRow(review, userId), updated_at: new Date().toISOString() };
+  const { error } = await sb.from('learning_reviews').upsert(row, { onConflict: 'user_id,review_key' });
+  if (error) throw error;
+  return row;
+}
+
+export async function syncReviewRemote(review, userId) {
+  try {
+    await pushReviewRemote(review, userId);
+  } catch (error) {
+    queueReviewMutation(review, userId);
+    throw error;
+  }
+}
+
+export async function flushReviewQueue(userId) {
+  if (!userId) return;
+  const queue = readReviewQueue();
+  const currentByKey = new Map(learningState.getReviews().map((review) => [review.key, review]));
+  const others = queue.filter((item) => item.userId !== userId);
+  const failed = [];
+  for (const item of queue.filter((entry) => entry.userId === userId)) {
+    const review = currentByKey.get(item.review?.key) || item.review;
+    try {
+      await pushReviewRemote(review, userId);
+    } catch {
+      failed.push({ ...item, review });
+    }
+  }
+  writeReviewQueue([...others, ...failed]);
+}
+
 export function queueCompletionMutation(mutation, user) {
   if (!user?.id || !mutation?.lessonId) return;
   const queue = readCompletionQueue().filter((item) => !(
@@ -205,9 +273,10 @@ export async function pullFromCloud(userId) {
   const sb = await getClient();
   if (!sb || !userId) return;
 
-  const [profileRes, progressRes] = await Promise.all([
-    sb.from('user_profiles').select('display_name,avatar_type,avatar_data,streak,last_study_date,furigana,total_score,ai_level').eq('user_id', userId).maybeSingle(),
+  const [profileRes, progressRes, reviewsRes] = await Promise.all([
+    sb.from('user_profiles').select('display_name,avatar_type,avatar_data,streak,last_study_date,furigana,exam_target_date,total_score,ai_level').eq('user_id', userId).maybeSingle(),
     sb.from('learning_progress').select('lesson_id').eq('user_id', userId),
+    sb.from('learning_reviews').select('review_key,lesson_id,category_id,prompt,correct_answer,options,correct_index,selected_answer,source,attempts,correct_attempts,lapses,interval_days,last_result,last_reviewed_at,due_at').eq('user_id', userId),
   ]);
 
   if (profileRes.data) {
@@ -215,12 +284,10 @@ export async function pullFromCloud(userId) {
       streak: profileRes.data.streak ?? 0,
       lastDate: profileRes.data.last_study_date ?? '',
     });
-    if (typeof profileRes.data.furigana === 'boolean') {
-      try {
-        const { setSettings } = await import('./store.js');
-        setSettings({ furigana: profileRes.data.furigana });
-      } catch { /* ignore */ }
-    }
+    const settingsPatch = {};
+    if (typeof profileRes.data.furigana === 'boolean') settingsPatch.furigana = profileRes.data.furigana;
+    if (typeof profileRes.data.exam_target_date === 'string') settingsPatch.examTargetDate = profileRes.data.exam_target_date;
+    if (Object.keys(settingsPatch).length) setSettings(settingsPatch);
     // Mirror the server's name/avatar locally so a second device (or a
     // fresh browser profile) shows the same identity without re-asking.
     if (typeof profileRes.data.display_name === 'string' && profileRes.data.display_name) {
@@ -235,6 +302,16 @@ export async function pullFromCloud(userId) {
     const map = {};
     for (const row of progressRes.data) map[row.lesson_id] = true;
     writeProgressMapExternal(map);
+  }
+  if (!reviewsRes.error) {
+    const remote = (reviewsRes.data || []).map(reviewFromRow);
+    const merged = mergeReviewCollections(learningState.getReviews(), remote);
+    learningState.replaceReviews(merged);
+    const remoteByKey = new Map(remote.map((review) => [review.key, review.lastReviewedAt]));
+    for (const review of merged) {
+      if (remoteByKey.get(review.key) === review.lastReviewedAt) continue;
+      try { await pushReviewRemote(review, userId); } catch { queueReviewMutation(review, userId); }
+    }
   }
 }
 
@@ -305,7 +382,7 @@ export async function pushTouchStreak(userId) {
  * image bytes. The leaderboard view nulls avatar_data for 'upload' rows too
  * as defense-in-depth.
  */
-export async function pushProfile(userId, { displayName, avatarType, avatarData }) {
+export async function pushProfile(userId, { displayName, avatarType, avatarData, examTargetDate }) {
   const sb = await getClient();
   if (!sb) return;
   if (typeof userId !== 'string' || !userId) return;
@@ -314,6 +391,9 @@ export async function pushProfile(userId, { displayName, avatarType, avatarData 
   if (avatarType === 'preset' || avatarType === 'upload') patch.avatar_type = avatarType;
   if (avatarType === 'preset' && typeof avatarData === 'string' && avatarData.length <= 64) {
     patch.avatar_data = avatarData;
+  }
+  if (examTargetDate === '' || (typeof examTargetDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(examTargetDate))) {
+    patch.exam_target_date = examTargetDate || null;
   }
   if (Object.keys(patch).length === 0) return;
   const { error } = await sb

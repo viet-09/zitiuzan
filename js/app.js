@@ -23,7 +23,8 @@ import {
 } from './profile.js';
 import { openSignInGate } from './auth.js';
 import { onAuthChange, ready as supabaseReady, currentUser } from './supabase.js';
-import { flushCompletionQueue, maybeMigrateLocalData, maybeSeedProfileFromGoogle, pullFromCloud, pushProfile } from './sync.js';
+import { flushCompletionQueue, flushReviewQueue, maybeMigrateLocalData, maybeSeedProfileFromGoogle, pullFromCloud, pushProfile, syncReviewRemote } from './sync.js';
+import { REVIEW_RECORDED_EVENT } from './learning-state.js';
 
 function registerServiceWorker() {
     if (!('serviceWorker' in navigator) || location.protocol === 'file:') return;
@@ -89,6 +90,20 @@ let petController = null;
 function wirePetWidget() {
     const streak = Number((getStreak() || {}).streak) || 0;
     petController = mountPet('#pet-widget-mount', { streak });
+}
+
+function wireReviewSync() {
+    window.addEventListener(REVIEW_RECORDED_EVENT, async (event) => {
+        const review = event.detail?.review;
+        if (!review) return;
+        const user = await currentUser();
+        if (!user?.id) return;
+        try {
+            await syncReviewRemote(review, user.id);
+        } catch (error) {
+            console.warn('[sync] review queued for retry:', error?.message || error);
+        }
+    });
 }
 
 async function loadLessons() {
@@ -170,6 +185,7 @@ async function bootstrap() {
     wireBottomNav();
     wireAccountButton();
     wirePetWidget();
+    wireReviewSync();
     // Account setup is handled by the mandatory Google sign-in gate below.
     mountProfile('#profile-mount', { promptOnFirstVisit: false });
 
@@ -201,6 +217,7 @@ async function bootstrap() {
                 await maybeSeedProfileFromGoogle(authedUser);
                 await pullFromCloud(authedUser.id);
                 await flushCompletionQueue(authedUser.id);
+                await flushReviewQueue(authedUser.id);
                 petController?.update({ streak: Number((getStreak() || {}).streak) || 0 });
             } catch (err) {
                 console.warn('[sync] bootstrap sync failed:', err);

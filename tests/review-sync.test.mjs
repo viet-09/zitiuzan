@@ -35,3 +35,16 @@ test('review sync merge keeps the newest review per key across devices', () => {
   assert.equal(merged.find((item) => item.key === 'shared').prompt, 'remote new');
   assert.deepEqual(merged.map((item) => item.key), ['local-only', 'shared', 'remote-only']);
 });
+
+test('review sync clamps malformed legacy counters to database invariants', () => {
+  const row = reviewToRow({
+    key: 'legacy', lessonId: 'g1d1', categoryId: 'grammar', attempts: 2,
+    correctAttempts: 99, lapses: 99, correctIndex: 42,
+    lastResult: 'wrong', lastReviewedAt: 'bad-date', dueAt: 'bad-date',
+  }, 'user-1');
+  assert.equal(row.attempts, 2);
+  assert.equal(row.correct_attempts, 2);
+  assert.equal(row.lapses, 2);
+  assert.equal(row.correct_index, -1);
+  assert.equal(row.last_reviewed_at, '1970-01-01T00:00:00.000Z');
+});

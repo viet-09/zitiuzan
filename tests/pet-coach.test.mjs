@@ -2,10 +2,19 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
+  PET_MEMORY_STORAGE_KEY,
+  announceLessonCompleted,
   buildPetCoachState,
   getPetEvolution,
   getPetMastery,
+  getPetMemories,
+  getPetPreferences,
+  getPetTier,
+  recordPetMemory,
+  renderPet,
+  setPetPreferences,
 } from '../js/pet.js';
+import { createFakeStorage } from './helpers/fake-storage.mjs';
 
 function mastered(categoryId, key) {
   return { key, categoryId, lapses: 2, lastResult: 'correct', intervalDays: 7 };
@@ -34,4 +43,28 @@ test('pet coach chooses a due review quest before a new lesson', () => {
   assert.equal(state.quest.route, '#/review');
   assert.match(state.quest.reason, /2 lỗi ngữ pháp/);
   assert.equal(state.evolution.id, 'hatchling');
+});
+
+test('pet preferences, unlocked visuals and memory journal remain local and bounded', () => {
+  const storage = createFakeStorage();
+  globalThis.localStorage = storage;
+  assert.deepEqual(getPetPreferences(), { petType: 'fox', petAccessory: 'none' });
+  assert.deepEqual(setPetPreferences({ petType: 'rabbit', petAccessory: 'pencil' }), {
+    petType: 'rabbit', petAccessory: 'pencil',
+  });
+  const markup = renderPet({ petType: 'rabbit', petAccessory: 'pencil', streak: 7, evolutionId: 'mentor' });
+  assert.match(markup, /🐰/u);
+  assert.match(markup, /✏️/u);
+  assert.equal(getPetTier(0).id, 'sleeping');
+  assert.equal(getPetTier(2).id, 'waking');
+  assert.equal(getPetTier(5).id, 'happy');
+  assert.equal(getPetTier(9).id, 'excited');
+  assert.equal(getPetTier(20).id, 'legendary');
+
+  recordPetMemory({ id: 'lesson:g1d1', type: 'lesson', title: 'Hoàn thành bài', detail: 'g1d1' }, storage);
+  recordPetMemory({ id: 'lesson:g1d1', type: 'lesson', title: 'Hoàn thành lại', detail: 'g1d1' }, storage);
+  assert.equal(getPetMemories(storage).length, 1);
+  assert.equal(getPetMemories(storage)[0].title, 'Hoàn thành lại');
+  assert.ok(storage.snapshot()[PET_MEMORY_STORAGE_KEY]);
+  announceLessonCompleted({ id: 'g1d1' });
 });

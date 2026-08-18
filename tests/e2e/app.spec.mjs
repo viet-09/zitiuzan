@@ -2,14 +2,17 @@ import { test, expect } from '@playwright/test';
 import axeCore from 'axe-core';
 
 async function dismissAuthGateForComponentChecks(page) {
-  await expect(page.getByRole('heading', { name: 'Bắt đầu học N2' })).toBeVisible();
-  await page.evaluate(() => {
-    document.querySelector('.auth-modal')?.remove();
-    document.querySelectorAll('[inert]').forEach((element) => {
-      element.inert = false;
-      element.removeAttribute('aria-hidden');
+  const gate = page.locator('.auth-modal');
+  await gate.waitFor({ state: 'attached', timeout: 2_000 }).catch(() => {});
+  if (await gate.count()) {
+    await page.evaluate(() => {
+      document.querySelector('.auth-modal')?.remove();
+      document.querySelectorAll('[inert]').forEach((element) => {
+        element.inert = false;
+        element.removeAttribute('aria-hidden');
+      });
     });
-  });
+  }
 }
 
 test('Google sign-in is mandatory and a legacy guest preference cannot bypass it', async ({ page }) => {
@@ -36,12 +39,13 @@ test('adaptive dashboard search and lesson review work end to end', async ({ pag
   await expect(page.locator('.search-result-grid .plan-item').first()).toBeVisible();
 
   await page.goto('/#/lesson/g1d1');
+  await dismissAuthGateForComponentChecks(page);
   await expect(page.locator('.lesson-header-title')).toBeVisible();
   const bookmark = page.getByRole('button', { name: 'Lưu bài học' });
   await bookmark.click();
   await expect(page.getByRole('button', { name: 'Bỏ lưu bài học' })).toBeVisible();
 
-  const quiz = page.locator('.quiz-question').first();
+  const quiz = page.locator('.quiz-question[data-correct-idx]:not([data-correct-idx="-1"])').first();
   if (await quiz.count()) {
     const correct = Number(await quiz.getAttribute('data-correct-idx'));
     const options = quiz.locator('[data-action="quiz-option"]');

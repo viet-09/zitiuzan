@@ -8,13 +8,16 @@ import {
   getProgressMap,
   getBookContent,
   findLesson,
+  getSettings,
+  setSettings,
 } from './store.js';
 import { renderFurigana } from './furigana.js';
 import { navigate } from './router.js';
-import { announceLessonCompleted } from './pet.js';
+import { announceLessonCompleted, PET_CONTEXT_EVENT } from './pet.js';
 import { toggleLessonCompletion } from './completion.js';
 import {
   buildDailyPlan,
+  buildNextBestAction,
   buildMiniTest,
   buildSearchIndex,
   buildWeaknessProfile,
@@ -24,6 +27,8 @@ import {
 import { learningState } from './learning-state.js';
 import { initialExpandedWeeks } from './dashboard-state.js';
 import { examHistoryStore } from './exam-history.js';
+import { currentUser } from './supabase.js';
+import { pushProfile } from './sync.js';
 
 const dashboardState = {
   activeCategory: 'all',
@@ -32,6 +37,7 @@ const dashboardState = {
   windowScrollY: 0,
   appScrollTop: 0,
   restorePending: false,
+  curriculumExpanded: false,
 };
 
 function escapeHtml(value) {
@@ -88,12 +94,16 @@ export function renderDashboard(root) {
     <h2 class="sr-only" data-route-heading>Tổng quan học tập</h2>
     <section class="stats-bar" id="dash-stats" aria-label="Tiến độ học"></section>
     <section class="learning-hub" id="learning-hub" aria-labelledby="learning-hub-title"></section>
-    <div class="category-tabs" id="category-tabs" role="group" aria-label="Lọc theo kỹ năng"></div>
-    <div id="dash-main"></div>
+    <section class="curriculum-overview" id="curriculum-overview" aria-labelledby="curriculum-overview-title"></section>
+    <section class="curriculum-browser"${dashboardState.curriculumExpanded ? '' : ' hidden'}>
+      <div class="category-tabs" id="category-tabs" role="group" aria-label="Lọc theo kỹ năng"></div>
+      <div id="dash-main"></div>
+    </section>
   `;
 
   renderStats();
   renderLearningHub(data);
+  renderCurriculumOverview(data);
   renderTabs(data);
   renderCategories(data);
   bindEvents(data);
@@ -106,6 +116,8 @@ const CATEGORY_SHORT = Object.freeze({
   kanji: 'Hán tự', vocabulary: 'Từ vựng', grammar: 'Ngữ pháp', reading: 'Đọc', listening: 'Nghe',
 });
 
+const CONFIDENCE_LABEL = Object.freeze({ low: 'thấp', medium: 'vừa', high: 'cao' });
+
 function lessonButton(item, label = 'Học ngay') {
   const found = findLesson(item.lessonId);
   const title = item.title || found?.lesson?.title || item.lessonId;
@@ -115,8 +127,27 @@ function lessonButton(item, label = 'Học ngay') {
         <span class="plan-item-type">${item.type === 'review' ? 'Ôn lỗi sai' : escapeHtml(CATEGORY_SHORT[item.categoryId] || item.categoryId)}</span>
         <div class="plan-item-title" lang="ja">${renderFurigana(title)}</div>
       </div>
-      <button type="button" class="study-btn" data-learning-open="${escapeHtml(item.lessonId)}">${label}</button>
+      <button type="button" class="study-btn" ${item.type === 'review' ? 'data-learning-review' : `data-learning-open="${escapeHtml(item.lessonId)}"`}>${item.type === 'review' ? 'Ôn lỗi' : label}</button>
     </article>`;
+}
+
+function targetDateSummary(value) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value || '')) return 'Chưa đặt ngày thi';
+  const target = new Date(`${value}T00:00:00`);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const days = Math.ceil((target.getTime() - today.getTime()) / 86_400_000);
+  if (!Number.isFinite(days)) return 'Chưa đặt ngày thi';
+  if (days < 0) return 'Ngày thi đã qua';
+  if (days === 0) return 'Ngày thi là hôm nay';
+  return `Còn ${days} ngày`;
+}
+
+function trendLabel(trend) {
+  if (!trend?.samples) return 'Chưa đủ mẫu';
+  if (trend.delta > 0) return `+${trend.delta} điểm`;
+  if (trend.delta < 0) return `${trend.delta} điểm`;
+  return 'Ổn định';
 }
 
 function renderLearningHub(data) {
@@ -125,10 +156,12 @@ function renderLearningHub(data) {
   const reviews = learningState.getReviews();
   const dueReviews = learningState.getDueReviews();
   const progress = getProgressMap();
-  const plan = buildDailyPlan({ lessons: data, progress, reviews, maxItems: 5 });
+  const plan = buildDailyPlan({ lessons: data, progress, reviews, maxItems: 3 });
   const readiness = calculateReadiness({ lessons: data, progress, reviews, examHistory: examHistoryStore.get() });
   const weaknessProfile = buildWeaknessProfile(reviews, { limit: 3 });
   const miniTest = buildMiniTest(reviews, { limit: 5 });
+  const nextAction = buildNextBestAction({ plan, weaknessProfile, miniTest });
+  const settings = getSettings();
   const bookmarks = learningState.getBookmarks().map((lessonId) => {
     const found = findLesson(lessonId);
     return found ? { type: 'bookmark', lessonId, categoryId: found.category.id, title: found.lesson.title } : null;
@@ -138,36 +171,43 @@ function renderLearningHub(data) {
       <span>${escapeHtml(CATEGORY_SHORT[categoryId] || categoryId)}</span>
       <progress max="100" value="${value}" aria-label="${escapeHtml(CATEGORY_SHORT[categoryId] || categoryId)}: ${value}%">${value}%</progress>
       <strong>${value}%</strong>
+      <small>Tin cậy ${escapeHtml(CONFIDENCE_LABEL[readiness.evidenceByCategory?.[categoryId]?.confidence] || 'thấp')}</small>
     </div>`).join('');
 
   hub.innerHTML = `
     <header class="learning-hub-head">
       <div><p class="eyebrow">Lộ trình thích ứng</p><h2 id="learning-hub-title">Hôm nay học gì?</h2></div>
-      <div class="readiness-score" aria-label="Mức sẵn sàng thi ${readiness.overall}%"><strong>${readiness.overall}%</strong><span>Sẵn sàng thi</span></div>
+      <div class="readiness-score" aria-label="Mức sẵn sàng thi ${readiness.overall}%, độ tin cậy ${escapeHtml(CONFIDENCE_LABEL[readiness.confidence])}"><strong>${readiness.overall}%</strong><span>Tin cậy ${escapeHtml(CONFIDENCE_LABEL[readiness.confidence])}</span></div>
     </header>
-    <ol class="learning-loop" aria-label="Vòng lặp học thích ứng">
-      <li><span>01</span><strong>Học bài</strong><small>${readiness.evidence.completedLessons} bài xong</small></li>
-      <li><span>02</span><strong>Ghi lỗi sai</strong><small>${weaknessProfile.total} điểm yếu</small></li>
-      <li><span>03</span><strong>Lên lịch ôn</strong><small>${dueReviews.length} đến hạn</small></li>
-      <li><span>04</span><strong>Gia sư đúng lỗi</strong><small>Cá nhân hóa</small></li>
-      <li><span>05</span><strong>Mini-test</strong><small>${miniTest.length ? `${miniTest.length} câu sẵn sàng` : 'Chờ dữ liệu lỗi'}</small></li>
-      <li><span>06</span><strong>JLPT readiness</strong><small>${readiness.overall}% hiện tại</small></li>
-    </ol>
-    ${weaknessProfile.total ? `
-      <section class="weakness-focus" aria-label="Điểm yếu ưu tiên">
-        <div><p class="eyebrow">Bước tiếp theo</p><h3>${weaknessProfile.due ? `${weaknessProfile.due} lỗi đang đến hạn` : `${weaknessProfile.total} lỗi cần củng cố`}</h3><p>Gia sư và mini-test sẽ dùng đúng các câu bạn từng nhầm.</p></div>
-        <div class="weakness-focus__actions">
-          <button type="button" class="study-btn" data-learning-tutor>Hỏi gia sư</button>
-          ${miniTest.length ? `<button type="button" class="complete-modal-btn" data-learning-review>Mini-test ${miniTest.length} câu</button>` : ''}
-        </div>
-      </section>` : ''}
+    <section class="today-primary-action" aria-label="Việc nên làm tiếp theo">
+      <div><p class="eyebrow">Việc nên làm tiếp theo</p><h3 lang="${nextAction.type === 'lesson' ? 'ja' : 'vi'}">${nextAction.type === 'lesson' ? renderFurigana(nextAction.title) : escapeHtml(nextAction.title)}</h3><p>${escapeHtml(nextAction.reason)}</p></div>
+      <button type="button" class="complete-modal-btn" data-learning-route="${escapeHtml(nextAction.route)}">${escapeHtml(nextAction.label)}</button>
+    </section>
+    <details class="learning-loop-details">
+      <summary>Vì sao đây là bước phù hợp?</summary>
+      <ol class="learning-loop" aria-label="Vòng lặp học thích ứng">
+        <li><span>01</span><strong>Học bài</strong><small>${readiness.evidence.completedLessons} bài xong</small></li>
+        <li><span>02</span><strong>Ghi lỗi sai</strong><small>${weaknessProfile.total} điểm yếu</small></li>
+        <li><span>03</span><strong>Lên lịch ôn</strong><small>${dueReviews.length} đến hạn</small></li>
+        <li><span>04</span><strong>Gia sư đúng lỗi</strong><small>Cá nhân hóa</small></li>
+        <li><span>05</span><strong>Mini-test</strong><small>${miniTest.length ? `${miniTest.length} câu sẵn sàng` : 'Chờ dữ liệu lỗi'}</small></li>
+        <li><span>06</span><strong>Mức sẵn sàng</strong><small>${readiness.overall}% hiện tại</small></li>
+      </ol>
+    </details>
     <div class="learning-hub-grid">
-      <div class="daily-plan" aria-label="Kế hoạch học hôm nay">
+      <div><p class="plan-heading">Kế hoạch hôm nay · tối đa 3 việc</p><div class="daily-plan" aria-label="Kế hoạch học hôm nay">
         ${plan.length ? plan.map((item) => lessonButton(item)).join('') : '<p class="dash-empty-state">Bạn đã hoàn thành kế hoạch hôm nay 🎉</p>'}
-      </div>
-      <aside class="readiness-card" aria-label="Mức sẵn sàng theo kỹ năng">${categoryMeters}</aside>
+      </div></div>
+      <aside class="readiness-card" aria-label="Mức sẵn sàng theo kỹ năng">
+        ${categoryMeters}
+        <div class="readiness-trends"><span>7 ngày: <strong>${trendLabel(readiness.trend.days7)}</strong></span><span>30 ngày: <strong>${trendLabel(readiness.trend.days30)}</strong></span></div>
+        <label class="exam-target-field">Ngày thi mục tiêu
+          <input type="date" data-exam-target value="${escapeHtml(settings.examTargetDate || '')}">
+          <small>${escapeHtml(targetDateSummary(settings.examTargetDate))}</small>
+        </label>
+      </aside>
     </div>
-    <p class="readiness-evidence">Dựa trên ${readiness.evidence.completedLessons}/${readiness.evidence.totalLessons} bài · ${readiness.evidence.reviewAttempts} lượt ôn · ${readiness.evidence.examAttempts} đề thi thử.</p>
+    <p class="readiness-evidence">Mức sẵn sàng JLPT dựa trên ${readiness.evidence.completedLessons}/${readiness.evidence.totalLessons} bài · ${readiness.evidence.reviewAttempts} lượt ôn · ${readiness.evidence.examAttempts} đề thi thử. Độ tin cậy hiện ${escapeHtml(CONFIDENCE_LABEL[readiness.confidence])}.</p>
     <div class="learning-tools">
       <label class="curriculum-search"><span class="sr-only">Tìm trong toàn bộ nội dung N2</span><input type="search" data-learning-search placeholder="Tìm kanji, từ vựng, ngữ pháp…" autocomplete="off"><span aria-hidden="true">⌕</span></label>
       <span class="learning-tool-count">${dueReviews.length} mục đến hạn ôn · ${bookmarks.length} bài đã lưu</span>
@@ -175,6 +215,9 @@ function renderLearningHub(data) {
     <div class="learning-search-results" data-learning-results aria-live="polite"></div>
     ${bookmarks.length ? `<details class="saved-lessons"><summary>Bài đã lưu (${bookmarks.length})</summary><div>${bookmarks.slice(0, 8).map((item) => lessonButton(item, 'Mở')).join('')}</div></details>` : ''}
   `;
+  window.dispatchEvent(new CustomEvent(PET_CONTEXT_EVENT, {
+    detail: { dailyPlan: plan, weaknessProfile, miniTest, readiness, reviews },
+  }));
   bindLearningHub(data, hub);
 }
 
@@ -182,6 +225,11 @@ function bindLearningHub(data, hub) {
   const searchIndex = buildSearchIndex(data, getBookContent);
   const results = hub.querySelector('[data-learning-results]');
   hub.addEventListener('click', (event) => {
+    const route = event.target.closest('[data-learning-route]')?.dataset.learningRoute;
+    if (route) {
+      navigate(route);
+      return;
+    }
     if (event.target.closest('[data-learning-review]')) {
       navigate('#/review');
       return;
@@ -205,6 +253,19 @@ function bindLearningHub(data, hub) {
     results.innerHTML = matches.length
       ? `<p class="search-result-count">${matches.length} kết quả gần nhất</p><div class="search-result-grid">${matches.map((item) => lessonButton({ ...item, type: 'search' }, 'Mở')).join('')}</div>`
       : '<p class="dash-empty-state">Không tìm thấy nội dung phù hợp.</p>';
+  });
+  hub.querySelector('[data-exam-target]')?.addEventListener('change', async (event) => {
+    const value = /^\d{4}-\d{2}-\d{2}$/.test(event.target.value) ? event.target.value : '';
+    setSettings({ examTargetDate: value });
+    const helper = event.target.parentElement?.querySelector('small');
+    if (helper) helper.textContent = targetDateSummary(value);
+    try {
+      const user = await currentUser();
+      if (user?.id) await pushProfile(user.id, { examTargetDate: value });
+    } catch (error) {
+      // The local choice remains usable offline and will migrate on the next successful sync.
+      console.warn('[dashboard] target date sync deferred:', error?.message || error);
+    }
   });
 }
 function renderStats() {
@@ -244,6 +305,28 @@ function renderTabs(data) {
   };
   tabsEl.innerHTML = makeTab('all', 'Tất cả')
     + (data.categories || []).map((cat) => makeTab(cat.id, cat.name)).join('');
+}
+
+function renderCurriculumOverview(data) {
+  const overview = document.getElementById('curriculum-overview');
+  if (!overview) return;
+  const rows = (data.categories || []).map((category) => {
+    const lessons = (category.weeks || []).flatMap((week) => week.lessons || []);
+    const done = lessons.filter((lesson) => isDone(lesson.id)).length;
+    const percentage = lessons.length ? Math.round((done / lessons.length) * 100) : 0;
+    return `
+      <button type="button" class="curriculum-skill-row" data-curriculum-category="${escapeHtml(category.id)}">
+        <span><strong>${escapeHtml(category.name)}</strong>${category.nameEn ? `<small lang="en">${escapeHtml(category.nameEn)}</small>` : ''}</span>
+        <progress max="100" value="${percentage}" aria-label="${escapeHtml(category.name)}: ${percentage}%">${percentage}%</progress>
+        <span>${done}/${lessons.length}</span>
+      </button>`;
+  }).join('');
+  overview.innerHTML = `
+    <header class="curriculum-overview__head">
+      <div><p class="eyebrow">Lớp nội dung thứ hai</p><h2 id="curriculum-overview-title">Toàn bộ giáo trình</h2></div>
+      <button type="button" class="study-btn curriculum-toggle" data-curriculum-toggle aria-expanded="${dashboardState.curriculumExpanded}">${dashboardState.curriculumExpanded ? 'Thu gọn giáo trình' : 'Xem toàn bộ giáo trình'}</button>
+    </header>
+    <div class="curriculum-skill-list">${rows}</div>`;
 }
 
 function renderCategories(data) {
@@ -347,6 +430,33 @@ function updateAncestorCounts(item, data) {
 function bindEvents(data) {
   const tabsEl = document.getElementById('category-tabs');
   const mainEl = document.getElementById('dash-main');
+  const overviewEl = document.getElementById('curriculum-overview');
+
+  const setCurriculumExpanded = (expanded, categoryId = null) => {
+    dashboardState.curriculumExpanded = expanded;
+    const browser = document.querySelector('.curriculum-browser');
+    if (browser) browser.hidden = !expanded;
+    const toggle = overviewEl?.querySelector('[data-curriculum-toggle]');
+    if (toggle) {
+      toggle.setAttribute('aria-expanded', String(expanded));
+      toggle.textContent = expanded ? 'Thu gọn giáo trình' : 'Xem toàn bộ giáo trình';
+    }
+    if (categoryId) {
+      dashboardState.activeCategory = categoryId;
+      renderTabs(data);
+      renderCategories(data);
+    }
+    if (expanded) document.querySelector('.curriculum-browser')?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  };
+
+  overviewEl?.addEventListener('click', (event) => {
+    if (event.target.closest('[data-curriculum-toggle]')) {
+      setCurriculumExpanded(!dashboardState.curriculumExpanded);
+      return;
+    }
+    const categoryId = event.target.closest('[data-curriculum-category]')?.dataset.curriculumCategory;
+    if (categoryId) setCurriculumExpanded(true, categoryId);
+  });
 
   tabsEl?.addEventListener('click', (event) => {
     const button = event.target.closest('.tab-btn');

@@ -8,6 +8,7 @@
 
 import { getSettings, setSettings } from './store.js';
 import { getClient } from './supabase.js';
+import { activateModalDialog } from './modal-dialog.js';
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -125,6 +126,7 @@ export async function askAudio({ system, history = [], audioBase64, mimeType, pr
 // ---------------------------------------------------------------------------
 
 const MODAL_ID = 'gemini-settings-overlay';
+let activeSettingsDialog = null;
 
 const MODEL_SUGGESTIONS = [
   'gemini-3.5-flash-lite',
@@ -136,6 +138,10 @@ const LIVE_MODEL_SUGGESTIONS = [
 ];
 
 function closeExistingSettingsModal() {
+  if (activeSettingsDialog) {
+    activeSettingsDialog.close();
+    return;
+  }
   const existing = document.getElementById(MODAL_ID);
   if (existing) existing.remove();
 }
@@ -150,7 +156,7 @@ export function openSettings() {
   closeExistingSettingsModal();
 
   const current = getSettings();
-  const returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  const trigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
 
   const overlay = document.createElement('div');
   overlay.className = 'modal-overlay settings-modal active';
@@ -258,31 +264,13 @@ export function openSettings() {
   overlay.appendChild(card);
   document.body.appendChild(overlay);
 
-  function onKeydown(e) {
-    if (e.key === 'Escape') {
-      e.preventDefault();
-      close();
-      return;
-    }
-    if (e.key !== 'Tab') return;
-    const focusable = [...card.querySelectorAll('button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])')];
-    if (!focusable.length) return;
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    if (e.shiftKey && document.activeElement === first) {
-      e.preventDefault();
-      last.focus();
-    } else if (!e.shiftKey && document.activeElement === last) {
-      e.preventDefault();
-      first.focus();
-    }
-  }
+  let modalDialog = null;
 
   function close() {
     overlay.removeEventListener('click', onOverlayClick);
-    document.removeEventListener('keydown', onKeydown);
+    modalDialog?.release();
     overlay.remove();
-    returnFocus?.focus?.();
+    activeSettingsDialog = null;
   }
 
   function onOverlayClick(e) {
@@ -291,7 +279,6 @@ export function openSettings() {
 
   overlay.addEventListener('click', onOverlayClick);
   closeBtn.addEventListener('click', close);
-  document.addEventListener('keydown', onKeydown);
 
   saveBtn.addEventListener('click', () => {
     const nextModel = modelInput.value.trim() || current.model;
@@ -302,6 +289,6 @@ export function openSettings() {
     setTimeout(close, 600);
   });
 
-  // Focus the most useful field for keyboard/a11y users.
-  modelInput.focus();
+  modalDialog = activateModalDialog(overlay, { trigger, initialFocus: modelInput, onEscape: close });
+  activeSettingsDialog = { close };
 }

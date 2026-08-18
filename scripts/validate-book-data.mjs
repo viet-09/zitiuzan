@@ -19,6 +19,7 @@ const CATEGORY_DEFINITIONS = Object.freeze({
 
 const errors = [];
 const warnings = [];
+const canonicalContentByCategory = new Map();
 let validatedFiles = 0;
 let validatedLessons = 0;
 let validatedQuestions = 0;
@@ -558,6 +559,49 @@ function validateImagesFile(category, content, lessonIds, fileLabel) {
   }
 }
 
+function expectedVietnameseItems(category, lesson) {
+  if (!isRecord(lesson)) return 0;
+  if (category === 'kanji') {
+    return (Array.isArray(lesson.kanji) ? lesson.kanji.length : 0)
+      + (Array.isArray(lesson.reviewKanji) ? lesson.reviewKanji.length : 0);
+  }
+  if (category === 'vocabulary') {
+    return (Array.isArray(lesson.sections) ? lesson.sections : [])
+      .reduce((total, section) => total + (Array.isArray(section?.words) ? section.words.length : 0), 0);
+  }
+  if (category === 'grammar') return Array.isArray(lesson.patterns) ? lesson.patterns.length : 0;
+  return 0;
+}
+
+function validateVietnameseFile(category, content, lessonIds, fileLabel) {
+  if (!isRecord(content)) {
+    fail('TYPE_OBJECT', fileLabel, 'Expected an object keyed by lesson ID.');
+    return;
+  }
+  const canonical = canonicalContentByCategory.get(category) || {};
+  const vietnameseSignal = /[ăâđêôơưáàảãạấầẩẫậắằẳẵặéèẻẽẹếềểễệíìỉĩịóòỏõọốồổỗộớờởỡợúùủũụứừửữựýỳỷỹỵ]/iu;
+  for (const [id, entries] of Object.entries(content)) {
+    const location = `${fileLabel}.${id}`;
+    if (!lessonIds.has(id)) {
+      fail('VI_UNKNOWN_LESSON', location, 'Lesson ID not in canonical book.');
+      continue;
+    }
+    if (!requireArray(entries, location)) continue;
+    const expected = expectedVietnameseItems(category, canonical[id]);
+    if (entries.length !== expected) {
+      fail('VI_ITEM_COUNT', location, `Expected ${expected} explanation(s) in canonical display order; found ${entries.length}.`);
+    }
+    entries.forEach((entry, index) => {
+      const itemLocation = `${location}[${index}]`;
+      if (!requireString(entry, itemLocation, { nonEmpty: true })) return;
+      if (entry.length > 500) fail('VI_TEXT_LENGTH', itemLocation, 'Vietnamese explanation must be at most 500 characters.');
+      if (!vietnameseSignal.test(entry)) {
+        fail('VI_DIACRITICS', itemLocation, 'Vietnamese copy must include normal diacritics; unaccented generated prose is not release-ready.');
+      }
+    });
+  }
+}
+
 const SCHEMA_VALIDATORS = Object.freeze({
   kanji: validateKanjiLesson,
   vocabulary: validateVocabularyLesson,
@@ -716,6 +760,7 @@ function validateManifest(manifest, lessonIdsByCategory) {
     }
 
     const canonicalIds = Object.keys(content);
+    canonicalContentByCategory.set(category, content);
     compareSets(canonicalIds, manifestIds, location, 'canonical lesson IDs', 'manifest lesson IDs');
     compareSets(canonicalIds, lessonIdsByCategory.get(category) || [], `data/book/${entry.file}`, 'canonical lesson IDs', 'lessons.json IDs');
     const pattern = new RegExp(`^${definition.prefix}[1-9]\\d*d[1-9]\\d*$`);
@@ -766,6 +811,7 @@ validateManifest(manifest, lessonIdsByCategory);
 const enrichmentFiles = [
   { suffix: 'classification.json', fn: validateEnrichmentFile },
   { suffix: 'images.json', fn: validateImagesFile },
+  { suffix: 'vietnamese.json', fn: validateVietnameseFile },
 ];
 for (const [category, entry] of Object.entries(manifest?.categories || {})) {
   if (!isRecord(entry)) continue;

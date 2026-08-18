@@ -2,6 +2,7 @@
 // Mandatory Google authentication gate.
 
 import { signInWithGoogle } from './supabase.js';
+import { activateModalDialog } from './modal-dialog.js';
 
 let activeDialog = null;
 let dialogSequence = 0;
@@ -32,20 +33,9 @@ export function openSignInGate(options = {}) {
     </section>`;
 
   document.body.appendChild(overlay);
-  const backgroundState = Array.from(document.body.children)
-    .filter((element) => element !== overlay && element instanceof HTMLElement)
-    .map((element) => ({
-      element,
-      inert: Boolean(element.inert),
-      ariaHidden: element.getAttribute('aria-hidden'),
-    }));
-  backgroundState.forEach(({ element }) => {
-    element.inert = true;
-    element.setAttribute('aria-hidden', 'true');
-  });
-
   const status = overlay.querySelector('[data-gate-status]');
   const googleBtn = overlay.querySelector('[data-gate-action="google"]');
+  let modalDialog = null;
   let closed = false;
 
   function setStatus(message, kind = '') {
@@ -56,11 +46,7 @@ export function openSignInGate(options = {}) {
   function closeDialog() {
     if (closed) return;
     closed = true;
-    backgroundState.forEach(({ element, inert, ariaHidden }) => {
-      element.inert = inert;
-      if (ariaHidden === null) element.removeAttribute('aria-hidden');
-      else element.setAttribute('aria-hidden', ariaHidden);
-    });
+    modalDialog?.release({ restoreFocus: false });
     overlay.remove();
     activeDialog = null;
   }
@@ -79,7 +65,8 @@ export function openSignInGate(options = {}) {
     }
   });
 
+  // This gate is mandatory, so Escape is contained but intentionally does not close it.
+  modalDialog = activateModalDialog(overlay, { initialFocus: googleBtn });
   activeDialog = { close: closeDialog, element: overlay };
-  window.setTimeout(() => googleBtn?.focus(), 0);
   return activeDialog;
 }

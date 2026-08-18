@@ -19,6 +19,7 @@ export const DEFAULT_SETTINGS = {
   model: 'gemini-3.5-flash-lite',
   liveModel: 'gemini-3.1-flash-live-preview',
   furigana: true,
+  examTargetDate: '',
 };
 
 // Points awarded/revoked when a lesson is marked done/undone while signed in.

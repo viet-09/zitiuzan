@@ -8,6 +8,7 @@ import { buildMiniTest, buildWeaknessProfile, calculateReadiness, formatWeakness
 import { examHistoryStore } from './exam-history.js';
 import { renderFurigana } from './furigana.js';
 import { navigate } from './router.js';
+import { recordPetMemory } from './pet.js';
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (ch) => ({
@@ -31,6 +32,7 @@ export function renderReview(root) {
   let selectedIndex = -1;
   let score = 0;
   let finished = false;
+  let memoryRecorded = false;
 
   const paintEmpty = () => {
     root.innerHTML = `
@@ -46,12 +48,20 @@ export function renderReview(root) {
     const current = readiness();
     const delta = current.overall - initialReadiness.overall;
     const deltaLabel = delta > 0 ? `+${delta}` : String(delta);
+    if (!memoryRecorded) {
+      memoryRecorded = true;
+      recordPetMemory({
+        type: 'mini-test',
+        title: `Hoàn thành mini-test ${score}/${questions.length}`,
+        detail: `${deltaLabel} điểm mức sẵn sàng JLPT`,
+      });
+    }
     root.innerHTML = `
       <section class="review-session review-result">
         <p class="eyebrow">Vòng lặp đã cập nhật</p>
         <h1 class="section-heading" data-route-heading>${score}/${questions.length} câu đúng</h1>
-        <div class="review-result__readiness" aria-label="Readiness hiện tại ${current.overall}%">
-          <span>Readiness hiện tại</span><strong>${current.overall}%</strong><small>${deltaLabel} điểm sau mini-test</small>
+        <div class="review-result__readiness" aria-label="Mức sẵn sàng hiện tại ${current.overall}%">
+          <span>Mức sẵn sàng hiện tại</span><strong>${current.overall}%</strong><small>${deltaLabel} điểm sau mini-test · độ tin cậy ${current.confidence === 'high' ? 'cao' : current.confidence === 'medium' ? 'vừa' : 'thấp'}</small>
         </div>
         <p>Kết quả vừa được ghi lại vào lịch ôn. Gia sư cũng đã nhận hồ sơ điểm yếu mới nhất.</p>
         <div class="review-result__actions">

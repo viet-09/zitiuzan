@@ -209,7 +209,7 @@ export function buildMiniTest(reviews, { now = new Date(), limit = 5, lessonId =
     .slice(0, Math.max(1, Number(limit) || 5));
 }
 
-export function buildDailyPlan({ lessons, progress = {}, reviews = [], now = new Date(), maxItems = 5 }) {
+export function buildDailyPlan({ lessons, progress = {}, reviews = [], now = new Date(), maxItems = 3 }) {
   const mistakes = reviews.filter((review) => (
     (Number(review?.lapses) || 0) > 0 || review?.lastResult === 'wrong'
   ));
@@ -241,12 +241,103 @@ export function buildDailyPlan({ lessons, progress = {}, reviews = [], now = new
   return plan;
 }
 
-export function calculateReadiness({ lessons, progress = {}, reviews = [], examHistory = [] }) {
+export function buildNextBestAction({ plan = [], weaknessProfile = {}, miniTest = [] } = {}) {
+  const due = Math.max(0, Number(weaknessProfile?.due) || 0);
+  const total = Math.max(0, Number(weaknessProfile?.total) || 0);
+  if (miniTest.length && (due || total)) {
+    const count = due || total;
+    return {
+      type: 'review',
+      title: due ? `Ôn ${count} lỗi đang đến hạn` : `Củng cố ${count} lỗi đã ghi`,
+      reason: 'Mini-test dùng đúng các câu bạn từng nhầm.',
+      label: 'Ôn 3 phút',
+      route: '#/review',
+    };
+  }
+  const next = plan.find((item) => item?.type === 'lesson');
+  if (next?.lessonId) {
+    return {
+      type: 'lesson',
+      title: next.title || 'Bài học tiếp theo',
+      reason: `Bước nhỏ tiếp theo cho ${next.categoryId || 'N2'}.`,
+      label: 'Mở bài tiếp theo',
+      route: `#/lesson/${encodeURIComponent(next.lessonId)}`,
+      lessonId: next.lessonId,
+      categoryId: next.categoryId || '',
+    };
+  }
+  return {
+    type: 'rest',
+    title: 'Kế hoạch hôm nay đã hoàn tất',
+    reason: 'Bạn có thể nghỉ ngơi hoặc làm một đề thi thử khi thấy sẵn sàng.',
+    label: 'Mở thi thử',
+    route: '#/exam',
+  };
+}
+
+const EXAM_SECTION_BY_CATEGORY = Object.freeze({
+  kanji: 'vocab_grammar',
+  vocabulary: 'vocab_grammar',
+  grammar: 'vocab_grammar',
+  reading: 'reading',
+  listening: 'listening',
+});
+
+function percentage(value) {
+  const number = typeof value === 'string' ? Number.parseFloat(value) : Number(value);
+  return Number.isFinite(number) ? Math.min(100, Math.max(0, number)) : null;
+}
+
+function examSectionEvidence(history, categoryId) {
+  const sectionId = EXAM_SECTION_BY_CATEGORY[categoryId];
+  let correct = 0;
+  let total = 0;
+  for (const attempt of history) {
+    const section = attempt?.score?.bySection?.[sectionId];
+    const sectionTotal = Math.max(0, Number(section?.total) || 0);
+    const sectionCorrect = Math.min(sectionTotal, Math.max(0, Number(section?.correct) || 0));
+    correct += sectionCorrect;
+    total += sectionTotal;
+  }
+  return { correct, total, score: total ? (correct / total) * 100 : null };
+}
+
+function evidenceConfidence({ completedLessons, totalLessons, reviewAttempts, examQuestions }) {
+  const completionThreshold = Math.max(8, Math.ceil(Math.max(0, totalLessons) * 0.25));
+  if (completedLessons >= completionThreshold && reviewAttempts >= 10 && examQuestions >= 20) return 'high';
+  if (completedLessons >= Math.min(3, Math.max(1, totalLessons)) && (reviewAttempts >= 5 || examQuestions >= 10)) return 'medium';
+  return 'low';
+}
+
+function trendWindow(history, nowTimestamp, days) {
+  const windowMs = days * 86_400_000;
+  const recent = [];
+  const previous = [];
+  for (const attempt of history) {
+    const timestamp = Date.parse(attempt?.created_at || attempt?.timestamp);
+    const score = percentage(attempt?.score?.percentage);
+    if (!Number.isFinite(timestamp) || score == null) continue;
+    const age = nowTimestamp - timestamp;
+    if (age >= 0 && age <= windowMs) recent.push(score);
+    else if (age > windowMs && age <= windowMs * 2) previous.push(score);
+  }
+  const average = (values) => values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null;
+  const recentAverage = average(recent);
+  const previousAverage = average(previous);
+  return {
+    delta: recentAverage == null || previousAverage == null ? 0 : Math.round(recentAverage - previousAverage),
+    samples: recent.length,
+  };
+}
+
+export function calculateReadiness({ lessons, progress = {}, reviews = [], examHistory = [], now = new Date() }) {
   const rows = flattenLessons(lessons);
   const categories = [...new Set(rows.map((row) => row.category.id))];
-  const examScores = examHistory.map((entry) => Number(entry?.score?.percentage)).filter(Number.isFinite);
+  const history = Array.isArray(examHistory) ? examHistory : [];
+  const examScores = history.map((entry) => percentage(entry?.score?.percentage)).filter((value) => value != null);
   const examScore = examScores.length ? examScores.reduce((sum, value) => sum + value, 0) / examScores.length : 0;
   const byCategory = {};
+  const evidenceByCategory = {};
   for (const categoryId of categories) {
     const categoryRows = rows.filter((row) => row.category.id === categoryId);
     const completion = categoryRows.length
@@ -256,17 +347,40 @@ export function calculateReadiness({ lessons, progress = {}, reviews = [], examH
     const attempts = categoryReviews.reduce((sum, review) => sum + (Number(review.attempts) || 0), 0);
     const correct = categoryReviews.reduce((sum, review) => sum + (Number(review.correctAttempts) || 0), 0);
     const reviewAccuracy = attempts ? correct / attempts : 0;
-    byCategory[categoryId] = Math.round(Math.min(100, completion * 50 + reviewAccuracy * 30 + examScore * 0.2));
+    const section = examSectionEvidence(history, categoryId);
+    const categoryExamScore = section.score == null ? examScore : section.score;
+    byCategory[categoryId] = Math.round(Math.min(100, completion * 45 + reviewAccuracy * 25 + categoryExamScore * 0.3));
+    const categoryEvidence = {
+      completedLessons: categoryRows.filter((row) => progress[row.lesson.id]).length,
+      totalLessons: categoryRows.length,
+      reviewAttempts: attempts,
+      examQuestions: section.total,
+    };
+    evidenceByCategory[categoryId] = {
+      ...categoryEvidence,
+      confidence: evidenceConfidence(categoryEvidence),
+    };
   }
   const values = Object.values(byCategory);
   const completedLessons = rows.filter((row) => progress[row.lesson.id]).length;
   const reviewAttempts = reviews.reduce((sum, review) => sum + (Number(review?.attempts) || 0), 0);
   const weakestCategory = Object.entries(byCategory)
     .sort((a, b) => a[1] - b[1] || a[0].localeCompare(b[0]))[0]?.[0] || '';
+  const confidenceValues = Object.values(evidenceByCategory).map((entry) => entry.confidence);
+  const confidence = confidenceValues.length >= 4 && confidenceValues.filter((value) => value === 'high').length >= 4
+    ? 'high'
+    : confidenceValues.length >= 3 && confidenceValues.filter((value) => value !== 'low').length >= 3 ? 'medium' : 'low';
+  const nowTimestamp = now instanceof Date ? now.getTime() : new Date(now).getTime();
   return {
     overall: values.length ? Math.round(values.reduce((sum, value) => sum + value, 0) / values.length) : 0,
     byCategory,
     weakestCategory,
+    confidence,
+    evidenceByCategory,
+    trend: {
+      days7: trendWindow(history, nowTimestamp, 7),
+      days30: trendWindow(history, nowTimestamp, 30),
+    },
     evidence: {
       completedLessons,
       totalLessons: rows.length,

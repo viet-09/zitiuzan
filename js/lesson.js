@@ -20,6 +20,7 @@ import { startLessonTimer } from './study-time.js';
 import { toggleLessonCompletion } from './completion.js';
 import { learningState } from './learning-state.js';
 import { buildBookViewerModel, renderBookViewerStrip } from './book-viewer.js';
+import { activateModalDialog } from './modal-dialog.js';
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (char) => ({
@@ -285,7 +286,7 @@ function renderGrammar(lessonId, content) {
       ${(Array.isArray(pattern?.examples) ? pattern.examples : []).map((example) => `
         <div class="example-box">
           ${renderJapaneseLine(example?.jp || '')}
-          ${example?.en ? `<div class="vi-sentence" lang="en">${escapeHtml(example.en)}</div>` : ''}
+          ${example?.en ? `<div class="vi-sentence example-meaning-en" lang="en">${escapeHtml(example.en)}</div>` : ''}
         </div>`).join('')}
     </article>`).join('');
   return `<section class="content-section grammar-section"><h2 class="section-heading">Ngữ pháp</h2>${patterns}${renderQuestions(content.practice, lessonId, '練習 · Luyện tập')}</section>`;
@@ -452,7 +453,13 @@ function pageHtml(found, lessonId, content) {
         </div>
         ${titleEn ? `<p class="lesson-title-en" lang="en">${escapeHtml(titleEn)}</p>` : ''}
       </header>
-      <div class="lesson-body">${renderBookContent(category?.id, content, lessonId)}</div>
+      <nav class="lesson-local-nav" aria-label="Mục lục bài học">
+        <a href="#lesson-content">Nội dung</a>
+        <a href="#lesson-practice" data-lesson-practice-link>Luyện tập</a>
+        <button type="button" data-action="ask-tutor">Gia sư</button>
+        <span class="lesson-local-progress"><strong data-lesson-progress-text>0/0 câu</strong><progress max="1" value="0" data-lesson-progress aria-label="Tiến độ câu luyện tập"></progress></span>
+      </nav>
+      <div class="lesson-body" id="lesson-content">${renderBookContent(category?.id, content, lessonId)}</div>
       <div class="lesson-footer-actions">
         <button type="button" class="tutor-lesson-btn" data-action="ask-tutor">🎓 Hỏi gia sư AI</button>
         <button type="button" class="back-btn back-btn-bottom" data-action="back">← Quay lại tổng quan</button>
@@ -503,6 +510,35 @@ function handleQuiz(button, lessonId, categoryId) {
       now: new Date(),
     });
   }
+  if (correct >= 0 && !wasCorrect && !container.querySelector('.quiz-inline-coach')) {
+    container.insertAdjacentHTML('beforeend', `
+      <div class="quiz-inline-coach">
+        <span>Đã ghi vào sổ lỗi và lên lịch ôn.</span>
+        <button type="button" class="study-btn" data-action="ask-tutor">Hỏi gia sư về lỗi này</button>
+      </div>`);
+  }
+  updateLessonProgress(container.closest('.lesson-page'));
+}
+
+function updateLessonProgress(scope) {
+  if (!scope) return;
+  const questions = [...scope.querySelectorAll('.quiz-question')];
+  const answered = questions.filter((question) => question.classList.contains('is-answered')).length;
+  const output = scope.querySelector('[data-lesson-progress-text]');
+  const progress = scope.querySelector('[data-lesson-progress]');
+  if (output) output.textContent = `${answered}/${questions.length} câu`;
+  if (progress) {
+    progress.max = Math.max(1, questions.length);
+    progress.value = answered;
+    progress.setAttribute('aria-label', `Đã làm ${answered} trên ${questions.length} câu luyện tập`);
+  }
+  const block = scope.querySelector('.quiz-block');
+  const link = scope.querySelector('[data-lesson-practice-link]');
+  if (block) block.id = 'lesson-practice';
+  if (link) {
+    link.hidden = !block;
+    link.setAttribute('aria-disabled', String(!block));
+  }
 }
 
 function lessonContext(found, content) {
@@ -519,15 +555,20 @@ function lessonContext(found, content) {
 export function renderLesson(root, id) {
   let popup = null;
   let popupTrigger = null;
+  let popupDialog = null;
   let tutorModal = null;
   let tutorController = null;
   let tutorTrigger = null;
+  let tutorDialog = null;
   let bookViewer = null;
   let bookViewerTrigger = null;
+  let bookViewerDialog = null;
   const studyTimer = startLessonTimer(id);
 
   const closePopup = () => {
     if (!popup) return;
+    popupDialog?.release();
+    popupDialog = null;
     popup.remove();
     popup = null;
     popupTrigger?.focus?.();
@@ -538,18 +579,12 @@ export function renderLesson(root, id) {
     if (!tutorModal) return;
     tutorController?.cleanup?.();
     tutorController = null;
+    tutorDialog?.release();
+    tutorDialog = null;
     tutorModal.remove();
     tutorModal = null;
     tutorTrigger?.focus?.();
     tutorTrigger = null;
-  };
-
-  const onKeyDown = (event) => {
-    if (event.key === 'Escape') { closePopup(); closeTutorModal(); closeBookViewer(); }
-    else if (event.key === 'Tab' && popup) {
-      event.preventDefault();
-      popup.querySelector('[data-popup-close]')?.focus();
-    }
   };
 
   const paint = () => {
@@ -559,6 +594,7 @@ export function renderLesson(root, id) {
       return;
     }
     root.innerHTML = pageHtml(found, id, getBookContent(id));
+    updateLessonProgress(root.querySelector('.lesson-page'));
     void hydrateLessonAudio(root);
   };
 
@@ -580,7 +616,11 @@ export function renderLesson(root, id) {
     popup = dialog;
     dialog.querySelector('[data-popup-close]')?.addEventListener('click', closePopup);
     dialog.addEventListener('click', (event) => { if (event.target === dialog) closePopup(); });
-    dialog.querySelector('[data-popup-close]')?.focus();
+    popupDialog = activateModalDialog(dialog, {
+      trigger,
+      initialFocus: dialog.querySelector('[data-popup-close]'),
+      onEscape: closePopup,
+    });
     if (cached) return;
 
     const epoch = getCurrentRoute().epoch;
@@ -683,10 +723,17 @@ export function renderLesson(root, id) {
     dialog.querySelector('[data-tutor-modal-close]')?.addEventListener('click', closeTutorModal);
     dialog.addEventListener('click', (event) => { if (event.target === dialog) closeTutorModal(); });
     tutorController = renderTutor(dialog.querySelector('.tutor-modal-body'));
+    tutorDialog = activateModalDialog(dialog, {
+      trigger,
+      initialFocus: dialog.querySelector('[data-tutor-modal-close]'),
+      onEscape: closeTutorModal,
+    });
   };
 
   const closeBookViewer = () => {
     if (!bookViewer) return;
+    bookViewerDialog?.release();
+    bookViewerDialog = null;
     bookViewer.remove();
     bookViewer = null;
     bookViewerTrigger?.focus?.();
@@ -711,7 +758,7 @@ export function renderLesson(root, id) {
       <div class="modal-card book-viewer-card">
         <div class="modal-header">
           <h3 lang="ja">📖 ${escapeHtml(plainJapanese(getBookContent(id)?.title || ''))}</h3>
-          <button type="button" class="modal-close" data-book-viewer-close aria-label="Đóng">×</button>
+          <button type="button" class="modal-close" data-book-viewer-close aria-label="Đóng trình đọc sách">×</button>
         </div>
         <div class="modal-body book-viewer-body">
           ${renderBookViewerStrip(pages)}
@@ -723,7 +770,11 @@ export function renderLesson(root, id) {
     dialog.addEventListener('click', (event) => {
       if (event.target === dialog) closeBookViewer();
     });
-    dialog.querySelector('[data-book-viewer-close]')?.focus();
+    bookViewerDialog = activateModalDialog(dialog, {
+      trigger,
+      initialFocus: dialog.querySelector('[data-book-viewer-close]'),
+      onEscape: closeBookViewer,
+    });
     dialog.querySelector('.book-viewer-body')?.addEventListener('click', (event) => {
       const image = event.target.closest('.book-viewer-page');
       if (!image) return;
@@ -733,13 +784,11 @@ export function renderLesson(root, id) {
   };
 
   root.addEventListener('click', onClick);
-  document.addEventListener('keydown', onKeyDown);
   paint();
 
   return {
     cleanup() {
       root.removeEventListener('click', onClick);
-      document.removeEventListener('keydown', onKeyDown);
       closePopup();
       closeTutorModal();
       closeBookViewer();

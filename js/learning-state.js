@@ -2,6 +2,7 @@ import { getDueReviews, recordReviewResult } from './learning-engine.js';
 
 export const REVIEW_STORAGE_KEY = 'n2_reviews_v1';
 export const BOOKMARK_STORAGE_KEY = 'n2_bookmarks_v1';
+export const REVIEW_RECORDED_EVENT = 'n2:review-recorded';
 
 function readJSON(storage, key, fallback) {
   try {
@@ -30,6 +31,13 @@ export function createLearningState(storage = globalThis.localStorage) {
 
   return {
     getReviews,
+    replaceReviews(items) {
+      const reviews = Array.isArray(items)
+        ? items.filter((item) => item && typeof item === 'object' && typeof item.key === 'string').slice(-1000)
+        : [];
+      writeJSON(storage, REVIEW_STORAGE_KEY, reviews);
+      return reviews;
+    },
     getDueReviews(now = new Date()) {
       return getDueReviews(getReviews().filter((item) => (
         (Number(item?.lapses) || 0) > 0 || item?.lastResult === 'wrong'
@@ -42,6 +50,9 @@ export function createLearningState(storage = globalThis.localStorage) {
       if (index >= 0) reviews[index] = next;
       else reviews.push(next);
       writeJSON(storage, REVIEW_STORAGE_KEY, reviews.slice(-1000));
+      if (typeof window !== 'undefined' && typeof CustomEvent === 'function') {
+        window.dispatchEvent(new CustomEvent(REVIEW_RECORDED_EVENT, { detail: { review: { ...next } } }));
+      }
       return next;
     },
     getBookmarks,

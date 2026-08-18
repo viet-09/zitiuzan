@@ -16,9 +16,11 @@ export const USER_SCOPED_STORAGE_KEYS = Object.freeze([
   'n2_profile_v2',
   'n2_profile_prompt_seen_v2',
   'n2_completion_queue_v1',
+  'n2_review_sync_queue_v1',
   'n2_reviews_v1',
   'n2_bookmarks_v1',
   'n2_exam_history_cache_v1',
+  'n2_pet_memories_v1',
 ]);
 
 export function shouldRunLegacyMigration(markerValue) {
