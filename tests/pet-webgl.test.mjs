@@ -15,7 +15,8 @@ test('Three.js pet scene uses GLB, PBR lighting, soft shadows and delta-time int
   assert.match(source, /GLTFLoader/);
   assert.match(source, /new WebGLRenderer\(\{[\s\S]*alpha:\s*true/);
   assert.match(source, /ACESFilmicToneMapping/);
-  assert.match(source, /PCFSoftShadowMap/);
+  assert.match(source, /VSMShadowMap/);
+  assert.doesNotMatch(source, /PCFSoftShadowMap/);
   assert.match(source, /new AmbientLight/);
   assert.match(source, /new HemisphereLight/);
   assert.match(source, /new DirectionalLight/);
