@@ -5,7 +5,7 @@ const APP_SHELL = [
   './manifest.webmanifest',
   './icons/app-icon.svg',
   './css/styles.css',
-  './js/app.js',
+  './js/app.js?v=4',
   './vendor/supabase.js',
   './data/lessons.json',
 ];
