@@ -177,7 +177,6 @@ function bindLearningHub(data, hub) {
       : '<p class="dash-empty-state">Không tìm thấy nội dung phù hợp.</p>';
   });
 }
-
 function renderStats() {
   const statsEl = document.getElementById('dash-stats');
   if (!statsEl) return;
