@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="N2 Study Journal">
+  <rect width="512" height="512" rx="96" fill="#f4f0e7"/>
+  <path d="M82 98h348v316H82z" fill="#fffdf8" stroke="#24211e" stroke-width="18"/>
+  <path d="M109 143h294M109 364h294" stroke="#b6463a" stroke-width="15"/>
+  <text x="256" y="288" text-anchor="middle" font-family="serif" font-size="170" font-weight="700" fill="#24211e">N2</text>
+</svg>

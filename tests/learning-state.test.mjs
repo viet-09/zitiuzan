@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { FakeStorage } from './helpers/fake-storage.mjs';
+import { createFakeStorage } from './helpers/fake-storage.mjs';
 import {
   createLearningState,
   REVIEW_STORAGE_KEY,
@@ -9,7 +9,7 @@ import {
 } from '../js/learning-state.js';
 
 test('quiz outcomes create a durable spaced-repetition review', () => {
-  const storage = new FakeStorage();
+  const storage = createFakeStorage();
   const learning = createLearningState(storage);
   const now = new Date('2026-08-18T00:00:00.000Z');
 
@@ -39,7 +39,7 @@ test('quiz outcomes create a durable spaced-repetition review', () => {
 });
 
 test('bookmarks toggle deterministically and survive a new state instance', () => {
-  const storage = new FakeStorage();
+  const storage = createFakeStorage();
   const first = createLearningState(storage);
   assert.equal(first.toggleBookmark('k1d1'), true);
   assert.equal(first.isBookmarked('k1d1'), true);
@@ -52,7 +52,7 @@ test('bookmarks toggle deterministically and survive a new state instance', () =
 });
 
 test('malformed review and bookmark storage falls back safely', () => {
-  const storage = new FakeStorage({
+  const storage = createFakeStorage({
     [REVIEW_STORAGE_KEY]: '{broken',
     [BOOKMARK_STORAGE_KEY]: '{broken',
   });

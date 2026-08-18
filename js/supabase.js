@@ -3,7 +3,7 @@
 // Public anon key is shipped to the browser; row-level security keeps every
 // per-user table locked to its owner (see supabase/schema.sql).
 
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.0/+esm';
+import { createClient } from '../vendor/supabase.js';
 
 let _client = null;
 let _readyPromise = null;

@@ -1,0 +1,19 @@
+{
+  "name": "N2 Study Journal — 日本語総まとめ",
+  "short_name": "N2 Journal",
+  "description": "Lộ trình tự học JLPT N2 với ôn tập thích ứng, thi thử và gia sư AI.",
+  "lang": "vi",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f0e7",
+  "theme_color": "#f4f0e7",
+  "icons": [
+    {
+      "src": "icons/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

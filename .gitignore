@@ -22,6 +22,8 @@ Thumbs.db
 __pycache__/
 *.py[cod]
 node_modules/
+test-results/
+playwright-report/
 
 # Resumable Gemini extraction checkpoints; canonical JSON is tracked instead
 data/book/*.draft.json

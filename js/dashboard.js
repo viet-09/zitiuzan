@@ -1,10 +1,26 @@
 // js/dashboard.js — dashboard list, progress, accessible completion controls,
 // collapsible units, and return-position restoration.
-import { getLessons, countProgress, isDone, getStreak } from './store.js';
+import {
+  getLessons,
+  countProgress,
+  isDone,
+  getStreak,
+  getProgressMap,
+  getBookContent,
+  findLesson,
+} from './store.js';
 import { renderFurigana } from './furigana.js';
 import { navigate } from './router.js';
 import { announceLessonCompleted } from './pet.js';
 import { toggleLessonCompletion } from './completion.js';
+import {
+  buildDailyPlan,
+  buildSearchIndex,
+  calculateReadiness,
+  searchCurriculum,
+} from './learning-engine.js';
+import { learningState } from './learning-state.js';
+import { initialExpandedWeeks } from './dashboard-state.js';
 
 const dashboardState = {
   activeCategory: 'all',
@@ -26,11 +42,7 @@ function weekKey(categoryId, weekNumber) {
 
 function initializeExpandedWeeks(data) {
   if (dashboardState.initialized) return;
-  (data.categories || []).forEach((category) => {
-    (category.weeks || []).forEach((week) => {
-      dashboardState.expandedWeeks.add(weekKey(category.id, week.week));
-    });
-  });
+  dashboardState.expandedWeeks = initialExpandedWeeks(data, isDone);
   dashboardState.initialized = true;
 }
 
@@ -72,17 +84,98 @@ export function renderDashboard(root) {
   root.innerHTML = `
     <h2 class="sr-only" data-route-heading>Tổng quan học tập</h2>
     <section class="stats-bar" id="dash-stats" aria-label="Tiến độ học"></section>
+    <section class="learning-hub" id="learning-hub" aria-labelledby="learning-hub-title"></section>
     <div class="category-tabs" id="category-tabs" role="group" aria-label="Lọc theo kỹ năng"></div>
     <div id="dash-main"></div>
   `;
 
   renderStats();
+  renderLearningHub(data);
   renderTabs(data);
   renderCategories(data);
   bindEvents(data);
   return {
     preserveScroll: restoreDashboardPosition(root),
   };
+}
+
+const CATEGORY_SHORT = Object.freeze({
+  kanji: 'Hán tự', vocabulary: 'Từ vựng', grammar: 'Ngữ pháp', reading: 'Đọc', listening: 'Nghe',
+});
+
+function lessonButton(item, label = 'Học ngay') {
+  const found = findLesson(item.lessonId);
+  const title = item.title || found?.lesson?.title || item.lessonId;
+  return `
+    <article class="plan-item">
+      <div>
+        <span class="plan-item-type">${item.type === 'review' ? 'Ôn lỗi sai' : escapeHtml(CATEGORY_SHORT[item.categoryId] || item.categoryId)}</span>
+        <div class="plan-item-title" lang="ja">${renderFurigana(title)}</div>
+      </div>
+      <button type="button" class="study-btn" data-learning-open="${escapeHtml(item.lessonId)}">${label}</button>
+    </article>`;
+}
+
+function renderLearningHub(data) {
+  const hub = document.getElementById('learning-hub');
+  if (!hub) return;
+  const reviews = learningState.getReviews();
+  const dueReviews = learningState.getDueReviews();
+  const progress = getProgressMap();
+  const plan = buildDailyPlan({ lessons: data, progress, reviews, maxItems: 5 });
+  const readiness = calculateReadiness({ lessons: data, progress, reviews, examHistory: [] });
+  const bookmarks = learningState.getBookmarks().map((lessonId) => {
+    const found = findLesson(lessonId);
+    return found ? { type: 'bookmark', lessonId, categoryId: found.category.id, title: found.lesson.title } : null;
+  }).filter(Boolean);
+  const categoryMeters = Object.entries(readiness.byCategory).map(([categoryId, value]) => `
+    <div class="readiness-row">
+      <span>${escapeHtml(CATEGORY_SHORT[categoryId] || categoryId)}</span>
+      <progress max="100" value="${value}" aria-label="${escapeHtml(CATEGORY_SHORT[categoryId] || categoryId)}: ${value}%">${value}%</progress>
+      <strong>${value}%</strong>
+    </div>`).join('');
+
+  hub.innerHTML = `
+    <header class="learning-hub-head">
+      <div><p class="eyebrow">Lộ trình thích ứng</p><h2 id="learning-hub-title">Hôm nay học gì?</h2></div>
+      <div class="readiness-score" aria-label="Mức sẵn sàng thi ${readiness.overall}%"><strong>${readiness.overall}%</strong><span>Sẵn sàng thi</span></div>
+    </header>
+    <div class="learning-hub-grid">
+      <div class="daily-plan" aria-label="Kế hoạch học hôm nay">
+        ${plan.length ? plan.map((item) => lessonButton(item)).join('') : '<p class="dash-empty-state">Bạn đã hoàn thành kế hoạch hôm nay 🎉</p>'}
+      </div>
+      <aside class="readiness-card" aria-label="Mức sẵn sàng theo kỹ năng">${categoryMeters}</aside>
+    </div>
+    <div class="learning-tools">
+      <label class="curriculum-search"><span class="sr-only">Tìm trong toàn bộ nội dung N2</span><input type="search" data-learning-search placeholder="Tìm kanji, từ vựng, ngữ pháp…" autocomplete="off"><span aria-hidden="true">⌕</span></label>
+      <span class="learning-tool-count">${dueReviews.length} mục đến hạn ôn · ${bookmarks.length} bài đã lưu</span>
+    </div>
+    <div class="learning-search-results" data-learning-results aria-live="polite"></div>
+    ${bookmarks.length ? `<details class="saved-lessons"><summary>Bài đã lưu (${bookmarks.length})</summary><div>${bookmarks.slice(0, 8).map((item) => lessonButton(item, 'Mở')).join('')}</div></details>` : ''}
+  `;
+  bindLearningHub(data, hub);
+}
+
+function bindLearningHub(data, hub) {
+  const searchIndex = buildSearchIndex(data, getBookContent);
+  const results = hub.querySelector('[data-learning-results]');
+  hub.addEventListener('click', (event) => {
+    const open = event.target.closest('[data-learning-open]');
+    if (!open?.dataset.learningOpen) return;
+    captureDashboardState();
+    navigate(`#/lesson/${encodeURIComponent(open.dataset.learningOpen)}`);
+  });
+  hub.querySelector('[data-learning-search]')?.addEventListener('input', (event) => {
+    const query = event.target.value.trim();
+    if (!query) {
+      results.innerHTML = '';
+      return;
+    }
+    const matches = searchCurriculum(searchIndex, query, 12);
+    results.innerHTML = matches.length
+      ? `<p class="search-result-count">${matches.length} kết quả gần nhất</p><div class="search-result-grid">${matches.map((item) => lessonButton({ ...item, type: 'search' }, 'Mở')).join('')}</div>`
+      : '<p class="dash-empty-state">Không tìm thấy nội dung phù hợp.</p>';
+  });
 }
 
 function renderStats() {
@@ -178,7 +271,7 @@ function renderWeekCard(category, week) {
         </button>
       </h4>
       <div class="lessons-grid" id="${panelId}"${expanded ? '' : ' hidden'}>
-        ${lessons.map(renderLessonItem).join('')}
+        ${expanded ? lessons.map(renderLessonItem).join('') : ''}
       </div>
     </section>`;
 }
@@ -195,22 +288,28 @@ function renderLessonItem(lesson) {
         <div class="lesson-title" lang="ja">${renderFurigana(title)}</div>
         ${lesson.titleEn ? `<div class="lesson-title-en" lang="en">${escapeHtml(lesson.titleEn)}</div>` : ''}
       </div>
+      <button type="button" class="bookmark-btn${learningState.isBookmarked(lesson.id) ? ' is-saved' : ''}" data-action="bookmark" aria-pressed="${learningState.isBookmarked(lesson.id)}" aria-label="${learningState.isBookmarked(lesson.id) ? 'Bỏ lưu' : 'Lưu'} bài ${escapeHtml(title.replace(/\{([^|{}]+)\|[^{}]+\}/g, '$1'))}">${learningState.isBookmarked(lesson.id) ? '★' : '☆'}</button>
       <button type="button" class="study-btn" aria-label="Học ${escapeHtml(title.replace(/\{([^|{}]+)\|[^{}]+\}/g, '$1'))}">Học</button>
     </article>`;
 }
 
-function updateAncestorCounts(item) {
+function updateAncestorCounts(item, data) {
   const weekCard = item.closest('.week-card');
   if (weekCard) {
-    const count = weekCard.querySelectorAll('.lesson-item.completed').length;
-    const total = weekCard.querySelectorAll('.lesson-item').length;
+    const [categoryId, weekNumber] = (weekCard.dataset.weekKey || '').split(':');
+    const lessons = data.categories?.find((category) => category.id === categoryId)?.weeks
+      ?.find((week) => String(week.week) === weekNumber)?.lessons || [];
+    const count = lessons.filter((lesson) => isDone(lesson.id)).length;
+    const total = lessons.length;
     const output = weekCard.querySelector('.week-count');
     if (output) output.textContent = `${count}/${total}`;
   }
   const category = item.closest('.category-block');
   if (category) {
-    const count = category.querySelectorAll('.lesson-item.completed').length;
-    const total = category.querySelectorAll('.lesson-item').length;
+    const categoryData = data.categories?.find((entry) => entry.id === category.dataset.catId);
+    const lessons = (categoryData?.weeks || []).flatMap((week) => week.lessons || []);
+    const count = lessons.filter((lesson) => isDone(lesson.id)).length;
+    const total = lessons.length;
     const output = category.querySelector('.category-progress-text');
     if (output) output.textContent = `${count}/${total} xong`;
   }
@@ -244,8 +343,19 @@ function bindEvents(data) {
       const expanded = weekButton.getAttribute('aria-expanded') !== 'true';
       weekButton.setAttribute('aria-expanded', String(expanded));
       panel.hidden = !expanded;
-      if (expanded) dashboardState.expandedWeeks.add(key);
-      else dashboardState.expandedWeeks.delete(key);
+      if (expanded) {
+        dashboardState.expandedWeeks.add(key);
+        if (!panel.childElementCount) {
+          const [categoryId, weekNumber] = key.split(':');
+          const lessons = data.categories
+            ?.find((category) => category.id === categoryId)?.weeks
+            ?.find((week) => String(week.week) === weekNumber)?.lessons || [];
+          panel.innerHTML = lessons.map(renderLessonItem).join('');
+        }
+      } else {
+        dashboardState.expandedWeeks.delete(key);
+        panel.innerHTML = '';
+      }
       return;
     }
 
@@ -253,6 +363,17 @@ function bindEvents(data) {
     if (!item) return;
     const id = item.dataset.id;
     if (!id) return;
+
+    const bookmarkButton = event.target.closest('[data-action="bookmark"]');
+    if (bookmarkButton) {
+      const saved = learningState.toggleBookmark(id);
+      bookmarkButton.classList.toggle('is-saved', saved);
+      bookmarkButton.setAttribute('aria-pressed', String(saved));
+      bookmarkButton.setAttribute('aria-label', `${saved ? 'Bỏ lưu' : 'Lưu'} bài ${item.querySelector('.lesson-title')?.textContent?.trim() || id}`);
+      bookmarkButton.textContent = saved ? '★' : '☆';
+      renderLearningHub(data);
+      return;
+    }
 
     if (event.target.closest('.study-btn')) {
       captureDashboardState();
@@ -271,7 +392,7 @@ function bindEvents(data) {
     completionButton.setAttribute('aria-pressed', String(done));
     const lessonTitle = item.querySelector('.lesson-title')?.textContent?.trim() || id;
     completionButton.setAttribute('aria-label', `${done ? 'Đánh dấu chưa hoàn thành' : 'Đánh dấu hoàn thành'}: ${lessonTitle}`);
-    updateAncestorCounts(item);
+    updateAncestorCounts(item, data);
     renderStats();
     void syncPromise.finally(renderStats);
     if (done) {

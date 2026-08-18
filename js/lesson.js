@@ -18,6 +18,7 @@ import { questionTypeInfo } from './question-types.js';
 import { hydrateLessonAudio } from './lesson-audio.js';
 import { startLessonTimer } from './study-time.js';
 import { toggleLessonCompletion } from './completion.js';
+import { learningState } from './learning-state.js';
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (char) => ({
@@ -205,7 +206,7 @@ function renderQuestionItem(question, lessonId, questionIndex) {
     ? `<div class="price-tag-row" aria-label="選択肢（金額）">${options.map((o, i) => `<button type="button" class="price-tag" data-action="quiz-option" data-idx="${i}" lang="ja">${renderFurigana(o)}</button>`).join('')}</div>`
     : '';
   return `
-    <div class="quiz-question${isPriceQuestion ? ' quiz-question-price' : ''}" data-correct-idx="${correct}">
+    <div class="quiz-question${isPriceQuestion ? ' quiz-question-price' : ''}" data-correct-idx="${correct}" data-review-key="${escapeHtml(`${lessonId}:q${headerIndex}`)}">
       ${header}
       <div class="quiz-q-text" lang="ja">${renderFurigana(question?.prompt || question?.q || '')}</div>
       ${priceTags}
@@ -422,12 +423,13 @@ function renderBookContent(categoryId, content, lessonId = '') {
   return '<p class="text-muted">Không có renderer cho danh mục này.</p>';
 }
 
-function renderToolbar(done) {
+function renderToolbar(done, bookmarked) {
   return `
     <div class="lesson-toolbar">
       <button type="button" class="back-btn" data-action="back">← Quay lại</button>
       <div class="lesson-toolbar-actions">
         <button type="button" class="furigana-toggle-btn" data-action="toggle-furigana" aria-pressed="${getFurigana()}">${getFurigana() ? 'あ' : 'ア'}<span class="sr-only">Furigana</span></button>
+        <button type="button" class="bookmark-btn${bookmarked ? ' is-saved' : ''}" data-action="bookmark" aria-pressed="${bookmarked}" aria-label="${bookmarked ? 'Bỏ lưu bài học' : 'Lưu bài học'}">${bookmarked ? '★' : '☆'}</button>
         <button type="button" class="complete-toggle-btn${done ? ' is-done' : ''}" data-action="toggle-complete" aria-pressed="${done}">${done ? 'Bỏ đánh dấu' : 'Đánh dấu đã học'}</button>
       </div>
     </div>`;
@@ -440,7 +442,7 @@ function pageHtml(found, lessonId, content) {
   const titleEn = content?.titleEn || lesson.titleEn || '';
   return `
     <article class="lesson-page">
-      ${renderToolbar(isDone(lesson.id))}
+      ${renderToolbar(isDone(lesson.id), learningState.isBookmarked(lesson.id))}
       <header class="lesson-header">
         <div class="lesson-header-meta">${escapeHtml(category?.name || '')} • ${unit} ${escapeHtml(week?.week ?? '')} • Ngày ${escapeHtml(lesson.day ?? '')}</div>
         <div class="lesson-header-title-row">
@@ -457,7 +459,7 @@ function pageHtml(found, lessonId, content) {
     </article>`;
 }
 
-function handleQuiz(button) {
+function handleQuiz(button, lessonId, categoryId) {
   const container = button.closest('.quiz-question');
   if (!container || container.classList.contains('is-answered')) return;
   container.classList.add('is-answered');
@@ -482,6 +484,17 @@ function handleQuiz(button) {
       ? `Đáp án: ${correctTarget.textContent.trim()}`
       : 'Đáp án của câu này chưa được xác minh.';
   }
+  if (correct >= 0) {
+    learningState.recordReview({
+      key: container.dataset.reviewKey || `${lessonId}:quiz`,
+      lessonId,
+      categoryId,
+      prompt: container.querySelector('.quiz-q-text')?.textContent?.trim() || 'Câu hỏi ôn tập',
+      correctAnswer: targets[correct]?.textContent?.trim() || '',
+      correct: selected === correct,
+      now: new Date(),
+    });
+  }
 }
 
 function lessonContext(found, content) {
@@ -501,6 +514,8 @@ export function renderLesson(root, id) {
   let tutorModal = null;
   let tutorController = null;
   let tutorTrigger = null;
+  let bookViewer = null;
+  let bookViewerTrigger = null;
   const studyTimer = startLessonTimer(id);
 
   const closePopup = () => {
@@ -522,7 +537,7 @@ export function renderLesson(root, id) {
   };
 
   const onKeyDown = (event) => {
-    if (event.key === 'Escape') { closePopup(); closeTutorModal(); }
+    if (event.key === 'Escape') { closePopup(); closeTutorModal(); closeBookViewer(); }
     else if (event.key === 'Tab' && popup) {
       event.preventDefault();
       popup.querySelector('[data-popup-close]')?.focus();
@@ -625,9 +640,13 @@ export function renderLesson(root, id) {
       void toggleLessonCompletion({ lessonId: id, categoryId: found?.category?.id || '' });
       paint();
     }
+    else if (action === 'bookmark') {
+      learningState.toggleBookmark(id);
+      paint();
+    }
     else if (action === 'view-book') openBookViewer(button);
     else if (action === 'speak') speak(button.dataset.jp || '');
-    else if (action === 'quiz-option') handleQuiz(button);
+    else if (action === 'quiz-option') handleQuiz(button, id, findLesson(id)?.category?.id || '');
     else if (action === 'explain-word') openExplanation(button);
     else if (action === 'explain-sentence') openSentenceExplanation(button);
     else if (action === 'ask-tutor') openTutorModal(button);
@@ -657,51 +676,15 @@ export function renderLesson(root, id) {
     tutorController = renderTutor(dialog.querySelector('.tutor-modal-body'));
   };
 
-  let bookViewer = null;
   const closeBookViewer = () => {
     if (!bookViewer) return;
     bookViewer.remove();
     bookViewer = null;
+    bookViewerTrigger?.focus?.();
+    bookViewerTrigger = null;
   };
 
-  // Load a single image by URL — resolves to an HTMLImageElement (decoded).
-  const loadImage = (src) => new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error(`Failed to load ${src}`));
-    img.src = src;
-  });
-
-  // Stack all page/discrete images into ONE tall canvas at native pixel
-  // resolution. The result is shown as a single full-width <img>; users
-  // scroll inside the modal to read each page in turn.
-  const stitchImages = async (entries) => {
-    const loaded = [];
-    for (const entry of entries) {
-      const url = entry.src.startsWith('/') ? entry.src : `data/book/${entry.src}`;
-      try {
-        loaded.push({ ...entry, img: await loadImage(url) });
-      } catch (err) {
-        console.warn('book viewer: skipped', url, err);
-      }
-    }
-    if (!loaded.length) return null;
-    const width = Math.max(...loaded.map((e) => e.img.naturalWidth));
-    const totalHeight = loaded.reduce((sum, e) => sum + e.img.naturalHeight, 0);
-    const canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = totalHeight;
-    const ctx = canvas.getContext('2d');
-    let y = 0;
-    for (const e of loaded) {
-      ctx.drawImage(e.img, 0, y);
-      y += e.img.naturalHeight;
-    }
-    return { dataUrl: canvas.toDataURL('image/png'), width, totalHeight };
-  };
-
-  const openBookViewer = async (trigger) => {
+  const openBookViewer = (trigger) => {
     const images = getLessonImages(id);
     const discrete = (images || []).filter((entry) => entry && entry.kind === 'image');
     const pages = (images || []).filter((entry) => entry && entry.kind === 'page');
@@ -715,6 +698,7 @@ export function renderLesson(root, id) {
     const ordered = [...pages].sort(byPage).concat([...discrete].sort(byPage));
 
     closeBookViewer();
+    bookViewerTrigger = trigger;
     const dialog = document.createElement('div');
     dialog.className = 'modal-overlay active book-viewer-overlay';
     dialog.setAttribute('role', 'dialog');
@@ -726,7 +710,13 @@ export function renderLesson(root, id) {
           <h3 lang="ja">📖 ${escapeHtml(plainJapanese(getBookContent(id)?.title || ''))}</h3>
           <button type="button" class="modal-close" data-book-viewer-close aria-label="Đóng">×</button>
         </div>
-        <div class="modal-body book-viewer-body"><p class="book-viewer-status">Đang ghép trang sách…</p></div>
+        <div class="modal-body book-viewer-body">
+          ${ordered.map((entry, index) => {
+            const src = entry.src.startsWith('/') ? entry.src : `data/book/${entry.src}`;
+            const page = entry.page != null ? ` — trang ${Number(entry.page) + 1}` : '';
+            return `<figure class="book-viewer-figure"><img class="book-viewer-page" src="${escapeHtml(src)}" alt="Trang sách ${index + 1}${page}" loading="lazy" decoding="async">${page ? `<figcaption class="book-viewer-page-num">${escapeHtml(page.slice(3))}</figcaption>` : ''}</figure>`;
+          }).join('')}
+        </div>
       </div>`;
     document.body.appendChild(dialog);
     bookViewer = dialog;
@@ -734,23 +724,12 @@ export function renderLesson(root, id) {
     dialog.addEventListener('click', (event) => {
       if (event.target === dialog) closeBookViewer();
     });
-
-    const body = dialog.querySelector('.book-viewer-body');
-    const stitched = await stitchImages(ordered);
-    if (!stitched) {
-      body.innerHTML = '<p class="book-viewer-status">Không tải được ảnh trang sách.</p>';
-      return;
-    }
-    const firstPage = ordered.find((e) => e.page != null)?.page;
-    const pageLabel = firstPage != null ? `<figcaption class="book-viewer-page-num">p.${firstPage + 1}${ordered.length > 1 ? `–${ordered[ordered.length - 1].page + 1}` : ''}</figcaption>` : '';
-    body.innerHTML = `
-      <figure class="book-viewer-figure">
-        <img class="book-viewer-stitched" src="${stitched.dataUrl}" alt="Trang sách ghép">
-        ${pageLabel}
-      </figure>`;
-    body.querySelector('img')?.addEventListener('click', () => {
+    dialog.querySelector('[data-book-viewer-close]')?.focus();
+    dialog.querySelector('.book-viewer-body')?.addEventListener('click', (event) => {
+      const image = event.target.closest('.book-viewer-page');
+      if (!image) return;
       if (document.fullscreenElement) document.exitFullscreen?.();
-      else body.querySelector('img')?.requestFullscreen?.();
+      else image.requestFullscreen?.();
     });
   };
 
@@ -764,6 +743,7 @@ export function renderLesson(root, id) {
       document.removeEventListener('keydown', onKeyDown);
       closePopup();
       closeTutorModal();
+      closeBookViewer();
       if (typeof speechSynthesis !== 'undefined') speechSynthesis.cancel();
       studyTimer.flush();
     },

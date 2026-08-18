@@ -1,10 +1,9 @@
 // js/auth.js
-// Mandatory sign-in gate: the app requires a Google session to be used at
-// all — no offline/skip mode. Google is the only sign-in method — see
-// js/supabase.js. Non-dismissable: no close button, no Escape, no backdrop
-// click — the only way out is to actually sign in.
+// First-run account choice. Google unlocks cloud sync and rankings, while
+// guest mode keeps the complete core curriculum available on this device.
 
 import { signInWithGoogle } from './supabase.js';
+import { guestPreference } from './guest-mode.js';
 
 let activeDialog = null;
 let dialogSequence = 0;
@@ -25,11 +24,12 @@ export function openSignInGate(options = {}) {
   overlay.innerHTML = `
     <section class="modal-card auth-modal__card" role="dialog" aria-modal="true" aria-labelledby="${titleId}">
       <header class="modal-header">
-        <h2 id="${titleId}">Đăng nhập để sử dụng</h2>
+        <h2 id="${titleId}">Bắt đầu học N2</h2>
       </header>
       <div class="modal-body">
-        <p class="profile-modal__help">Ứng dụng yêu cầu đăng nhập bằng Google để lưu tiến độ, streak và điểm trên máy chủ, đồng thời hiện trên bảng xếp hạng cùng bạn bè.</p>
+        <p class="profile-modal__help">Đăng nhập Google để đồng bộ tiến độ và bảng xếp hạng, hoặc dùng thử trên thiết bị này mà không cần tài khoản.</p>
         <button type="button" class="auth-pill auth-modal__google" data-gate-action="google">Đăng nhập bằng Google</button>
+        <button type="button" class="tts-btn back-btn auth-modal__guest" data-gate-action="guest">Dùng thử không đăng nhập</button>
         <p class="profile-status" data-gate-status role="status" aria-live="polite"></p>
       </div>
     </section>`;
@@ -49,6 +49,7 @@ export function openSignInGate(options = {}) {
 
   const status = overlay.querySelector('[data-gate-status]');
   const googleBtn = overlay.querySelector('[data-gate-action="google"]');
+  const guestBtn = overlay.querySelector('[data-gate-action="guest"]');
   let closed = false;
 
   function setStatus(message, kind = '') {
@@ -80,6 +81,12 @@ export function openSignInGate(options = {}) {
         googleBtn.disabled = false;
       }
     }
+  });
+
+  guestBtn.addEventListener('click', () => {
+    guestPreference.enable();
+    closeDialog();
+    options.onSkip?.();
   });
 
   activeDialog = { close: closeDialog, element: overlay };

@@ -23,6 +23,16 @@ import {
 import { openSignInGate } from './auth.js';
 import { onAuthChange, ready as supabaseReady, currentUser } from './supabase.js';
 import { flushCompletionQueue, maybeMigrateLocalData, maybeSeedProfileFromGoogle, pullFromCloud, pushProfile } from './sync.js';
+import { guestPreference } from './guest-mode.js';
+
+function registerServiceWorker() {
+    if (!('serviceWorker' in navigator) || location.protocol === 'file:') return;
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch((error) => {
+            console.warn('[pwa] service worker registration failed:', error);
+        });
+    }, { once: true });
+}
 
 function setCurrentDate() {
     const el = document.getElementById('current-date');
@@ -158,6 +168,7 @@ function profileButton(profileController) {
 }
 
 async function bootstrap() {
+    registerServiceWorker();
     setCurrentDate();
     initFuriganaToggle();
     wireSettingsButton();
@@ -176,10 +187,9 @@ async function bootstrap() {
         const user = sb ? await currentUser() : null;
 
         if (user) {
+            guestPreference.disable();
             markProfilePromptSeen();
-        } else {
-            // No offline mode — the app requires a Google session. The gate
-            // has no close/skip affordance; it stays up until sign-in redirects.
+        } else if (!guestPreference.isEnabled()) {
             openSignInGate({ trigger: profileButton(profileController) });
             return;
         }
@@ -188,6 +198,7 @@ async function bootstrap() {
 
         onAuthChange(async (authedUser) => {
             if (!authedUser) return;
+            guestPreference.disable();
             markProfilePromptSeen();
             try {
                 const migrated = await maybeMigrateLocalData();

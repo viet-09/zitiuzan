@@ -3,10 +3,11 @@
 // the top-right avatar icon (see index.html #btn-account, wired in app.js)
 // or #/profile directly.
 
-import { currentUser, signOut, ready as supabaseReady } from './supabase.js';
+import { currentUser, signInWithGoogle, signOut, ready as supabaseReady } from './supabase.js';
 import { getProfile, renderAvatar, openProfileDialog } from './profile.js';
 import { PET_TYPES, getPetPreferences, setPetPreferences, renderPet } from './pet.js';
 import { clearUserScopedStorage } from './account-storage.js';
+import { guestPreference } from './guest-mode.js';
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (ch) => ({
@@ -47,7 +48,7 @@ async function paint(el) {
     </header>
     <div class="profile-page__actions">
       <button type="button" class="tts-btn" data-action="edit-profile">Chỉnh tên / ảnh đại diện</button>
-      <button type="button" class="tts-btn back-btn" data-action="sign-out">Đăng xuất</button>
+      <button type="button" class="tts-btn back-btn" data-action="${user ? 'sign-out' : 'sign-in'}">${user ? 'Đăng xuất' : 'Đăng nhập bằng Google để đồng bộ'}</button>
     </div>
 
     <section class="pet-customizer" aria-labelledby="pet-customizer-heading">
@@ -76,12 +77,24 @@ async function paint(el) {
     btn.disabled = true;
     try {
       await signOut();
+      guestPreference.disable();
       clearUserScopedStorage();
       // Full reload so the mandatory sign-in gate re-runs from a clean state.
       location.hash = '#/';
       location.reload();
     } catch (err) {
       console.warn('[profile] sign-out failed:', err);
+      btn.disabled = false;
+    }
+  });
+
+  el.querySelector('[data-action="sign-in"]')?.addEventListener('click', async (event) => {
+    const btn = event.currentTarget;
+    btn.disabled = true;
+    try {
+      await signInWithGoogle();
+    } catch (err) {
+      console.warn('[profile] sign-in failed:', err);
       btn.disabled = false;
     }
   });

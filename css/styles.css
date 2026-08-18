@@ -379,6 +379,8 @@ a {
     min-width: 0;
 }
 
+.lessons-grid[hidden] { display: none !important; }
+
 .lesson-item {
     display: flex;
     align-items: center;
@@ -639,7 +641,7 @@ a {
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: inherit;
-    opacity: 0.85;
+    opacity: 1;
 }
 
 .nav-btn.active {
@@ -3138,4 +3140,104 @@ body.furigana-off rt {
     border-color: var(--accent-red);
     background: var(--accent-red-bg);
     color: var(--danger);
+}
+
+/* ==========================================================================
+   Adaptive learning hub
+   ========================================================================== */
+.learning-hub {
+    margin: 0 0 32px;
+    padding: clamp(18px, 3vw, 30px);
+    border: 1px solid var(--border-dark);
+    background: var(--paper-2);
+}
+
+.learning-hub-head,
+.learning-hub-grid,
+.learning-tools,
+.plan-item,
+.readiness-row {
+    display: flex;
+    align-items: center;
+}
+
+.learning-hub-head {
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 22px;
+}
+
+.learning-hub-head h2 { font: 900 clamp(1.65rem, 4vw, 2.7rem)/1 var(--font-display); }
+.eyebrow {
+    margin-bottom: 6px;
+    color: var(--accent-red);
+    font: 700 0.68rem/1 var(--font-sans);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.readiness-score {
+    min-width: 100px;
+    text-align: right;
+}
+.readiness-score strong { display: block; font: 900 2rem/1 var(--font-display); }
+.readiness-score span { color: var(--text-muted); font: 600 .68rem/1.2 var(--font-sans); text-transform: uppercase; }
+
+.learning-hub-grid { align-items: stretch; gap: 18px; }
+.daily-plan { flex: 1 1 58%; display: grid; gap: 8px; }
+.readiness-card { flex: 1 1 36%; padding: 14px; border: 1px solid var(--border-color); background: var(--bg-card); }
+.readiness-row { display: grid; grid-template-columns: 76px 1fr 36px; gap: 8px; margin: 8px 0; font: 600 .7rem/1 var(--font-sans); }
+.readiness-row progress { width: 100%; height: 7px; accent-color: var(--accent-red); }
+.readiness-row strong { text-align: right; font-variant-numeric: tabular-nums; }
+
+.plan-item {
+    justify-content: space-between;
+    gap: 14px;
+    padding: 11px 12px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+}
+.plan-item-type { color: var(--text-muted); font: 600 .65rem/1 var(--font-sans); letter-spacing: .05em; text-transform: uppercase; }
+.plan-item-title { margin-top: 4px; font: 600 .92rem/1.3 var(--font-serif); }
+
+.learning-tools { justify-content: space-between; gap: 14px; margin-top: 18px; }
+.curriculum-search { position: relative; flex: 1; max-width: 600px; }
+.curriculum-search input {
+    width: 100%;
+    min-height: 46px;
+    padding: 10px 42px 10px 14px;
+    border: 1px solid var(--border-dark);
+    border-radius: 0;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font: 500 .88rem/1 var(--font-sans);
+}
+.curriculum-search > span[aria-hidden] { position: absolute; right: 14px; top: 10px; font-size: 1.4rem; }
+.learning-tool-count,
+.search-result-count { color: var(--text-muted); font: 600 .7rem/1.4 var(--font-sans); }
+.learning-search-results:not(:empty) { margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--border-dark); }
+.search-result-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+.saved-lessons { margin-top: 14px; font: 600 .75rem/1.4 var(--font-sans); }
+.saved-lessons summary { min-height: 36px; cursor: pointer; }
+.saved-lessons > div { display: grid; gap: 8px; }
+
+.bookmark-btn {
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 1.35rem;
+    cursor: pointer;
+}
+.bookmark-btn.is-saved { color: #9b6516; }
+.book-viewer-page { content-visibility: auto; contain-intrinsic-size: 900px 1200px; }
+
+@media (max-width: 720px) {
+    .learning-hub-grid { flex-direction: column; }
+    .learning-tools { align-items: stretch; flex-direction: column; }
+    .search-result-grid { grid-template-columns: 1fr; }
+    .lesson-item { gap: 6px; }
+    .bookmark-btn { flex-basis: 40px; width: 40px; }
 }

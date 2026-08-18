@@ -208,6 +208,11 @@ function readProgressMap() {
   return map && typeof map === 'object' ? map : {};
 }
 
+/** Defensive snapshot for planning/readiness without exposing mutable state. */
+export function getProgressMap() {
+  return { ...readProgressMap() };
+}
+
 function writeProgressMap(map) {
   writeJSON(STORAGE.progress, map);
 }
