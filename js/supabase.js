@@ -88,15 +88,13 @@ export async function onAuthChange(handler) {
   return sb.auth.onAuthStateChange((_event, session) => handler(session?.user ?? null));
 }
 
-/** Look up the public leaderboard view. Public read — no JWT required. */
+/** Look up the sanitized, authenticated leaderboard projection. */
 export async function fetchLeaderboard(limit = 50) {
   const sb = await getClient();
   if (!sb) return [];
-  const { data, error } = await sb
-    .from('leaderboard')
-    .select('rank,user_id,display_name,avatar_type,avatar_data,streak,ai_level,completion_percent,total_study_ms,avg_study_ms')
-    .order('rank', { ascending: true })
-    .limit(limit);
+  const { data, error } = await sb.rpc('get_leaderboard', {
+    p_limit: Math.max(1, Math.min(100, Number(limit) || 50)),
+  });
   if (error) {
     console.warn('[supabase] leaderboard query failed:', error.message);
     return [];

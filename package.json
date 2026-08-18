@@ -8,10 +8,12 @@
     "test:e2e": "playwright test",
     "build:vendor": "node scripts/build-vendor.mjs",
     "validate:data": "node scripts/validate-book-data.mjs",
-    "check": "npm test && npm run validate:data"
+    "check": "npm test && npm run validate:data",
+    "verify:schema": "node scripts/verify-schema.mjs",
+    "deploy:supabase": "node scripts/link-and-deploy.mjs"
   },
   "dependencies": {
-    "@supabase/supabase-js": "2.49.0",
+    "@supabase/supabase-js": "2.112.3",
     "ffmpeg-static": "^5.3.0",
     "pg": "8.13.3"
   },

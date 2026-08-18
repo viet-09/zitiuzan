@@ -1,4 +1,5 @@
 import path from 'node:path';
+import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { build } from 'esbuild';
 
@@ -18,5 +19,9 @@ await build({
   target: ['es2022'],
   legalComments: 'none',
 });
+
+const outputPath = path.join(root, 'vendor', 'supabase.js');
+const output = fs.readFileSync(outputPath, 'utf8');
+fs.writeFileSync(outputPath, output.replace(/[ \t]+$/gm, ''), 'utf8');
 
 console.log('Built vendor/supabase.js');

@@ -1,0 +1,2 @@
+-- Canonical curriculum rows are created by schema.sql / migrations.
+-- Production user data and exam answer keys must never be seeded here.

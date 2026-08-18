@@ -322,17 +322,3 @@ export async function pushProfile(userId, { displayName, avatarType, avatarData 
     .eq('user_id', userId);
   if (error) console.warn('[sync] pushProfile failed:', error.message);
 }
-
-/**
- * Increment total_score on the server (atomic via bump_score RPC).
- */
-export async function pushScore(userId, delta) {
-  const sb = await getClient();
-  if (!sb) return null;
-  const { data, error } = await sb.rpc('bump_score', { p_user_id: userId, p_delta: delta });
-  if (error) {
-    console.warn('[sync] pushScore failed:', error.message);
-    return null;
-  }
-  return data;
-}

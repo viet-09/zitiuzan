@@ -234,7 +234,10 @@ async function bootstrap() {
         });
     }, 0);
 
-    await Promise.all([loadLessons(), loadBookContent()]);
+    // Render the dashboard as soon as the tiny curriculum index is ready.
+    // The multi-megabyte book payload enriches search and lesson bodies in the
+    // background, then refreshes the active route once without blocking FCP.
+    await loadLessons();
 
     const rootEl = document.getElementById('app');
     initRouter(
@@ -249,6 +252,10 @@ async function bootstrap() {
         },
         rootEl
     );
+
+    void loadBookContent().then(() => {
+        navigate(location.hash || '#/');
+    });
 }
 
 document.addEventListener('DOMContentLoaded', bootstrap);

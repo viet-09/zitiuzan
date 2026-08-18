@@ -208,12 +208,6 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'Failed to save attempt' }, 500);
   }
 
-  // Award score on the user's own JWT so the existing bump_score RPC's
-  // auth.uid() check applies normally — same mechanism as lesson completion.
-  const bonus = 30 + Math.round(scorePercentage * 0.5);
-  const { error: bumpErr } = await authedClient.rpc('bump_score', { p_user_id: user.id, p_delta: bonus });
-  if (bumpErr) console.error('bump_score after exam failed:', bumpErr);
-
   return jsonResponse({
     session_id: inserted.id,
     timestamp: inserted.created_at,

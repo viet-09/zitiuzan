@@ -8,6 +8,9 @@ test('database exposes idempotent completion RPC instead of direct leaderboard w
   assert.match(sql, /create or replace function public\.set_lesson_completion/i);
   assert.match(sql, /revoke\s+(?:all|insert[\s\S]*delete)[\s\S]*learning_progress[\s\S]*authenticated/i);
   assert.match(sql, /least\(100[\s\S]*completion_percent/i);
+  assert.match(sql, /function public\.get_leaderboard/i);
+  assert.doesNotMatch(sql, /create view public\.leaderboard/i);
+  assert.match(sql, /revoke all on function public\.bump_score\(uuid, int\) from public, anon, authenticated/i);
 });
 
 test('study time is credited from server-timed sessions, not arbitrary client durations', async () => {
