@@ -3,7 +3,9 @@ import assert from 'node:assert/strict';
 
 import {
   buildDailyPlan,
+  buildMiniTest,
   buildSearchIndex,
+  buildWeaknessProfile,
   calculateReadiness,
   getDueReviews,
   recordReviewResult,
@@ -83,4 +85,58 @@ test('readiness combines completion, review accuracy and mock-exam evidence', ()
 
   assert.ok(readiness.overall > 0 && readiness.overall <= 100);
   assert.ok(readiness.byCategory.kanji > readiness.byCategory.grammar);
+  assert.deepEqual(readiness.evidence, {
+    completedLessons: 2,
+    totalLessons: 3,
+    reviewAttempts: 6,
+    examAttempts: 1,
+  });
+  assert.equal(readiness.weakestCategory, 'grammar');
+});
+
+test('weakness profile ranks due repeated mistakes above mastered items', () => {
+  const now = new Date('2026-08-18T12:00:00Z');
+  const profile = buildWeaknessProfile([
+    {
+      key: 'g1d1:q0', lessonId: 'g1d1', categoryId: 'grammar', prompt: '電車が遅れた（　）。',
+      correctAnswer: 'ために', attempts: 4, correctAttempts: 1, lapses: 3,
+      lastResult: 'wrong', dueAt: '2026-08-18T10:00:00Z',
+    },
+    {
+      key: 'k1d1:q0', lessonId: 'k1d1', categoryId: 'kanji', prompt: '禁止',
+      correctAnswer: 'きんし', attempts: 5, correctAttempts: 5, lapses: 0,
+      lastResult: 'correct', dueAt: '2026-08-20T10:00:00Z',
+    },
+  ], { now });
+
+  assert.equal(profile.total, 1);
+  assert.equal(profile.due, 1);
+  assert.equal(profile.top[0].key, 'g1d1:q0');
+  assert.equal(profile.byCategory.grammar.accuracy, 25);
+  assert.equal(profile.byCategory.kanji, undefined);
+});
+
+test('mini-test uses answerable weaknesses and keeps the correct option index', () => {
+  const questions = buildMiniTest([
+    {
+      key: 'g1d1:q0', lessonId: 'g1d1', categoryId: 'grammar', prompt: 'もう雨は降る（　）。',
+      options: ['ために', 'に違いない'], correctIndex: 1, correctAnswer: 'に違いない',
+      attempts: 2, correctAttempts: 0, lapses: 2, lastResult: 'wrong', dueAt: '2026-08-18T00:00:00Z',
+    },
+    {
+      key: 'k1d1:q0', lessonId: 'k1d1', categoryId: 'kanji', prompt: '禁止',
+      attempts: 2, correctAttempts: 0, lapses: 2, lastResult: 'wrong', dueAt: '2026-08-18T00:00:00Z',
+    },
+  ], { now: new Date('2026-08-18T12:00:00Z'), limit: 5 });
+
+  assert.equal(questions.length, 1);
+  assert.deepEqual(questions[0], {
+    reviewKey: 'g1d1:q0',
+    lessonId: 'g1d1',
+    categoryId: 'grammar',
+    prompt: 'もう雨は降る（　）。',
+    options: ['ために', 'に違いない'],
+    correctIndex: 1,
+    correctAnswer: 'に違いない',
+  });
 });

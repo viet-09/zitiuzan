@@ -19,11 +19,17 @@ test('quiz outcomes create a durable spaced-repetition review', () => {
     categoryId: 'grammar',
     prompt: '電車が遅れた（　）、遅刻した。',
     correctAnswer: 'ために',
+    options: ['ために', 'ためで'],
+    correctIndex: 0,
+    selectedAnswer: 'ためで',
     correct: false,
     now,
   });
 
   assert.equal(wrong.lastResult, 'wrong');
+  assert.deepEqual(wrong.options, ['ために', 'ためで']);
+  assert.equal(wrong.correctIndex, 0);
+  assert.equal(wrong.selectedAnswer, 'ためで');
   assert.equal(learning.getDueReviews(now).length, 1);
   assert.match(storage.getItem(REVIEW_STORAGE_KEY), /g1d1:q0/);
 
