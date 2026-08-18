@@ -2,6 +2,12 @@
   "name": "n2-web-scripts",
   "private": true,
   "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "test:coverage": "node --test --experimental-test-coverage tests/*.test.mjs",
+    "validate:data": "node scripts/validate-book-data.mjs",
+    "check": "npm test && npm run validate:data"
+  },
   "dependencies": {
     "ffmpeg-static": "^5.3.0"
   },
