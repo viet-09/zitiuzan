@@ -110,7 +110,7 @@ test('a due weakness launches a mini-test and updates readiness evidence', async
   await expect(page.getByRole('button', { name: /Hỏi gia sư về điểm yếu/ })).toBeVisible();
 });
 
-test('pet opens one calm next-action coach panel and avoids the nav while scrolling', async ({ page }) => {
+test('full-body pet stays visible, reacts to touch and keeps its learning quest', async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem('n2_reviews_v1', JSON.stringify([{
       key: 'g1d1:q0', lessonId: 'g1d1', categoryId: 'grammar', prompt: '雨が降る（　）。',
@@ -121,12 +121,26 @@ test('pet opens one calm next-action coach panel and avoids the nav while scroll
   });
   await page.goto('/');
   await dismissAuthGateForComponentChecks(page);
-  const pet = page.getByRole('button', { name: /Mở coach học tập/ });
-  await pet.click();
+  const petArt = page.locator('#pet-widget-mount .pet-art--fox');
+  await expect(petArt).toBeVisible();
+  await expect(petArt.locator('[data-pet-part="body"]')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Nựng đầu Cáo' }).click();
+  await expect(page.locator('.pet-widget')).toHaveAttribute('data-reaction', 'pat');
+  await expect(page.locator('.pet-widget__bubble')).toContainText(/nựng|thích/i);
+
+  await page.getByRole('button', { name: 'Trêu đùa với Cáo' }).click();
+  await expect(page.locator('.pet-widget')).toHaveAttribute('data-reaction', 'tease');
+
+  await page.getByRole('button', { name: 'Đập tay với Cáo' }).click();
+  await expect(page.locator('.pet-widget')).toHaveAttribute('data-reaction', 'highfive');
+
+  await page.getByRole('button', { name: 'Mở nhiệm vụ học của Cáo' }).click();
   const panel = page.getByRole('region', { name: 'Nhiệm vụ của bạn đồng hành' });
   await expect(panel).toBeVisible();
   await expect(panel.getByRole('button', { name: 'Ôn 3 phút' })).toBeVisible();
   await expect(panel).toContainText('lỗi ngữ pháp');
+  await expect(petArt).toBeVisible();
   await page.evaluate(() => window.scrollTo(0, 500));
   await expect(page.locator('#pet-widget-mount')).toHaveClass(/is-compact/);
 });
