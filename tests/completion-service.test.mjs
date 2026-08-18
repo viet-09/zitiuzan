@@ -41,18 +41,20 @@ test('failed server mutations are retained for retry without losing local progre
   assert.deepEqual(queued, [{ lessonId: 'g2d3', categoryId: 'grammar', done: false }]);
 });
 
-test('guest completion remains local and does not create a cross-account queue', async () => {
+test('signed-out users cannot change lesson completion locally or remotely', async () => {
   const queued = [];
+  let localToggles = 0;
   const service = createCompletionService({
-    toggleLocal: () => true,
+    toggleLocal: () => { localToggles += 1; return true; },
     getCurrentUser: async () => null,
-    syncRemote: async () => assert.fail('guest must not call remote'),
+    syncRemote: async () => assert.fail('signed-out users must not call remote'),
     queueMutation: (mutation) => queued.push(mutation),
     writeStreak: () => {},
   });
 
   const result = await service.toggle({ lessonId: 'v1d1', categoryId: 'vocabulary' });
 
-  assert.deepEqual(result, { done: true, synced: false });
+  assert.deepEqual(result, { done: false, synced: false, requiresAuth: true });
+  assert.equal(localToggles, 0);
   assert.deepEqual(queued, []);
 });
