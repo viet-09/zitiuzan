@@ -21,6 +21,14 @@ test('the app is installable and registers a service worker', () => {
   assert.match(worker, /data\/lessons\.json/);
 });
 
+test('the boot module is versioned consistently to bypass a stale service-worker cache', () => {
+  const index = read('index.html');
+  const worker = read('sw.js');
+
+  assert.match(index, /src="js\/app\.js\?v=4"/);
+  assert.match(worker, /'\.\/js\/app\.js\?v=4'/);
+});
+
 test('production CSP needs neither unsafe-eval nor a third-party module CDN', () => {
   const index = read('index.html');
   const vercel = read('vercel.json');
