@@ -1,11 +1,14 @@
-const CACHE_NAME = 'n2-journal-v6';
+const CACHE_NAME = 'n2-journal-v7';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './icons/app-icon.svg',
+  './assets/pets/fox-3d.png',
+  './assets/pets/rabbit-3d.png',
   './css/styles.css',
-  './js/app.js?v=6',
+  './js/app.js?v=7',
+  './js/pet-art.js',
   './vendor/supabase.js',
   './data/lessons.json',
 ];

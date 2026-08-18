@@ -1,9 +1,9 @@
 // js/pet.js
-// Minimal streak companion: a small emoji that bobs/wanders in a corner.
-// No illustration — species preference is stored inside the existing
-// settings object so changing it never overwrites unrelated settings.
+// Full-body study companion. Species preference is stored inside the existing
+// settings object so changing the character never overwrites unrelated settings.
 
 import { getSettings, setSettings } from './store.js';
+import { renderPetArt } from './pet-art.js';
 
 export const PET_UPDATED_EVENT = 'n2:pet-updated';
 export const PET_COMPLETION_EVENT = 'n2:lesson-complete';
@@ -11,15 +11,15 @@ export const PET_CONTEXT_EVENT = 'n2:pet-context';
 export const PET_MEMORY_STORAGE_KEY = 'n2_pet_memories_v1';
 
 export const PET_TYPES = Object.freeze([
-  Object.freeze({ id: 'fox', label: 'Cáo', sound: 'Rúc!', emoji: '🦊' }),
-  Object.freeze({ id: 'rabbit', label: 'Thỏ', sound: 'Chít!', emoji: '🐰' }),
+  Object.freeze({ id: 'fox', label: 'Cáo', sound: 'Rúc!' }),
+  Object.freeze({ id: 'rabbit', label: 'Thỏ', sound: 'Chít!' }),
 ]);
 
 export const PET_ACCESSORIES = Object.freeze([
-  Object.freeze({ id: 'none', label: 'Không phụ kiện', symbol: '', minMastered: 0 }),
-  Object.freeze({ id: 'pencil', label: 'Bút chì chăm học', symbol: '✏️', minMastered: 1 }),
-  Object.freeze({ id: 'seal', label: 'Dấu son tiến bộ', symbol: '🔖', minMastered: 5 }),
-  Object.freeze({ id: 'lamp', label: 'Đèn học bền bỉ', symbol: '🏮', minMastered: 15 }),
+  Object.freeze({ id: 'none', label: 'Không phụ kiện', minMastered: 0 }),
+  Object.freeze({ id: 'pencil', label: 'Bút chì chăm học', minMastered: 1 }),
+  Object.freeze({ id: 'seal', label: 'Dấu son tiến bộ', minMastered: 5 }),
+  Object.freeze({ id: 'lamp', label: 'Đèn học bền bỉ', minMastered: 15 }),
 ]);
 
 const DEFAULT_PET = Object.freeze({ petType: 'fox', petAccessory: 'none' });
@@ -167,7 +167,7 @@ export function recordPetMemory(memory, storage = globalThis.localStorage) {
   return next;
 }
 
-/** Stable streak tiers used by both the emoji label and dashboard copy. */
+/** Stable streak tiers used by both the character label and dashboard copy. */
 export function getPetTier(streakValue) {
   const streak = safeStreak(streakValue);
   if (streak === 0) {
@@ -211,8 +211,8 @@ export function getPetTier(streakValue) {
 }
 
 /**
- * Render one small emoji glyph. All dynamic values are normalized to fixed
- * allow-lists before reaching markup.
+ * Render one full-body raster character. All dynamic values are normalized to
+ * fixed allow-lists before reaching markup.
  */
 export function renderPet(options = {}) {
   const preferences = {
@@ -228,7 +228,7 @@ export function renderPet(options = {}) {
   const label = `${type.label} ${tier.label.toLocaleLowerCase('vi-VN')}`;
   const accessibility = decorative ? 'aria-hidden="true"' : `role="img" aria-label="${escapeHtml(label)}"`;
 
-  return `<span class="pet-emoji pet--${type.id} pet--tier-${tier.id} pet--evolution-${evolutionId}" ${accessibility}>${type.emoji}${accessory.symbol ? `<span class="pet-accessory" aria-hidden="true">${accessory.symbol}</span>` : ''}</span>`;
+  return `<span class="pet-figure pet--${type.id} pet--tier-${tier.id} pet--evolution-${evolutionId}" ${accessibility}>${renderPetArt(type.id, accessory.id)}</span>`;
 }
 
 function resolveTarget(target) {
@@ -245,6 +245,9 @@ function prefersReducedMotion() {
 function reactionCopy(kind, type) {
   if (kind === 'complete') return `${type.sound} Tuyệt lắm — thêm một bài đã hoàn thành!`;
   if (kind === 'tier-up') return `${type.sound} Chuỗi học vừa lên một cấp mới!`;
+  if (kind === 'pat') return `${type.sound} Mình thích được nựng đầu như vậy!`;
+  if (kind === 'tease') return 'Ồ, trêu mình à? Bắt được bạn rồi nhé!';
+  if (kind === 'highfive') return 'Đập tay! Học thêm một chút nữa nhé!';
   return `${type.sound} Mình học tiếp cùng nhau nhé!`;
 }
 
@@ -280,14 +283,14 @@ export function mountPet(target, options = {}) {
   let destroyed = false;
 
   const statusId = `pet-widget-status-${sequence}`;
+  const panelId = `pet-coach-panel-${sequence}`;
 
   function render() {
     if (destroyed) return;
     const tier = getPetTier(streak);
     const type = lookup(PET_TYPES, preferences.petType);
-    const panelId = `pet-coach-panel-${sequence}`;
     mount.innerHTML = `
-      <div class="pet-widget" data-tier="${escapeHtml(tier.id)}" data-mood="${escapeHtml(coach.mood)}" data-evolution="${escapeHtml(coach.evolution.id)}">
+      <div class="pet-widget" data-pet-type="${escapeHtml(type.id)}" data-tier="${escapeHtml(tier.id)}" data-mood="${escapeHtml(coach.mood)}" data-evolution="${escapeHtml(coach.evolution.id)}" data-reaction="">
         <p id="${statusId}" class="pet-widget__bubble" role="status" aria-live="polite"></p>
         <section id="${panelId}" class="pet-coach-panel" role="region" aria-label="Nhiệm vụ của bạn đồng hành"${panelOpen ? '' : ' hidden'}>
           <p class="pet-coach-panel__eyebrow">${escapeHtml(coach.moodLabel)} · ${escapeHtml(coach.evolution.label)}</p>
@@ -295,10 +298,33 @@ export function mountPet(target, options = {}) {
           <p>${escapeHtml(coach.quest.reason)}</p>
           <button type="button" class="complete-modal-btn" data-pet-quest="${escapeHtml(coach.quest.route)}">${escapeHtml(coach.quest.label)}</button>
         </section>
-        <button type="button" class="pet-widget__button" aria-label="${panelOpen ? 'Đóng' : 'Mở'} coach học tập — ${escapeHtml(type.label)} ${escapeHtml(coach.moodLabel.toLocaleLowerCase('vi-VN'))}" aria-expanded="${panelOpen}" aria-controls="${panelId}" aria-describedby="${statusId}">
+        <div class="pet-widget__companion">
           <span class="pet-widget__stage">${renderPet({ ...preferences, streak, evolutionId: coach.evolution.id, decorative: true })}</span>
-        </button>
+          <div class="pet-widget__hit-zones" role="group" aria-label="Tương tác với ${escapeHtml(type.label)}">
+            <button type="button" class="pet-hit-zone pet-hit-zone--head" data-pet-interaction="pat" data-hint="Nựng" aria-label="Nựng đầu ${escapeHtml(type.label)}" aria-describedby="${statusId}"></button>
+            <button type="button" class="pet-hit-zone pet-hit-zone--tail" data-pet-interaction="tease" data-hint="Trêu" aria-label="Trêu đùa với ${escapeHtml(type.label)}" aria-describedby="${statusId}"></button>
+            <button type="button" class="pet-hit-zone pet-hit-zone--paw" data-pet-interaction="highfive" data-hint="Đập tay" aria-label="Đập tay với ${escapeHtml(type.label)}" aria-describedby="${statusId}"></button>
+          </div>
+          <button type="button" class="pet-widget__quest-toggle" data-pet-quest-toggle aria-label="${panelOpen ? 'Đóng' : 'Mở'} nhiệm vụ học của ${escapeHtml(type.label)}" aria-expanded="${panelOpen}" aria-controls="${panelId}" aria-describedby="${statusId}">
+            <span aria-hidden="true">!</span>
+          </button>
+        </div>
       </div>`;
+    mount.classList.toggle('is-panel-open', panelOpen);
+  }
+
+  function setPanelOpen(next, { restoreFocus = false } = {}) {
+    panelOpen = Boolean(next);
+    const panel = mount.querySelector('.pet-coach-panel');
+    const toggle = mount.querySelector('[data-pet-quest-toggle]');
+    if (panel) panel.hidden = !panelOpen;
+    if (toggle) {
+      toggle.setAttribute('aria-expanded', String(panelOpen));
+      const type = lookup(PET_TYPES, preferences.petType);
+      toggle.setAttribute('aria-label', `${panelOpen ? 'Đóng' : 'Mở'} nhiệm vụ học của ${type.label}`);
+      if (restoreFocus) toggle.focus();
+    }
+    mount.classList.toggle('is-panel-open', panelOpen);
   }
 
   function showBubble(text) {
@@ -316,33 +342,39 @@ export function mountPet(target, options = {}) {
   function react(kind = 'play') {
     if (destroyed) return;
     const type = lookup(PET_TYPES, preferences.petType);
-    const stage = mount.querySelector('.pet-widget__stage');
+    const widget = mount.querySelector('.pet-widget');
     showBubble(reactionCopy(kind, type));
 
     if (reactionTimer) window.clearTimeout(reactionTimer);
-    if (stage && !prefersReducedMotion()) {
-      stage.classList.remove('is-reacting', 'is-celebrating');
-      // Force a new animation only after an explicit user/completion event.
-      void stage.offsetWidth;
-      stage.classList.add(kind === 'complete' || kind === 'tier-up' ? 'is-celebrating' : 'is-reacting');
+    if (widget) {
+      widget.dataset.reaction = '';
+      if (!prefersReducedMotion()) {
+        // Force a new animation only after an explicit user/completion event.
+        void widget.offsetWidth;
+      }
+      widget.dataset.reaction = kind;
       reactionTimer = window.setTimeout(() => {
-        stage.classList.remove('is-reacting', 'is-celebrating');
+        widget.dataset.reaction = '';
         reactionTimer = null;
-      }, 1400);
+      }, kind === 'complete' || kind === 'tier-up' ? 1500 : 1000);
     }
     if (typeof options.onReact === 'function') options.onReact(kind);
   }
 
   function onClick(event) {
+    const interaction = event.target.closest('[data-pet-interaction]');
+    if (interaction?.dataset.petInteraction) {
+      react(interaction.dataset.petInteraction);
+      return;
+    }
     const quest = event.target.closest('[data-pet-quest]');
     if (quest?.dataset.petQuest) {
-      panelOpen = false;
+      setPanelOpen(false);
       location.hash = quest.dataset.petQuest;
       return;
     }
-    if (event.target.closest('.pet-widget__button')) {
-      panelOpen = !panelOpen;
-      render();
+    if (event.target.closest('[data-pet-quest-toggle]')) {
+      setPanelOpen(!panelOpen);
     }
   }
 
@@ -351,15 +383,12 @@ export function mountPet(target, options = {}) {
       ? event.composedPath().includes(mount)
       : mount.contains(event.target);
     if (!panelOpen || cameFromPet) return;
-    panelOpen = false;
-    render();
+    setPanelOpen(false);
   }
 
   function onKeyDown(event) {
     if (event.key !== 'Escape' || !panelOpen) return;
-    panelOpen = false;
-    render();
-    mount.querySelector('.pet-widget__button')?.focus();
+    setPanelOpen(false, { restoreFocus: true });
   }
 
   function onScroll() {
