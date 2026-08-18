@@ -4,7 +4,7 @@
 
 import { getSettings, setSettings } from './store.js';
 import { renderPetArt } from './pet-art.js';
-import { mountPetScene } from '../vendor/pet-scene.js?v=9';
+import { mountPetScene } from '../vendor/pet-scene.js?v=10';
 
 export const PET_UPDATED_EVENT = 'n2:pet-updated';
 export const PET_COMPLETION_EVENT = 'n2:lesson-complete';
