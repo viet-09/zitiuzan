@@ -131,7 +131,24 @@ test('pixel desktop companion roams, reacts, drags and keeps its learning quest'
   await expect(petCompanion).toHaveAttribute('data-pet-state', 'idle');
   await expect(page.locator('#pet-widget-mount')).toHaveCSS('pointer-events', 'none');
 
-  await page.getByRole('button', { name: 'Nựng đầu Cáo' }).click();
+  const compactPetSize = await petCompanion.boundingBox();
+  expect(compactPetSize).not.toBeNull();
+  expect(compactPetSize.width).toBeCloseTo(74.4, 0);
+  expect(compactPetSize.height).toBeCloseTo(110.4, 0);
+
+  const patInteraction = page.getByRole('button', { name: 'Nựng đầu Cáo' });
+  const interactionChrome = await patInteraction.evaluate((node) => ({
+    label: getComputedStyle(node, '::before').display,
+    marker: getComputedStyle(node, '::after').display,
+    background: getComputedStyle(node).backgroundColor,
+  }));
+  expect(interactionChrome).toEqual({
+    label: 'none',
+    marker: 'none',
+    background: 'rgba(0, 0, 0, 0)',
+  });
+
+  await patInteraction.click();
   await expect(petWidget).toHaveAttribute('data-reaction', 'pat');
   await expect(petCompanion).toHaveAttribute('data-pet-state', 'look');
   await expect(page.locator('.pet-widget__bubble')).toContainText(/nựng|thích/i);
@@ -194,7 +211,12 @@ test('mobile dashboard has no horizontal overflow and passes serious axe checks'
   await page.goto('/');
   await dismissAuthGateForComponentChecks(page);
   await expect(page.locator('#learning-hub')).toBeVisible();
-  await expect(page.locator('#pet-widget-mount [data-pet-companion]')).toHaveAttribute('data-renderer', 'pixel-sprite');
+  const mobilePet = page.locator('#pet-widget-mount [data-pet-companion]');
+  await expect(mobilePet).toHaveAttribute('data-renderer', 'pixel-sprite');
+  const mobilePetSize = await mobilePet.boundingBox();
+  expect(mobilePetSize).not.toBeNull();
+  expect(mobilePetSize.width).toBeCloseTo(64.8, 0);
+  expect(mobilePetSize.height).toBeCloseTo(96, 0);
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(1);
 
