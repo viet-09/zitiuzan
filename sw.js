@@ -1,15 +1,17 @@
-const CACHE_NAME = 'n2-journal-v12';
+const CACHE_NAME = 'n2-journal-v13';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './icons/app-icon.svg',
-  './css/styles.css?v=12',
-  './js/app.js?v=12',
-  './js/pet.js?v=12',
-  './js/pet-art.js?v=12',
-  './js/pet-companion.js?v=12',
-  './js/pet-companion-state.js?v=12',
+  './css/styles.css?v=13',
+  './js/app.js?v=13',
+  './js/pet.js?v=13',
+  './js/pet-art.js?v=13',
+  './js/pet-companion.js?v=13',
+  './js/pet-companion-state.js?v=13',
+  './assets/pets/fox-sprites.png',
+  './assets/pets/rabbit-sprites.png',
   './vendor/supabase.js',
   './data/lessons.json',
 ];

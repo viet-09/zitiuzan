@@ -3807,68 +3807,54 @@ body.modal-open { overflow: hidden; }
     width: 100%;
     height: 100%;
     animation: none;
-    filter: drop-shadow(3px 4px 0 color-mix(in srgb, var(--text-primary) 21%, transparent));
+    filter: none;
     image-rendering: pixelated;
     transform: none;
     transform-style: flat;
 }
-.pixel-pet__svg {
+.pixel-pet__sprite {
+    --pet-facing: 1;
+    position: absolute;
+    left: 50%;
+    bottom: 0;
     display: block;
-    width: 100%;
-    height: 100%;
-    overflow: visible;
+    width: 110px;
+    height: 110px;
+    background-position: 0 0;
+    background-repeat: no-repeat;
+    background-size: 300% 200%;
     image-rendering: pixelated;
-    transform-origin: center;
+    transform: translate3d(-50%, 0, 0) scaleX(var(--pet-facing));
+    transform-origin: center bottom;
+    will-change: transform;
 }
-.pixel-pet__body-rig,
-.pixel-pet__head-rig,
-.pixel-pet__tail,
-.pixel-pet__legs,
-.pixel-pet__paw,
-.pixel-pet__bell {
-    transform-box: fill-box;
-    transform-origin: center;
-}
-.pixel-pet__eyes--closed,
-.pixel-pet__sleep-marks,
-.pixel-pet__advice-mark { opacity: 0; }
-.pixel-pet-host[data-facing='left'] .pixel-pet__svg { transform: scaleX(-1); }
+.pixel-pet--fox .pixel-pet__sprite { background-image: url('../assets/pets/fox-sprites.png'); }
+.pixel-pet--rabbit .pixel-pet__sprite { background-image: url('../assets/pets/rabbit-sprites.png'); }
+.pixel-pet-host[data-facing='left'] .pixel-pet__sprite { --pet-facing: -1; }
 
-.pixel-pet-host[data-pet-state='idle'] .pixel-pet__body-rig {
-    animation: pixel-pet-idle 2.4s steps(2, end) infinite;
+.pixel-pet-host[data-pet-state='idle'] .pixel-pet__sprite {
+    background-position: 0 0;
+    animation: pixel-sprite-idle 2.4s steps(2, end) infinite;
 }
-.pixel-pet-host[data-pet-state='look'] .pixel-pet__head-rig {
-    animation: pixel-pet-look 1.2s steps(2, end) infinite;
+.pixel-pet-host[data-pet-state='look'] .pixel-pet__sprite {
+    background-position: 50% 0;
+    animation: pixel-sprite-look 1.2s steps(2, end) infinite;
 }
-.pixel-pet-host[data-pet-state='look'] .pixel-pet__tail {
-    animation: pixel-pet-tail .6s steps(2, end) infinite;
+.pixel-pet-host[data-pet-state='walk'] .pixel-pet__sprite {
+    background-position: 100% 0;
+    animation: pixel-sprite-walk .48s steps(2, end) infinite;
 }
-.pixel-pet-host[data-pet-state='walk'] .pixel-pet__body-rig {
-    animation: pixel-pet-walk-body .48s steps(2, end) infinite;
+.pixel-pet-host[data-pet-state='sleep'] .pixel-pet__sprite {
+    background-position: 0 100%;
+    animation: pixel-sprite-sleep 2.8s steps(2, end) infinite;
 }
-.pixel-pet-host[data-pet-state='walk'] .pixel-pet__legs {
-    animation: pixel-pet-walk-feet .24s steps(2, end) infinite;
+.pixel-pet-host[data-pet-state='deep-sleep'] .pixel-pet__sprite {
+    background-position: 50% 100%;
+    animation: pixel-sprite-sleep 3.2s steps(2, end) infinite;
 }
-.pixel-pet-host[data-pet-state='walk'] .pixel-pet__tail {
-    animation: pixel-pet-tail .42s steps(2, end) infinite;
-}
-.pixel-pet-host:is([data-pet-state='sleep'], [data-pet-state='deep-sleep']) .pixel-pet__eyes--open { opacity: 0; }
-.pixel-pet-host:is([data-pet-state='sleep'], [data-pet-state='deep-sleep']) .pixel-pet__eyes--closed,
-.pixel-pet-host:is([data-pet-state='sleep'], [data-pet-state='deep-sleep']) .pixel-pet__sleep-marks { opacity: 1; }
-.pixel-pet-host[data-pet-state='sleep'] .pixel-pet__body-rig {
-    transform: translate3d(5px, 28px, 0) rotate(76deg) scale(.82);
-    animation: pixel-pet-sleep 2.8s steps(2, end) infinite;
-}
-.pixel-pet-host[data-pet-state='deep-sleep'] .pixel-pet__body-rig {
-    transform: translate3d(0, 36px, 0) rotate(-78deg) scale(.84, .78);
-    animation: pixel-pet-deep-sleep 3.2s steps(2, end) infinite;
-}
-.pixel-pet-host[data-pet-state='advice'] .pixel-pet__advice-mark { opacity: 1; }
-.pixel-pet-host[data-pet-state='advice'] .pixel-pet__paw--right {
-    animation: pixel-pet-advice-paw .72s steps(2, end) infinite;
-}
-.pixel-pet-host[data-pet-state='advice'] .pixel-pet__bell {
-    animation: pixel-pet-bell .72s steps(2, end) infinite;
+.pixel-pet-host[data-pet-state='advice'] .pixel-pet__sprite {
+    background-position: 100% 100%;
+    animation: pixel-sprite-advice .72s steps(2, end) infinite;
 }
 
 .pet-figure::after {
@@ -3915,16 +3901,17 @@ body.modal-open { overflow: hidden; }
     font-family: var(--font-sans);
 }
 .pet-widget__quest-toggle span {
-    width: 28px;
-    height: 28px;
+    width: 9px;
+    height: 9px;
     display: grid;
     place-items: center;
     border: 1px solid var(--border-dark);
     border-radius: 2px;
     background: var(--accent-red);
-    box-shadow: 2px 2px 0 color-mix(in srgb, var(--text-primary) 24%, transparent);
+    box-shadow: 1px 1px 0 color-mix(in srgb, var(--text-primary) 24%, transparent);
     color: #fffaf0;
-    font-size: 14px;
+    font-size: 6px;
+    line-height: 1;
 }
 .pet-widget__quest-toggle:hover { box-shadow: none; }
 .pet-widget__quest-toggle:hover span {
@@ -3952,46 +3939,31 @@ body.modal-open { overflow: hidden; }
     animation: pet-effect-pop .7s cubic-bezier(.22, 1, .36, 1);
 }
 
-@keyframes pixel-pet-idle {
-    0%, 100% { transform: translate3d(0, 0, 0); }
-    50% { transform: translate3d(0, -2px, 0); }
-}
-@keyframes pixel-pet-look {
-    0%, 34%, 100% { transform: translateX(0); }
-    35%, 66% { transform: translateX(4px); }
-    67%, 84% { transform: translateX(-3px); }
-}
-@keyframes pixel-pet-tail {
-    0%, 100% { transform: rotate(-5deg); }
-    50% { transform: rotate(8deg) translateY(-2px); }
-}
-@keyframes pixel-pet-walk-body {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-4px); }
-}
-@keyframes pixel-pet-walk-feet {
-    0%, 100% { transform: skewX(8deg); }
-    50% { transform: skewX(-8deg); }
-}
-@keyframes pixel-pet-sleep {
-    0%, 100% { transform: translate3d(5px, 28px, 0) rotate(76deg) scale(.82); }
-    50% { transform: translate3d(5px, 30px, 0) rotate(76deg) scale(.84, .8); }
-}
-@keyframes pixel-pet-deep-sleep {
-    0%, 100% { transform: translate3d(0, 36px, 0) rotate(-78deg) scale(.84, .78); }
-    50% { transform: translate3d(0, 38px, 0) rotate(-78deg) scale(.86, .76); }
-}
-@keyframes pixel-pet-advice-paw {
-    0%, 100% { transform: rotate(0) translateY(0); }
-    50% { transform: rotate(-64deg) translate(-3px, -8px); }
-}
-@keyframes pixel-pet-bell {
-    0%, 100% { transform: rotate(-4deg); }
-    50% { transform: rotate(5deg); }
-}
 @keyframes pixel-pet-shadow {
     0%, 100% { opacity: .72; transform: scaleX(1); }
     50% { opacity: .52; transform: scaleX(.88); }
+}
+
+@keyframes pixel-sprite-idle {
+    0%, 100% { transform: translate3d(-50%, 0, 0) scaleX(var(--pet-facing)); }
+    50% { transform: translate3d(-50%, -2px, 0) scaleX(var(--pet-facing)); }
+}
+@keyframes pixel-sprite-look {
+    0%, 34%, 100% { transform: translate3d(-50%, 0, 0) scaleX(var(--pet-facing)); }
+    35%, 66% { transform: translate3d(calc(-50% + 2px), 0, 0) scaleX(var(--pet-facing)); }
+    67%, 84% { transform: translate3d(calc(-50% - 2px), 0, 0) scaleX(var(--pet-facing)); }
+}
+@keyframes pixel-sprite-walk {
+    0%, 100% { transform: translate3d(-50%, 0, 0) scaleX(var(--pet-facing)); }
+    50% { transform: translate3d(-50%, -3px, 0) scaleX(var(--pet-facing)); }
+}
+@keyframes pixel-sprite-sleep {
+    0%, 100% { transform: translate3d(-50%, 1px, 0) scaleX(var(--pet-facing)); }
+    50% { transform: translate3d(-50%, 0, 0) scaleX(var(--pet-facing)); }
+}
+@keyframes pixel-sprite-advice {
+    0%, 100% { transform: translate3d(-50%, 0, 0) scaleX(var(--pet-facing)); }
+    50% { transform: translate3d(-50%, -2px, 0) scaleX(var(--pet-facing)); }
 }
 
 @media (max-width: 600px) {
@@ -4002,11 +3974,9 @@ body.modal-open { overflow: hidden; }
 
 @media (prefers-reduced-motion: reduce) {
     .streak-pet-mount { transition: none !important; }
-    .pixel-pet__body-rig,
-    .pixel-pet__head-rig,
-    .pixel-pet__tail,
-    .pixel-pet__legs,
-    .pixel-pet__paw,
-    .pixel-pet__bell,
     .pet-figure::after { animation: none !important; transform: none !important; }
+    .pixel-pet__sprite {
+        animation: none !important;
+        transform: translate3d(-50%, 0, 0) scaleX(var(--pet-facing)) !important;
+    }
 }

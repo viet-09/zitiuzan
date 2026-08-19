@@ -6,7 +6,7 @@ import {
   chooseNextPetState,
   clampPetPosition,
   getContextualPetAdvice,
-} from './pet-companion-state.js?v=12';
+} from './pet-companion-state.js?v=13';
 
 const POSITION_STORAGE_KEY = 'n2_pet_position_v1';
 const STATE_DURATION = Object.freeze({
