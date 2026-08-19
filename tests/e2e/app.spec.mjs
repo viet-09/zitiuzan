@@ -110,7 +110,7 @@ test('a due weakness launches a mini-test and updates readiness evidence', async
   await expect(page.getByRole('button', { name: /Hỏi gia sư về điểm yếu/ })).toBeVisible();
 });
 
-test('full-body pet stays visible, reacts to touch and keeps its learning quest', async ({ page }) => {
+test('pixel desktop companion roams, reacts, drags and keeps its learning quest', async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem('n2_reviews_v1', JSON.stringify([{
       key: 'g1d1:q0', lessonId: 'g1d1', categoryId: 'grammar', prompt: '雨が降る（　）。',
@@ -121,71 +121,70 @@ test('full-body pet stays visible, reacts to touch and keeps its learning quest'
   });
   await page.goto('/');
   await dismissAuthGateForComponentChecks(page);
-  const petArt = page.locator('#pet-widget-mount .pet-art--fox');
+  const petArt = page.locator('#pet-widget-mount .pixel-pet--fox');
   const petWidget = page.locator('#pet-widget-mount .pet-widget');
-  const petScene = page.locator('#pet-widget-mount [data-pet-scene]');
-  const petCanvas = petScene.locator('canvas');
+  const petCompanion = page.locator('#pet-widget-mount [data-pet-companion]');
   await expect(petArt).toHaveCount(1);
-  await expect(petArt).toHaveAttribute('src', './assets/pets/fox-3d.png');
-  expect(await petArt.evaluate((image) => image.naturalWidth)).toBeGreaterThan(0);
-  await expect(petScene).toHaveAttribute('data-scene-state', 'ready', { timeout: 10_000 });
-  await expect(petScene).toHaveAttribute('data-renderer', 'three-webgl');
-  await expect(petScene).toHaveAttribute('data-motion', 'idle');
-  await expect(petCanvas).toBeVisible();
-  await expect(petArt).toBeHidden();
-  const idleFrameA = await petCanvas.screenshot();
-  await page.waitForTimeout(420);
-  const idleFrameB = await petCanvas.screenshot();
-  expect(idleFrameA.equals(idleFrameB)).toBe(false);
-  await petCanvas.evaluate((canvas) => { canvas.dataset.instanceCheck = 'stable'; });
+  await expect(petArt.locator('svg')).toBeVisible();
+  await expect(petCompanion).toHaveAttribute('data-renderer', 'pixel-sprite');
+  await expect(petCompanion).toHaveAttribute('data-pet-state', 'idle');
+  await expect(page.locator('#pet-widget-mount')).toHaveCSS('pointer-events', 'none');
 
   await page.getByRole('button', { name: 'Nựng đầu Cáo' }).click();
   await expect(petWidget).toHaveAttribute('data-reaction', 'pat');
-  await expect(petScene).toHaveAttribute('data-motion', 'pat');
+  await expect(petCompanion).toHaveAttribute('data-pet-state', 'look');
   await expect(page.locator('.pet-widget__bubble')).toContainText(/nựng|thích/i);
 
   await page.getByRole('button', { name: 'Trêu đùa với Cáo' }).click();
   await expect(petWidget).toHaveAttribute('data-reaction', 'tease');
-  await expect(petScene).toHaveAttribute('data-motion', 'tease');
+  await expect(petCompanion).toHaveAttribute('data-pet-state', 'walk');
 
   await page.getByRole('button', { name: 'Đập tay với Cáo' }).click();
   await expect(petWidget).toHaveAttribute('data-reaction', 'highfive');
-  await expect(petScene).toHaveAttribute('data-motion', 'highfive');
-  await expect(petCanvas).toHaveAttribute('data-instance-check', 'stable');
-  await expect(petCanvas).toHaveCount(1);
+  await expect(petCompanion).toHaveAttribute('data-pet-state', 'advice');
+
+  const transformBeforeDrag = await page.locator('#pet-widget-mount .streak-pet-mount').evaluate((node) => getComputedStyle(node).transform);
+  const dragTarget = page.getByRole('button', { name: 'Nựng đầu Cáo' });
+  const dragBox = await dragTarget.boundingBox();
+  expect(dragBox).not.toBeNull();
+  await page.mouse.move(dragBox.x + dragBox.width / 2, dragBox.y + dragBox.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(dragBox.x + 96, dragBox.y - 42, { steps: 6 });
+  await page.mouse.up();
+  const transformAfterDrag = await page.locator('#pet-widget-mount .streak-pet-mount').evaluate((node) => getComputedStyle(node).transform);
+  expect(transformAfterDrag).not.toBe(transformBeforeDrag);
 
   await page.evaluate(() => window.dispatchEvent(new CustomEvent('n2:lesson-complete', {
     detail: { id: 'motion-check', done: true, streak: 0 },
   })));
   await expect(petWidget).toHaveAttribute('data-reaction', 'complete');
-  await expect(petScene).toHaveAttribute('data-motion', 'complete');
+  await expect(petCompanion).toHaveAttribute('data-pet-state', 'advice');
 
   await page.getByRole('button', { name: 'Mở nhiệm vụ học của Cáo' }).click();
   const panel = page.getByRole('region', { name: 'Nhiệm vụ của bạn đồng hành' });
   await expect(panel).toBeVisible();
   await expect(panel.getByRole('button', { name: 'Ôn 3 phút' })).toBeVisible();
   await expect(panel).toContainText('lỗi ngữ pháp');
-  await expect(petCanvas).toBeVisible();
   await expect(petWidget).toHaveAttribute('data-reaction', '', { timeout: 3_000 });
-  const sizeBeforeScroll = await petScene.boundingBox();
+  const sizeBeforeScroll = await petCompanion.boundingBox();
   await page.evaluate(() => window.scrollTo(0, 500));
   await expect(page.locator('#pet-widget-mount')).not.toHaveClass(/is-compact/);
-  const sizeAfterScroll = await petScene.boundingBox();
+  const sizeAfterScroll = await petCompanion.boundingBox();
   expect(sizeBeforeScroll).not.toBeNull();
   expect(sizeAfterScroll).not.toBeNull();
   expect(Math.abs(sizeAfterScroll.width - sizeBeforeScroll.width)).toBeLessThanOrEqual(0.5);
   expect(Math.abs(sizeAfterScroll.height - sizeBeforeScroll.height)).toBeLessThanOrEqual(0.5);
 
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await expect(petScene).toHaveAttribute('data-motion', 'reduced');
+  await expect(petCompanion).toHaveAttribute('data-motion', 'reduced');
 
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.goto('/#/profile');
   await dismissAuthGateForComponentChecks(page);
   await page.getByRole('combobox', { name: 'Loài' }).selectOption('rabbit');
-  const rabbitScene = page.locator('#pet-widget-mount [data-pet-scene][data-pet-type="rabbit"]');
-  await expect(rabbitScene).toHaveAttribute('data-scene-state', 'ready', { timeout: 10_000 });
-  await expect(rabbitScene.locator('canvas')).toBeVisible();
+  const rabbitCompanion = page.locator('#pet-widget-mount [data-pet-companion][data-pet-type="rabbit"]');
+  await expect(rabbitCompanion).toHaveAttribute('data-renderer', 'pixel-sprite');
+  await expect(rabbitCompanion.locator('.pixel-pet--rabbit')).toBeVisible();
   await page.getByRole('combobox', { name: 'Loài' }).selectOption('fox');
 });
 
@@ -194,7 +193,7 @@ test('mobile dashboard has no horizontal overflow and passes serious axe checks'
   await page.goto('/');
   await dismissAuthGateForComponentChecks(page);
   await expect(page.locator('#learning-hub')).toBeVisible();
-  await expect(page.locator('#pet-widget-mount [data-pet-scene]')).toHaveAttribute('data-scene-state', 'ready', { timeout: 10_000 });
+  await expect(page.locator('#pet-widget-mount [data-pet-companion]')).toHaveAttribute('data-renderer', 'pixel-sprite');
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(1);
 
