@@ -3,34 +3,33 @@
 // Uploaded images are validated in the browser and are never sent over the network.
 
 import { activateModalDialog } from './modal-dialog.js';
+import {
+  AVATAR_OUTPUT_SIZE,
+  DEFAULT_PROFILE,
+  PROFILE_LIMITS,
+  PROFILE_PRESETS,
+  calculateCoverCrop,
+  escapeProfileHtml as escapeHtml,
+  isSafeImageDataUrl,
+  normalizeProfile,
+  presetById,
+  renderAvatar as renderAvatarMarkup,
+} from './profile-avatar.js';
+
+export {
+  AVATAR_OUTPUT_SIZE,
+  DEFAULT_PROFILE,
+  PROFILE_LIMITS,
+  PROFILE_PRESETS,
+  calculateCoverCrop,
+  normalizeProfile,
+} from './profile-avatar.js';
 
 export const PROFILE_STORAGE_KEY = 'n2_profile_v2';
 export const PROFILE_PROMPT_KEY = 'n2_profile_prompt_seen_v2';
 export const PROFILE_UPDATED_EVENT = 'n2:profile-updated';
 
-export const PROFILE_LIMITS = Object.freeze({
-  nameLength: 40,
-  imageBytes: 1_500_000,
-  dataUrlBytes: 2_100_000,
-  minImageSide: 32,
-  maxImageSide: 4096,
-});
-
-export const PROFILE_PRESETS = Object.freeze([
-  Object.freeze({ id: 'neko', symbol: '🐱', label: 'Mèo chăm học' }),
-  Object.freeze({ id: 'kitsune', symbol: '🦊', label: 'Cáo tinh nghịch' }),
-  Object.freeze({ id: 'usagi', symbol: '🐰', label: 'Thỏ dịu dàng' }),
-  Object.freeze({ id: 'sakura', symbol: '🌸', label: 'Hoa anh đào' }),
-]);
-
-export const DEFAULT_PROFILE = Object.freeze({
-  name: '',
-  avatarType: 'preset',
-  avatarData: PROFILE_PRESETS[0].id,
-});
-
 const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
-const SAFE_IMAGE_DATA_URL = /^data:image\/(?:jpeg|png|webp);base64,[a-z0-9+/=\s]+$/i;
 
 let memoryProfile = { ...DEFAULT_PROFILE };
 let storageAvailable = true;
@@ -38,53 +37,6 @@ let mountSequence = 0;
 let dialogSequence = 0;
 let promptScheduled = false;
 let activeDialog = null;
-
-function escapeHtml(value) {
-  return String(value ?? '').replace(/[&<>"']/g, (character) => ({
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;',
-  }[character]));
-}
-
-function sanitizeName(value) {
-  return String(value ?? '')
-    .replace(/[\u0000-\u001f\u007f]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, PROFILE_LIMITS.nameLength);
-}
-
-function isSafeImageDataUrl(value) {
-  if (typeof value !== 'string' || value.length === 0) return false;
-  if (value.length > PROFILE_LIMITS.dataUrlBytes) return false;
-  return SAFE_IMAGE_DATA_URL.test(value);
-}
-
-function presetById(id) {
-  return PROFILE_PRESETS.find((preset) => preset.id === id) || PROFILE_PRESETS[0];
-}
-
-/**
- * Convert arbitrary stored/caller data into the public profile shape.
- * User text remains plain text here and is escaped only at the HTML boundary.
- */
-export function normalizeProfile(value) {
-  const source = value && typeof value === 'object' ? value : {};
-  const name = sanitizeName(source.name);
-
-  if (source.avatarType === 'upload' && isSafeImageDataUrl(source.avatarData)) {
-    return { name, avatarType: 'upload', avatarData: source.avatarData };
-  }
-
-  return {
-    name,
-    avatarType: 'preset',
-    avatarData: presetById(source.avatarData).id,
-  };
-}
 
 function readStoredProfile() {
   if (typeof localStorage === 'undefined') return { ...memoryProfile };
@@ -168,18 +120,49 @@ function readFileAsDataUrl(file) {
   });
 }
 
-function readImageDimensions(dataUrl) {
+function loadImageFromObjectUrl(file) {
   return new Promise((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file);
     const image = new Image();
     image.decoding = 'async';
-    image.onload = () => resolve({ width: image.naturalWidth, height: image.naturalHeight });
-    image.onerror = () => reject(new Error('Tệp đã chọn không phải là ảnh hợp lệ.'));
-    image.src = dataUrl;
+    image.onload = () => resolve({
+      source: image,
+      width: image.naturalWidth,
+      height: image.naturalHeight,
+      release: () => URL.revokeObjectURL(objectUrl),
+    });
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error('Tệp đã chọn không phải là ảnh hợp lệ.'));
+    };
+    image.src = objectUrl;
   });
 }
 
+async function decodeAvatarSource(file) {
+  if (typeof createImageBitmap === 'function') {
+    try {
+      const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+      return {
+        source: bitmap,
+        width: bitmap.width,
+        height: bitmap.height,
+        release: () => bitmap.close(),
+      };
+    } catch {
+      // Some older browsers cannot decode every valid JPEG through ImageBitmap.
+    }
+  }
+  return loadImageFromObjectUrl(file);
+}
+
+function canvasToBlob(canvas, type, quality) {
+  return new Promise((resolve) => canvas.toBlob(resolve, type, quality));
+}
+
 /**
- * Validate an avatar File and return a safe local data URL plus image metadata.
+ * Decode, center-crop and compress an avatar File locally. Input size is not
+ * restricted: only the compact 256px result is persisted in localStorage.
  * SVG/GIF are intentionally rejected: static raster formats avoid script payloads
  * and keep localStorage usage predictable.
  */
@@ -191,44 +174,58 @@ export async function validateAvatarFile(file) {
   if (!Number.isFinite(file.size) || file.size <= 0) {
     throw new Error('Tệp ảnh đang trống hoặc không đọc được.');
   }
-  if (file.size > PROFILE_LIMITS.imageBytes) {
-    throw new Error('Ảnh phải nhỏ hơn 1,5 MB.');
+  const decoded = await decodeAvatarSource(file);
+  const { width: sourceWidth, height: sourceHeight } = decoded;
+  if (!Number.isFinite(sourceWidth) || !Number.isFinite(sourceHeight) || sourceWidth <= 0 || sourceHeight <= 0) {
+    decoded.release();
+    throw new Error('Tệp đã chọn không phải là ảnh hợp lệ.');
   }
 
-  const dataUrl = await readFileAsDataUrl(file);
-  if (!isSafeImageDataUrl(dataUrl)) {
-    throw new Error('Dữ liệu ảnh không hợp lệ hoặc quá lớn để lưu trên thiết bị.');
-  }
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = AVATAR_OUTPUT_SIZE;
+    canvas.height = AVATAR_OUTPUT_SIZE;
+    const context = canvas.getContext('2d', { alpha: false });
+    if (!context) throw new Error('Trình duyệt không thể xử lý ảnh này.');
+    const { sourceX, sourceY, sourceSize } = calculateCoverCrop(sourceWidth, sourceHeight);
+    context.fillStyle = '#f7f3eb';
+    context.fillRect(0, 0, AVATAR_OUTPUT_SIZE, AVATAR_OUTPUT_SIZE);
+    context.drawImage(
+      decoded.source,
+      sourceX,
+      sourceY,
+      sourceSize,
+      sourceSize,
+      0,
+      0,
+      AVATAR_OUTPUT_SIZE,
+      AVATAR_OUTPUT_SIZE,
+    );
 
-  const { width, height } = await readImageDimensions(dataUrl);
-  const { minImageSide, maxImageSide } = PROFILE_LIMITS;
-  if (width < minImageSide || height < minImageSide) {
-    throw new Error(`Ảnh cần có kích thước tối thiểu ${minImageSide} × ${minImageSide} px.`);
-  }
-  if (width > maxImageSide || height > maxImageSide) {
-    throw new Error(`Ảnh không được vượt quá ${maxImageSide} × ${maxImageSide} px.`);
-  }
+    let output = await canvasToBlob(canvas, 'image/webp', 0.82);
+    if (!output || output.type !== 'image/webp') output = await canvasToBlob(canvas, 'image/jpeg', 0.86);
+    if (!output) throw new Error('Không thể nén ảnh trên trình duyệt này.');
+    const dataUrl = await readFileAsDataUrl(output);
+    if (!isSafeImageDataUrl(dataUrl)) throw new Error('Ảnh sau khi nén vẫn quá lớn để lưu trên thiết bị.');
 
-  return { dataUrl, mimeType: file.type, width, height, bytes: file.size };
+    return {
+      dataUrl,
+      mimeType: output.type,
+      width: AVATAR_OUTPUT_SIZE,
+      height: AVATAR_OUTPUT_SIZE,
+      bytes: output.size,
+      sourceWidth,
+      sourceHeight,
+      sourceBytes: file.size,
+    };
+  } finally {
+    decoded.release();
+  }
 }
 
 /** Return safe avatar markup for mastheads, buttons, or settings previews. */
 export function renderAvatar(profileValue = getProfile(), options = {}) {
-  const profile = normalizeProfile(profileValue);
-  const extraClass = typeof options.className === 'string'
-    ? options.className.replace(/[^a-z0-9_ -]/gi, '').trim()
-    : '';
-  const className = `profile-avatar${extraClass ? ` ${extraClass}` : ''}`;
-  const decorative = options.decorative !== false;
-  const alt = decorative ? '' : sanitizeName(options.alt || profile.name || 'Ảnh đại diện');
-
-  if (profile.avatarType === 'upload') {
-    return `<span class="${escapeHtml(className)} profile-avatar--upload"><img src="${escapeHtml(profile.avatarData)}" alt="${escapeHtml(alt)}"></span>`;
-  }
-
-  const preset = presetById(profile.avatarData);
-  const aria = decorative ? ' aria-hidden="true"' : ` role="img" aria-label="${escapeHtml(alt || preset.label)}"`;
-  return `<span class="${escapeHtml(className)} profile-avatar--preset profile-avatar--${escapeHtml(preset.id)}"${aria}>${escapeHtml(preset.symbol)}</span>`;
+  return renderAvatarMarkup(profileValue, options);
 }
 
 function resolveTarget(target) {
@@ -242,7 +239,7 @@ function makePresetChoices(profile, groupName) {
     return `
       <label class="profile-preset${checked ? ' is-selected' : ''}">
         <input type="radio" name="${escapeHtml(groupName)}" value="${escapeHtml(preset.id)}"${checked ? ' checked' : ''}>
-        <span class="profile-preset__symbol" aria-hidden="true">${escapeHtml(preset.symbol)}</span>
+        <span class="profile-preset__pet profile-preset--${escapeHtml(preset.id)}" aria-hidden="true"></span>
         <span class="profile-preset__label">${escapeHtml(preset.label)}</span>
       </label>`;
   }).join('');
@@ -299,7 +296,7 @@ export function openProfileDialog(options = {}) {
             <div class="profile-presets">${makePresetChoices(initial, groupName)}</div>
             <label class="profile-upload" for="${uploadId}">
               <span class="profile-upload__label">Hoặc chọn ảnh từ thiết bị</span>
-              <span class="profile-upload__hint">JPG, PNG hoặc WebP · tối đa 1,5 MB · 32–4096 px mỗi chiều</span>
+              <span class="profile-upload__hint">JPG, PNG hoặc WebP · ảnh lớn sẽ tự nén và cắt vuông trên thiết bị</span>
               <input id="${uploadId}" name="avatarFile" type="file" accept="image/jpeg,image/png,image/webp">
             </label>
           </fieldset>
@@ -371,7 +368,7 @@ export function openProfileDialog(options = {}) {
       overlay.querySelectorAll(`input[name="${groupName}"]`).forEach((radio) => {
         radio.checked = false;
       });
-      setStatus(`Ảnh hợp lệ: ${result.width} × ${result.height} px.`, 'success');
+      setStatus(`Đã nén ${result.sourceWidth} × ${result.sourceHeight} xuống ${result.width} × ${result.height} px.`, 'success');
       updatePreview();
     } catch (error) {
       if (!closed) {

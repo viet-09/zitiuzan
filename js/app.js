@@ -2,7 +2,7 @@
 // Loads lesson data, wires the header/nav controls, and starts the hash router.
 
 import { setLessons, resetBookContent, mergeBookContent, setTutorContext, setQuestionClassification, setLessonImages, setVietnameseExplanations, getStreak } from './store.js';
-import { mountPet } from './pet.js?v=13';
+import { mountPet } from './pet.js?v=14';
 import { initRouter, navigate } from './router.js';
 import { initFuriganaToggle } from './furigana.js';
 import { openSettings } from './gemini.js';

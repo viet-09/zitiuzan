@@ -4,8 +4,8 @@
 // or #/profile directly.
 
 import { currentUser, signInWithGoogle, signOut, ready as supabaseReady } from './supabase.js';
-import { getProfile, renderAvatar, openProfileDialog } from './profile.js';
-import { PET_ACCESSORIES, PET_TYPES, getPetEvolution, getPetMemories, getPetPreferences, setPetPreferences, renderPet } from './pet.js?v=13';
+import { getProfile, renderAvatar, openProfileDialog, saveProfile } from './profile.js';
+import { PET_ACCESSORIES, PET_TYPES, getPetEvolution, getPetMemories, getPetPreferences, setPetPreferences, renderPet } from './pet.js?v=14';
 import { clearUserScopedStorage } from './account-storage.js';
 import { learningState } from './learning-state.js';
 
@@ -120,6 +120,14 @@ async function paint(el) {
     const select = event.target.closest('[data-pet-setting]');
     if (!select) return;
     const next = setPetPreferences({ [select.dataset.petSetting]: select.value });
+    if (select.dataset.petSetting === 'petType') {
+      const currentProfile = getProfile();
+      if (currentProfile.avatarType === 'preset') {
+        saveProfile({ ...currentProfile, avatarData: next.petType });
+        const pageAvatar = el.querySelector('.profile-page__avatar');
+        if (pageAvatar) pageAvatar.innerHTML = renderAvatar(getProfile());
+      }
+    }
     const preview = el.querySelector('[data-pet-preview]');
     if (preview) preview.innerHTML = renderPet({ ...next, evolutionId: evolution.id, decorative: true });
   });

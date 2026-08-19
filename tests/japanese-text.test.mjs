@@ -12,6 +12,10 @@ test('furigana aligns each kanji run with full-word readings', () => {
     buildFuriganaMarkup('銀行でお金を下ろす / 引き出す', 'ぎんこう で おかね を おろす / ひきだす'),
     '{銀行|ぎんこう}でお{金|かね}を{下|お}ろす / {引|ひ}き{出|だ}す',
   );
+  assert.equal(
+    buildFuriganaMarkup('「お元気でしたか。／お元気でいらっしゃいましたか。」', 'おげんきでしたか / おげんきでいらっしゃいましたか'),
+    '「お{元気|げんき}でしたか。／お{元気|げんき}でいらっしゃいましたか。」',
+  );
 });
 
 test('space-delimited kanji readings stay directly over their own kanji', () => {

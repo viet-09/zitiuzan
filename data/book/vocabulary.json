@@ -617,20 +617,20 @@
             "note": ""
           },
           {
-            "jp": "「おじゃします。」",
+            "jp": "「おじゃまします。」",
             "reading": "",
             "en": "Thank you.",
             "note": ""
           },
           {
             "jp": "ご無沙汰しています。",
-            "reading": "",
+            "reading": "ごぶさたしています",
             "en": "It has been a long time since we saw each other. How have you been?",
             "note": ""
           },
           {
-            "jp": "お元気で(いらっしゃいまし)たか。」",
-            "reading": "",
+            "jp": "「お元気でしたか。／お元気でいらっしゃいましたか。」",
+            "reading": "おげんきでしたか / おげんきでいらっしゃいましたか",
             "en": "",
             "note": ""
           },
@@ -648,7 +648,7 @@
           },
           {
             "jp": "＊人にお土産などをあげるときの謙譲した言い方。",
-            "reading": "ひと みやげ けんぜん い かた",
+            "reading": "ひと みやげ けんじょう い かた",
             "en": "A polite expression when you give gifts to someone.",
             "note": ""
           },
@@ -700,8 +700,8 @@
         "heading": "もっと おぼえましょう",
         "words": [
           {
-            "jp": "友人を家に[<ruby>招<rt>まね</rt></ruby>く / <ruby>招待<rt>しょうたい</rt></ruby>する]",
-            "reading": "ゆうじん い",
+            "jp": "友人を家に[招く / 招待する]",
+            "reading": "ゆうじんをいえに[まねく / しょうたいする]",
             "en": "invite friends to your home",
             "note": ""
           },
@@ -712,13 +712,13 @@
             "note": ""
           },
           {
-            "jp": "⇒寝り心地が※いいベッド",
+            "jp": "⇒寝心地が※いいベッド",
             "reading": "ね ごこち",
             "en": "a comfortable bed",
             "note": ""
           },
           {
-            "jp": "⇒居り心地が※いい家",
+            "jp": "⇒居心地が※いい家",
             "reading": "い ごこち い",
             "en": "a comfortable house",
             "note": ""
@@ -778,10 +778,10 @@
         "answerIndex": 0
       },
       {
-        "prompt": "② 昨日は家でゆっくり（a. くつろいだ b. 暮した）。",
+        "prompt": "② 昨日は家でゆっくり（a. くつろいだ b. 暮らした）。",
         "options": [
           "a. くつろいだ",
-          "b. 暮した"
+          "b. 暮らした"
         ],
         "answerIndex": 0
       },
@@ -820,7 +820,7 @@
       {
         "prompt": "⑦ 昨年の夏、1週間ほど北海道の友人の家で（ ）。",
         "options": [
-          "1 暮した",
+          "1 暮らした",
           "2 招かれた",
           "3 過ごした",
           "4 おじゃました"
@@ -848,61 +848,61 @@
         "words": [
           {
             "jp": "家事をする",
-            "reading": "",
+            "reading": "かじをする",
             "en": "do housework",
             "note": ""
           },
           {
             "jp": "炊事",
-            "reading": "",
+            "reading": "すいじ",
             "en": "cooking",
             "note": ""
           },
           {
             "jp": "食卓を片付ける",
-            "reading": "",
+            "reading": "しょくたくをかたづける",
             "en": "clear the table",
             "note": ""
           },
           {
             "jp": "洗い物を流しに持っていく",
-            "reading": "",
+            "reading": "あらいものをながしにもっていく",
             "en": "take the dirty dishes to the sink",
             "note": ""
           },
           {
             "jp": "汚れた食器",
-            "reading": "",
+            "reading": "よごれたしょっき",
             "en": "dirty dishes",
             "note": ""
           },
           {
             "jp": "育児(N)",
-            "reading": "",
+            "reading": "いくじ",
             "en": "child rearing",
             "note": ""
           },
           {
             "jp": "子育てをする",
-            "reading": "",
+            "reading": "こそだてをする",
             "en": "raise a child",
             "note": ""
           },
           {
             "jp": "子どもをかわいがる",
-            "reading": "",
+            "reading": "こどもをかわいがる",
             "en": "love your child",
             "note": ""
           },
           {
             "jp": "子どもが甘える",
-            "reading": "",
+            "reading": "こどもがあまえる",
             "en": "a child wanting more attention",
             "note": ""
           },
           {
             "jp": "子どもを甘やかす",
-            "reading": "",
+            "reading": "こどもをあまやかす",
             "en": "spoil your child",
             "note": ""
           },
@@ -914,25 +914,25 @@
           },
           {
             "jp": "子どもをしつける",
-            "reading": "",
+            "reading": "こどもをしつける",
             "en": "teach manners to a child",
             "note": ""
           },
           {
             "jp": "お尻をたたく",
-            "reading": "",
+            "reading": "おしりをたたく",
             "en": "spank",
             "note": ""
           },
           {
             "jp": "怒鳴る",
-            "reading": "",
+            "reading": "どなる",
             "en": "yell",
             "note": ""
           },
           {
             "jp": "この話はよそう。",
-            "reading": "",
+            "reading": "このはなしはよそう",
             "en": "Let's stop talking about it.",
             "note": ""
           },
@@ -950,55 +950,55 @@
           },
           {
             "jp": "妊娠する",
-            "reading": "",
+            "reading": "にんしんする",
             "en": "get pregnant",
             "note": ""
           },
           {
             "jp": "子どもを産む",
-            "reading": "",
+            "reading": "こどもをうむ",
             "en": "give a birth to a baby",
             "note": ""
           },
           {
             "jp": "生まれる",
-            "reading": "",
+            "reading": "うまれる",
             "en": "be born",
             "note": ""
           },
           {
             "jp": "赤ちゃんを\nおんぶする\nおぶう",
-            "reading": "",
+            "reading": "あかちゃんを おんぶする おぶう",
             "en": "carry a baby on your back",
             "note": ""
           },
           {
             "jp": "だっこする\n(腕)抱く",
-            "reading": "",
+            "reading": "だっこする (うで)だく",
             "en": "pick the baby/pet up",
             "note": ""
           },
           {
             "jp": "おむつ\nを\nおしめ\n換える\n当てる",
-            "reading": "",
+            "reading": "おむつを おしめ かえる あてる",
             "en": "change a diaper\nput a diaper on the baby",
             "note": ""
           },
           {
             "jp": "紙おむつ",
-            "reading": "",
+            "reading": "かみおむつ",
             "en": "disposable diaper",
             "note": ""
           },
           {
             "jp": "やんちゃな子ども",
-            "reading": "",
+            "reading": "やんちゃなこども",
             "en": "a mischievous child",
             "note": ""
           },
           {
             "jp": "落書きをする",
-            "reading": "",
+            "reading": "らくがきをする",
             "en": "scribble",
             "note": ""
           },
@@ -1010,7 +1010,7 @@
           },
           {
             "jp": "暴れる",
-            "reading": "",
+            "reading": "あばれる",
             "en": "get out-of-control",
             "note": ""
           },
@@ -1022,7 +1022,7 @@
           },
           {
             "jp": "頭をぶつ",
-            "reading": "",
+            "reading": "あたまをぶつ",
             "en": "bump your head on ...",
             "note": ""
           },
@@ -1034,7 +1034,7 @@
           },
           {
             "jp": "顔をなぐる",
-            "reading": "",
+            "reading": "かおをなぐる",
             "en": "punch someone in the face",
             "note": ""
           },
@@ -1046,7 +1046,7 @@
           },
           {
             "jp": "足でける",
-            "reading": "",
+            "reading": "あしでける",
             "en": "kick",
             "note": ""
           },
@@ -1058,7 +1058,7 @@
           },
           {
             "jp": "猫の耳を引っ張る",
-            "reading": "",
+            "reading": "ねこのみみをひっぱる",
             "en": "pull a cat's ear",
             "note": ""
           },
@@ -1070,7 +1070,7 @@
           },
           {
             "jp": "動物をいじめる",
-            "reading": "",
+            "reading": "どうぶつをいじめる",
             "en": "be cruel to an animal",
             "note": ""
           }
@@ -1555,7 +1555,7 @@
             "note": ""
           },
           {
-            "jp": "英養がかたよる",
+            "jp": "栄養がかたよる",
             "reading": "えいよう が かたよる",
             "en": "a poor diet",
             "note": ""
@@ -1984,7 +1984,7 @@
           },
           {
             "jp": "会社に問い合わせる",
-            "reading": "かいしゃにととい合わせる",
+            "reading": "かいしゃにといあわせる",
             "en": "ask the company about ...",
             "note": ""
           },
@@ -2718,49 +2718,49 @@
         "words": [
           {
             "jp": "パソコンを操作する",
-            "reading": "",
+            "reading": "ぱそこんをそうさする",
             "en": "operate the computer",
             "note": ""
           },
           {
             "jp": "基本をマスターする",
-            "reading": "",
+            "reading": "きほんをますたーする",
             "en": "master the basic operations",
             "note": ""
           },
           {
             "jp": "パソコンを起動する / 立ち上げる",
-            "reading": "",
+            "reading": "ぱそこんをきどうする / たちあげる",
             "en": "start the computer",
             "note": ""
           },
           {
             "jp": "終了する",
-            "reading": "",
+            "reading": "しゅうりょうする",
             "en": "turn off",
             "note": ""
           },
           {
             "jp": "パソコンを再起動する",
-            "reading": "",
+            "reading": "ぱそこんをさいきどうする",
             "en": "restart the computer",
             "note": ""
           },
           {
             "jp": "次の画面を表示する",
-            "reading": "",
+            "reading": "つぎのがめんをひょうじする",
             "en": "display the next page",
             "note": ""
           },
           {
             "jp": "プロバイダーと契約する",
-            "reading": "",
+            "reading": "ぷろばいだーとけいやくする",
             "en": "subscribe to a provider",
             "note": ""
           },
           {
             "jp": "インターネット \\ ネット に 接続する / つなぐ / アクセスする",
-            "reading": "",
+            "reading": "いんたーねっと / ねっとにせつぞくする / つなぐ / あくせすする",
             "en": "get connected to the internet",
             "note": ""
           },
@@ -2772,25 +2772,25 @@
           },
           {
             "jp": "インターネットで検索する",
-            "reading": "",
+            "reading": "いんたーねっとでけんさくする",
             "en": "search on the internet",
             "note": ""
           },
           {
             "jp": "ホームページで情報を得る",
-            "reading": "",
+            "reading": "ほーむぺーじでじょうほうをえる",
             "en": "obtain the information on the website",
             "note": ""
           },
           {
             "jp": "ダウンロードを開始する",
-            "reading": "",
+            "reading": "だうんろーどをかいしする",
             "en": "start downloading",
             "note": ""
           },
           {
             "jp": "完了する",
-            "reading": "",
+            "reading": "かんりょうする",
             "en": "finish",
             "note": ""
           },
@@ -2814,25 +2814,25 @@
           },
           {
             "jp": "パソコンのシステムを更新する",
-            "reading": "",
+            "reading": "ぱそこんのしすてむをこうしんする",
             "en": "update the computer operating system",
             "note": ""
           },
           {
             "jp": "便利な機能",
-            "reading": "",
+            "reading": "べんりなきのう",
             "en": "convenient features",
             "note": ""
           },
           {
             "jp": "メールのやり取りをする",
-            "reading": "",
+            "reading": "めーるのやりとりをする",
             "en": "exchange email messages",
             "note": ""
           },
           {
             "jp": "アドレスを 入力する / 登録する",
-            "reading": "",
+            "reading": "あどれすをにゅうりょくする / とうろくする",
             "en": "input addresses / register addresses",
             "note": ""
           }
@@ -12543,7 +12543,7 @@
           },
           {
             "jp": "〜ごとに(=たびに)上達する",
-            "reading": "",
+            "reading": "〜ごとに(=たびに)じょうたつする",
             "en": "learn from your mistakes\n每次失败，都会有提高    ",
             "note": ""
           },
@@ -14087,38 +14087,38 @@
             "note": ""
           },
           {
-            "jp": "大した\nたいした",
-            "reading": "",
+            "jp": "大した",
+            "reading": "たいした",
             "en": "He is really something!",
             "note": ""
           },
           {
-            "jp": "大した\nたいした",
-            "reading": "",
+            "jp": "大した",
+            "reading": "たいした",
             "en": "This isn't much of a meal, but I hope you'll enjoy it.",
             "note": ""
           },
           {
-            "jp": "大した\nたいした",
-            "reading": "",
+            "jp": "大した",
+            "reading": "たいした",
             "en": "",
             "note": ""
           },
           {
-            "jp": "大した\nたいした",
-            "reading": "",
+            "jp": "大した",
+            "reading": "たいした",
             "en": "My mother's illness isn't very serious.",
             "note": ""
           },
           {
-            "jp": "あっという間に\nまに",
-            "reading": "",
+            "jp": "あっという間に",
+            "reading": "あっというまに",
             "en": "He came and left before I knew it.",
             "note": ""
           },
           {
-            "jp": "あっという間に\nまに",
-            "reading": "",
+            "jp": "あっという間に",
+            "reading": "あっというまに",
             "en": "",
             "note": ""
           },
@@ -14129,50 +14129,50 @@
             "note": ""
           },
           {
-            "jp": "当たり前\nあたりまえ",
-            "reading": "",
+            "jp": "当たり前",
+            "reading": "あたりまえ",
             "en": "You have good reason to be angry as he deceived you.",
             "note": ""
           },
           {
-            "jp": "当たり前\nあたりまえ",
-            "reading": "",
+            "jp": "当たり前",
+            "reading": "あたりまえ",
             "en": "You won't succeed unless you try exceptionally hard.",
             "note": ""
           },
           {
-            "jp": "当たり前\nあたりまえ",
-            "reading": "",
+            "jp": "当たり前",
+            "reading": "あたりまえ",
             "en": "",
             "note": ""
           },
           {
-            "jp": "覚え\nおぼえ",
-            "reading": "",
+            "jp": "覚え",
+            "reading": "おぼえ",
             "en": "She is slow to learn her job.",
             "note": ""
           },
           {
-            "jp": "覚え\nおぼえ",
-            "reading": "",
+            "jp": "覚え",
+            "reading": "おぼえ",
             "en": "I don't recall saying anything like that.",
             "note": ""
           },
           {
-            "jp": "余裕\nよゆう",
-            "reading": "",
+            "jp": "余裕",
+            "reading": "よゆう",
             "en": "There is no room for a bed in this room.",
             "note": ""
           },
           {
-            "jp": "余裕\nよゆう",
-            "reading": "",
+            "jp": "余裕",
+            "reading": "よゆう",
             "en": "We can't afford a new car.",
             "note": ""
           },
           {
-            "jp": "余裕\nよゆう",
-            "reading": "",
+            "jp": "余裕",
+            "reading": "よゆう",
             "en": "",
             "note": ""
           }

@@ -10,7 +10,7 @@ import {
   isDone,
 } from './store.js';
 import { navigate, getCurrentRoute, isRouteActive } from './router.js';
-import { renderFurigana, setFurigana, getFurigana } from './furigana.js';
+import { buildFuriganaMarkup, renderFurigana, setFurigana, getFurigana } from './furigana.js';
 import { askText } from './gemini.js';
 import { renderTutor } from './tutor.js';
 import { getQuestionClassification, getLessonImages, getVietnameseExplanation } from './store.js';
@@ -21,6 +21,7 @@ import { toggleLessonCompletion } from './completion.js';
 import { learningState } from './learning-state.js';
 import { buildBookViewerModel, renderBookViewerStrip } from './book-viewer.js';
 import { activateModalDialog } from './modal-dialog.js';
+import { openKanjiWritingPad } from './kanji-writing.js?v=14';
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (char) => ({
@@ -65,59 +66,6 @@ function speak(text) {
 function ttsButton(text) {
   if (!String(text || '').trim()) return '';
   return `<button type="button" class="tts-btn" data-action="speak" data-jp="${escapeHtml(text)}" aria-label="Nghe phát âm tiếng Nhật">🔊</button>`;
-}
-
-const KANJI_RE = /[一-龯㐀-䶿々]/;
-
-/** Splits `word` into alternating kanji/non-kanji runs and aligns each
- * kanji run with its slice of `reading`, using the non-kanji runs (which
- * must appear verbatim in the reading, since kana doesn't change) as
- * anchors. Wrapping the WHOLE word+reading in one {word|reading} ruby —
- * the previous behavior — visually misaligns as soon as `word` mixes kanji
- * with okurigana/particles (e.g. "引っ越しの荷造りをする"): the browser
- * centers the full reading over the full word as one block instead of
- * lining up each kanji with just its own reading. Falls back to a single
- * whole-word ruby if the alignment can't be made to work out (should be
- * rare — only a real word/reading mismatch would trigger it).
- */
-function buildFuriganaMarkup(word, reading) {
-  if (!reading || reading === word) return word;
-  const segments = [];
-  let i = 0;
-  while (i < word.length) {
-    const isKanji = KANJI_RE.test(word[i]);
-    let j = i + 1;
-    while (j < word.length && KANJI_RE.test(word[j]) === isKanji) j += 1;
-    segments.push({ text: word.slice(i, j), isKanji });
-    i = j;
-  }
-  if (segments.length === 1) return segments[0].isKanji ? `{${word}|${reading}}` : word;
-
-  const wholeWordFallback = `{${word}|${reading}}`;
-  let readingPos = 0;
-  let out = '';
-  for (let idx = 0; idx < segments.length; idx += 1) {
-    const seg = segments[idx];
-    if (!seg.isKanji) {
-      if (!reading.startsWith(seg.text, readingPos)) return wholeWordFallback;
-      out += seg.text;
-      readingPos += seg.text.length;
-    } else {
-      const nextKana = segments.slice(idx + 1).find((s) => !s.isKanji);
-      let endPos;
-      if (nextKana) {
-        const found = reading.indexOf(nextKana.text, readingPos);
-        if (found === -1) return wholeWordFallback;
-        endPos = found;
-      } else {
-        endPos = reading.length;
-      }
-      const rubyReading = reading.slice(readingPos, endPos);
-      out += rubyReading ? `{${seg.text}|${rubyReading}}` : seg.text;
-      readingPos = endPos;
-    }
-  }
-  return out;
 }
 
 function wordButton(word, reading = '', label = null) {
@@ -226,7 +174,10 @@ function renderKanji(lessonId, content) {
   const kanjiList = Array.isArray(content.kanji) ? content.kanji : [];
   const cards = kanjiList.map((item, index) => `
     <article class="kanji-item">
-      <div class="kanji-char">${wordButton(item?.char || '', [item?.on, item?.kun].filter(Boolean).join(' / '))}</div>
+      <div class="kanji-char-row">
+        <div class="kanji-char">${wordButton(item?.char || '', [item?.on, item?.kun].filter(Boolean).join(' / '))}</div>
+        <button type="button" class="kanji-writing-trigger" data-action="practice-kanji" data-kanji="${escapeHtml(item?.char || '')}" aria-label="Luyện viết chữ ${escapeHtml(item?.char || '')}" title="Luyện viết"><span aria-hidden="true">✎</span></button>
+      </div>
       <div class="kanji-readings" lang="ja">
         ${item?.on ? `<span class="kanji-on">音: ${escapeHtml(item.on)}</span>` : ''}
         ${item?.kun ? `<span class="kanji-kun">訓: ${escapeHtml(item.kun)}</span>` : ''}
@@ -234,7 +185,7 @@ function renderKanji(lessonId, content) {
       </div>
       ${(() => { const vi = getVietnameseExplanation(lessonId, index); return vi ? `<p class="kanji-vi">${escapeHtml(vi)}</p>` : ''; })()}
       <ul class="kanji-word-list">
-        ${(Array.isArray(item?.words) ? item.words : []).map((word) => `<li>${wordButton(word?.jp || '', word?.reading || '')}<span class="book-meaning" lang="en">${escapeHtml(word?.en || '')}</span></li>`).join('')}
+        ${(Array.isArray(item?.words) ? item.words : []).map((word) => `<li>${wordButton(word?.jp || '', word?.reading || '')}${word?.en ? `<span class="book-meaning" lang="en">${escapeHtml(word.en)}</span>` : ''}</li>`).join('')}
       </ul>
     </article>`).join('');
   const review = Array.isArray(content.reviewKanji) ? content.reviewKanji : [];
@@ -264,7 +215,7 @@ function renderVocabulary(lessonId, content) {
           return `
           <article class="vocab-item">
             <div class="vocab-word">${wordButton(word?.jp || '', word?.reading || '')}</div>
-            <div class="vocab-meaning" lang="en">${escapeHtml(word?.en || '')}</div>
+            ${word?.en ? `<div class="vocab-meaning" lang="en">${escapeHtml(word.en)}</div>` : ''}
             ${vi ? `<div class="vocab-meaning-vi">${escapeHtml(vi)}</div>` : ''}
             ${word?.note ? `<div class="lesson-notes" lang="en">${escapeHtml(word.note)}</div>` : ''}
           </article>`;
@@ -563,6 +514,7 @@ export function renderLesson(root, id) {
   let bookViewer = null;
   let bookViewerTrigger = null;
   let bookViewerDialog = null;
+  let writingPad = null;
   const studyTimer = startLessonTimer(id);
 
   const closePopup = () => {
@@ -698,6 +650,10 @@ export function renderLesson(root, id) {
     else if (action === 'quiz-option') handleQuiz(button, id, findLesson(id)?.category?.id || '');
     else if (action === 'explain-word') openExplanation(button);
     else if (action === 'explain-sentence') openSentenceExplanation(button);
+    else if (action === 'practice-kanji') {
+      writingPad?.close?.();
+      writingPad = openKanjiWritingPad({ character: button.dataset.kanji || '', trigger: button });
+    }
     else if (action === 'ask-tutor') openTutorModal(button);
   };
 
@@ -792,6 +748,7 @@ export function renderLesson(root, id) {
       closePopup();
       closeTutorModal();
       closeBookViewer();
+      writingPad?.close?.();
       if (typeof speechSynthesis !== 'undefined') speechSynthesis.cancel();
       studyTimer.flush();
     },

@@ -206,6 +206,9 @@ function requireInteger(value, location, { min, max } = {}) {
 }
 
 function validateFuriganaString(value, location) {
+  if (/<\/?(?:ruby|rt)>/iu.test(value)) {
+    fail('RAW_RUBY_HTML', location, 'Use {base|reading} data markup instead of literal ruby HTML.');
+  }
   let index = 0;
   while (index < value.length) {
     if (value[index] === '}') {
@@ -374,6 +377,15 @@ function validateVocabularyLesson(value, id, location) {
         requireString(word.reading, `${wordLocation}.reading`);
         requireString(word.en, `${wordLocation}.en`);
         requireString(word.note, `${wordLocation}.note`);
+        if (typeof word.jp === 'string' && typeof word.reading === 'string') {
+          const visibleJapanese = word.jp.replace(/<[^>]{1,8}>/gu, '');
+          if (/[一-龯㐀-䶿々]/u.test(visibleJapanese) && word.reading.trim() === '') {
+            fail('VOCAB_READING_MISSING', `${wordLocation}.reading`, 'Vocabulary containing kanji needs a verified reading.');
+          }
+          if (/おじゃします|寝り心地|居り心地|英養|ととい合わせ|暮した/u.test(`${word.jp}\n${word.reading}`)) {
+            fail('KNOWN_OCR_REGRESSION', wordLocation, 'Known OCR-corrupted Japanese string reintroduced.');
+          }
+        }
       });
     });
   }

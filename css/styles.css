@@ -665,7 +665,7 @@ ruby > rb {
 }
 
 ruby rt {
-    font-family: var(--font-sans);
+    font-family: var(--font-jp);
     font-size: 0.45em;
     line-height: 1;
     color: var(--text-muted);
@@ -893,7 +893,7 @@ body.furigana-off rt {
 }
 
 .jp-sentence {
-    font-family: var(--font-serif);
+    font-family: var(--font-jp);
     font-weight: 600;
     font-size: 17px;
     margin-bottom: 6px;
@@ -904,7 +904,7 @@ body.furigana-off rt {
 }
 
 .jp-text {
-    font-family: var(--font-serif);
+    font-family: var(--font-jp);
 }
 
 .vi-sentence {
@@ -926,7 +926,7 @@ body.furigana-off rt {
 }
 
 .vocab-word {
-    font-family: var(--font-serif);
+    font-family: var(--font-jp);
     font-size: 20px;
     font-weight: 700;
     margin-bottom: 4px;
@@ -2203,14 +2203,14 @@ body.furigana-off rt {
 
 .kanji-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
     gap: 14px;
 }
 .kanji-word-list { list-style: none; display: grid; gap: 8px; margin-top: 12px; }
 .kanji-word-list li { border-top: 1px solid var(--border-color); padding-top: 8px; }
 .review-kanji { margin-top: 26px; padding: 18px; border: 1px dashed var(--border-dark); }
 .review-kanji-list { display: flex; flex-wrap: wrap; gap: 10px; }
-.vocab-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+.vocab-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 12px; }
 .vocab-book-section + .vocab-book-section { margin-top: 26px; }
 .lesson-audio { width: 100%; margin: 12px 0 22px; }
 .transcript-line + .transcript-line { margin-top: 8px; }
@@ -2381,6 +2381,20 @@ body.furigana-off rt {
     font-size: 20px;
 }
 .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.profile-avatar__pet,
+.profile-preset__pet {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    background-size: 300% 200%;
+    image-rendering: pixelated;
+}
+.profile-avatar--fox .profile-avatar__pet,
+.profile-preset--fox { background-image: url('../assets/pets/fox-sprites.png'); }
+.profile-avatar--rabbit .profile-avatar__pet,
+.profile-preset--rabbit { background-image: url('../assets/pets/rabbit-sprites.png'); }
 .profile-button__copy { display: grid; text-align: left; line-height: 1.15; }
 .profile-button__label,
 .profile-modal__eyebrow {
@@ -2402,7 +2416,7 @@ body.furigana-off rt {
 .profile-presets { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 12px 0 16px; }
 .profile-preset { min-height: 54px; display: flex; align-items: center; gap: 9px; padding: 8px; border: 1px solid var(--border-color); cursor: pointer; }
 .profile-preset.is-selected { border: 2px solid var(--text-primary); background: var(--paper-2); }
-.profile-preset__symbol { font-size: 24px; }
+.profile-preset__pet { width: 42px; height: 42px; flex: 0 0 42px; border-radius: 50%; background-color: var(--accent-red-bg); }
 .profile-upload { display: grid; gap: 5px; }
 .profile-upload__label { font-weight: 700; }
 .profile-upload__hint { color: var(--text-muted); font-size: 0.8rem; }
@@ -3979,4 +3993,116 @@ body.modal-open { overflow: hidden; }
         animation: none !important;
         transform: translate3d(-50%, 0, 0) scaleX(var(--pet-facing)) !important;
     }
+}
+
+/* v14: Japanese text integrity, pet-linked avatars and pen input. */
+.pet-figure::after {
+    content: none !important;
+    display: none !important;
+}
+
+.lesson-page,
+.lesson-body,
+.content-section,
+.vocab-book-section,
+.vocab-list,
+.vocab-item,
+.kanji-grid,
+.kanji-item,
+.quiz-question {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.lesson-page [lang='ja'],
+.quiz-q-text,
+.quiz-option,
+.kanji-readings,
+.kanji-word-list {
+    font-family: var(--font-jp);
+}
+
+.explain-word-btn,
+.jp-text,
+.vocab-word,
+.quiz-q-text,
+.quiz-option,
+.lesson-notes {
+    min-width: 0;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: normal;
+}
+
+.kanji-char-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+.kanji-char-row .kanji-char { margin-bottom: 0; }
+.kanji-writing-trigger {
+    width: 32px;
+    height: 32px;
+    display: inline-grid;
+    place-items: center;
+    flex: 0 0 32px;
+    margin-top: -4px;
+    padding: 0;
+    border: 1px solid var(--border-dark);
+    border-radius: 50% 48% 52% 46%;
+    background: var(--accent-red-bg);
+    color: var(--accent-red);
+    box-shadow: 2px 2px 0 color-mix(in srgb, var(--text-primary) 16%, transparent);
+    font: 800 18px/1 var(--font-serif);
+    cursor: pointer;
+    transform: rotate(-7deg);
+}
+.kanji-writing-trigger:hover { transform: rotate(3deg) translateY(-1px); }
+
+.kanji-writing-card { width: min(620px, 100%); }
+.kanji-writing-body { display: grid; gap: 12px; }
+.kanji-writing-hint { color: var(--text-muted); font: 500 .82rem/1.45 var(--font-sans); }
+.kanji-writing-sheet {
+    position: relative;
+    width: min(100%, 500px);
+    aspect-ratio: 1;
+    justify-self: center;
+    overflow: hidden;
+    border: 2px solid var(--border-dark);
+    background-color: #fffdf8;
+    background-image:
+        linear-gradient(to right, transparent calc(50% - .5px), color-mix(in srgb, var(--accent-red) 35%, transparent) 50%, transparent calc(50% + .5px)),
+        linear-gradient(to bottom, transparent calc(50% - .5px), color-mix(in srgb, var(--accent-red) 35%, transparent) 50%, transparent calc(50% + .5px)),
+        linear-gradient(45deg, transparent calc(50% - .5px), color-mix(in srgb, var(--border-color) 75%, transparent) 50%, transparent calc(50% + .5px)),
+        linear-gradient(-45deg, transparent calc(50% - .5px), color-mix(in srgb, var(--border-color) 75%, transparent) 50%, transparent calc(50% + .5px));
+}
+.kanji-writing-guide {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: color-mix(in srgb, var(--text-muted) 13%, transparent);
+    font: 800 clamp(9rem, 36vw, 19rem)/1 var(--font-jp);
+    pointer-events: none;
+    user-select: none;
+}
+.kanji-writing-canvas {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+    touch-action: none;
+}
+.kanji-writing-actions { flex-wrap: wrap; }
+
+@media (max-width: 520px) {
+    .kanji-writing-overlay { padding: 8px; }
+    .kanji-writing-card { max-height: calc(100dvh - 16px); }
+    .kanji-writing-card .modal-header { padding-block: 12px; }
+    .kanji-writing-card .modal-body { padding: 12px; }
+    .kanji-writing-actions { padding: 10px 12px; }
 }

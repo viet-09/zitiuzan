@@ -299,9 +299,9 @@ test('vocabulary ruby, Japanese font and long text stay intact on mobile', async
   await dismissAuthGateForComponentChecks(page);
 
   await expect(page.getByText('「おじゃまします。」', { exact: true })).toBeVisible();
-  await expect(page.locator('.vocab-list')).not.toContainText('<ruby>');
+  await expect(page.locator('.vocab-section')).not.toContainText('<ruby>');
   await expect(page.locator('.vocab-meaning:empty')).toHaveCount(0);
-  const invitation = page.locator('.vocab-item').filter({ hasText: '招待する' });
+  const invitation = page.locator('.vocab-item').filter({ has: page.locator('[data-word*="招待する"]') });
   await expect(invitation.locator('ruby')).toHaveCount(4);
   const japaneseFont = await invitation.locator('.vocab-word').evaluate((node) => getComputedStyle(node).fontFamily);
   expect(japaneseFont).toContain('Zen Kaku Gothic New');

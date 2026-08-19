@@ -18,6 +18,9 @@ const FURIGANA_OFF_CLASS = 'furigana-off';
 // first wins at each position, same combined left-to-right scan.
 const MARKUP_PATTERN = /\{([^{}|]+)\|([^{}|]+)\}|《([^《》]+)》/g;
 const NEWLINE_PATTERN = /\r\n|\r|\n/g;
+const KANJI_RE = /[一-龥㐀-䶿々]/u;
+const KANA_RE = /^[\p{Script=Hiragana}\p{Script=Katakana}ー]+$/u;
+const LEGACY_RUBY_PATTERN = /<ruby>([^<>]+)<rt>([^<>]+)<\/rt><\/ruby>/giu;
 
 /**
  * Escape a string for safe insertion as HTML text content.
@@ -33,6 +36,87 @@ function escapeHtml(value) {
     .replace(/'/g, '&#39;');
 }
 
+function kanaCharacters(value) {
+  return [...String(value)].filter((character) => {
+    const code = character.codePointAt(0);
+    return (code >= 0x30A1 && code <= 0x30F6)
+      || (code >= 0x3041 && code <= 0x3096)
+      || character === 'ー';
+  }).join('');
+}
+
+function kanaAlignmentKey(value) {
+  return [...kanaCharacters(value)].map((character) => {
+    const code = character.codePointAt(0);
+    return code >= 0x30A1 && code <= 0x30F6 ? String.fromCodePoint(code - 0x60) : character;
+  }).join('');
+}
+
+/**
+ * Align a full-word reading with individual kanji runs so each reading sits
+ * directly over the characters it belongs to. Space-delimited reading lists
+ * (common in scanned notes) are mapped one token per kanji run.
+ */
+export function buildFuriganaMarkup(wordValue, readingValue) {
+  const word = String(wordValue ?? '');
+  const reading = String(readingValue ?? '').trim();
+  if (!reading || reading === word) return word;
+
+  const segments = [];
+  for (let index = 0; index < word.length;) {
+    const isKanji = KANJI_RE.test(word[index]);
+    let end = index + 1;
+    while (end < word.length && KANJI_RE.test(word[end]) === isKanji) end += 1;
+    segments.push({ text: word.slice(index, end), isKanji });
+    index = end;
+  }
+  const kanjiSegments = segments.filter((segment) => segment.isKanji);
+  if (kanjiSegments.length === 0) return word;
+
+  const tokens = reading.split(/\s+/u).filter(Boolean);
+  if (tokens.length === kanjiSegments.length && tokens.every((token) => KANA_RE.test(token))) {
+    let tokenIndex = 0;
+    return segments.map((segment) => {
+      if (!segment.isKanji) return segment.text;
+      const token = tokens[tokenIndex];
+      tokenIndex += 1;
+      return `{${segment.text}|${token}}`;
+    }).join('');
+  }
+
+  const alignedReading = kanaAlignmentKey(reading);
+  const displayReading = kanaCharacters(reading);
+  if (segments.length === 1) return `{${word}|${reading}}`;
+  const fallback = `{${word}|${reading}}`;
+  let readingPosition = 0;
+  let output = '';
+
+  for (let index = 0; index < segments.length; index += 1) {
+    const segment = segments[index];
+    if (!segment.isKanji) {
+      const anchor = kanaAlignmentKey(segment.text);
+      if (anchor && !alignedReading.startsWith(anchor, readingPosition)) return fallback;
+      output += segment.text;
+      readingPosition += anchor.length;
+      continue;
+    }
+
+    const nextAnchor = segments.slice(index + 1)
+      .filter((candidate) => !candidate.isKanji)
+      .map((candidate) => kanaAlignmentKey(candidate.text))
+      .find(Boolean);
+    const end = nextAnchor
+      ? alignedReading.indexOf(nextAnchor, readingPosition)
+      : alignedReading.length;
+    if (end < readingPosition) return fallback;
+    const rubyReading = displayReading.slice(readingPosition, end);
+    output += rubyReading ? `{${segment.text}|${rubyReading}}` : segment.text;
+    readingPosition = end;
+  }
+
+  return readingPosition === alignedReading.length ? output : fallback;
+}
+
 /**
  * Render furigana markup into trusted HTML.
  * `{base|reading}` becomes `<ruby>base<rt>reading</rt></ruby>` (base & reading escaped).
@@ -43,7 +127,9 @@ function escapeHtml(value) {
  */
 export function renderFurigana(text) {
   if (text == null) return '';
-  const str = String(text);
+  // Import data once contained literal ruby tags. Accept only this exact,
+  // text-only legacy form; every other HTML tag remains escaped below.
+  const str = String(text).replace(LEGACY_RUBY_PATTERN, '{$1|$2}');
 
   let html = '';
   let lastIndex = 0;
