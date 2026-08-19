@@ -125,7 +125,10 @@ test('pixel desktop companion roams, reacts, drags and keeps its learning quest'
   const petWidget = page.locator('#pet-widget-mount .pet-widget');
   const petCompanion = page.locator('#pet-widget-mount [data-pet-companion]');
   await expect(petArt).toHaveCount(1);
-  await expect(petArt.locator('svg')).toBeVisible();
+  const rasterSprite = petArt.locator('.pixel-pet__sprite');
+  await expect(rasterSprite).toBeVisible();
+  await expect(rasterSprite).toHaveCSS('background-image', /fox-sprites\.png/);
+  await expect(petArt.locator('.pixel-pet__svg')).toHaveCount(0);
   await expect(petCompanion).toHaveAttribute('data-renderer', 'pixel-sprite');
   await expect(petCompanion).toHaveAttribute('data-companion-ready', 'true');
   await expect(petCompanion).toHaveAttribute('data-pet-state', 'idle');
@@ -135,6 +138,11 @@ test('pixel desktop companion roams, reacts, drags and keeps its learning quest'
   expect(compactPetSize).not.toBeNull();
   expect(compactPetSize.width).toBeCloseTo(74.4, 0);
   expect(compactPetSize.height).toBeCloseTo(110.4, 0);
+
+  const questMarkSize = await page.locator('.pet-widget__quest-toggle span').boundingBox();
+  expect(questMarkSize).not.toBeNull();
+  expect(questMarkSize.width).toBeLessThanOrEqual(10);
+  expect(questMarkSize.height).toBeLessThanOrEqual(10);
 
   const directInteraction = page.getByRole('button', { name: 'Tương tác trực tiếp với Cáo' });
   const directInteractionSize = await directInteraction.boundingBox();

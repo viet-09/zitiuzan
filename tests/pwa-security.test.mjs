@@ -26,16 +26,18 @@ test('pet motion assets are versioned consistently to bypass a stale service-wor
   const worker = read('sw.js');
   const app = read('js/app.js');
 
-  assert.match(index, /href="css\/styles\.css\?v=12"/);
-  assert.match(index, /src="js\/app\.js\?v=12"/);
-  assert.match(app, /from '\.\/pet\.js\?v=12'/);
-  assert.match(worker, /n2-journal-v12/);
-  assert.match(worker, /'\.\/css\/styles\.css\?v=12'/);
-  assert.match(worker, /'\.\/js\/app\.js\?v=12'/);
-  assert.match(worker, /'\.\/js\/pet\.js\?v=12'/);
-  assert.match(worker, /'\.\/js\/pet-companion\.js\?v=12'/);
-  assert.match(worker, /'\.\/js\/pet-companion-state\.js\?v=12'/);
-  assert.match(worker, /'\.\/js\/pet-art\.js\?v=12'/);
+  assert.match(index, /href="css\/styles\.css\?v=13"/);
+  assert.match(index, /src="js\/app\.js\?v=13"/);
+  assert.match(app, /from '\.\/pet\.js\?v=13'/);
+  assert.match(worker, /n2-journal-v13/);
+  assert.match(worker, /'\.\/css\/styles\.css\?v=13'/);
+  assert.match(worker, /'\.\/js\/app\.js\?v=13'/);
+  assert.match(worker, /'\.\/js\/pet\.js\?v=13'/);
+  assert.match(worker, /'\.\/js\/pet-companion\.js\?v=13'/);
+  assert.match(worker, /'\.\/js\/pet-companion-state\.js\?v=13'/);
+  assert.match(worker, /'\.\/js\/pet-art\.js\?v=13'/);
+  assert.match(worker, /'\.\/assets\/pets\/fox-sprites\.png'/);
+  assert.match(worker, /'\.\/assets\/pets\/rabbit-sprites\.png'/);
   assert.doesNotMatch(worker, /mascot\.glb/);
 });
 

@@ -54,14 +54,15 @@ test('pet preferences, unlocked visuals and memory journal remain local and boun
   });
   const markup = renderPet({ petType: 'rabbit', petAccessory: 'pencil', streak: 7, evolutionId: 'mentor' });
   assert.match(markup, /class="pet-art pet-art--rabbit pixel-pet pixel-pet--rabbit"/u);
-  assert.match(markup, /<svg[^>]+class="pixel-pet__svg"/u);
-  assert.match(markup, /shape-rendering="crispEdges"/u);
+  assert.match(markup, /class="pixel-pet__sprite"/u);
+  assert.doesNotMatch(markup, /class="pixel-pet__svg"/u);
   assert.match(markup, /pet-accessory--pencil/u);
   assert.doesNotMatch(markup, /🐰|🦊/u);
 
   const fox = renderPet({ petType: 'fox', petAccessory: 'none', streak: 0 });
   assert.match(fox, /class="pet-art pet-art--fox pixel-pet pixel-pet--fox"/u);
-  assert.match(fox, /<svg[^>]+class="pixel-pet__svg"/u);
+  assert.match(fox, /class="pixel-pet__sprite"/u);
+  assert.doesNotMatch(fox, /<svg/u);
   assert.doesNotMatch(fox, /🐰|🦊/u);
   assert.equal(getPetTier(0).id, 'sleeping');
   assert.equal(getPetTier(2).id, 'waking');
