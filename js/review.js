@@ -8,7 +8,7 @@ import { buildMiniTest, buildWeaknessProfile, calculateReadiness, formatWeakness
 import { examHistoryStore } from './exam-history.js';
 import { renderFurigana } from './furigana.js';
 import { navigate } from './router.js';
-import { recordPetMemory } from './pet.js?v=11';
+import { recordPetMemory } from './pet.js?v=12';
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (ch) => ({

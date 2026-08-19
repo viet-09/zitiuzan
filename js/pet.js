@@ -3,7 +3,7 @@
 // settings object so changing the character never overwrites unrelated settings.
 
 import { getSettings, setSettings } from './store.js';
-import { renderPetArt } from './pet-art.js?v=11';
+import { renderPetArt } from './pet-art.js?v=12';
 
 export const PET_UPDATED_EVENT = 'n2:pet-updated';
 export const PET_COMPLETION_EVENT = 'n2:lesson-complete';
@@ -311,9 +311,7 @@ export function mountPet(target, options = {}) {
             </span>
           </span>
           <div class="pet-widget__hit-zones" role="group" aria-label="Tương tác với ${escapeHtml(type.label)}">
-            <button type="button" class="pet-hit-zone pet-hit-zone--head" data-pet-interaction="pat" data-hint="Nựng" aria-label="Nựng đầu ${escapeHtml(type.label)}" aria-describedby="${statusId}"></button>
-            <button type="button" class="pet-hit-zone pet-hit-zone--tail" data-pet-interaction="tease" data-hint="Trêu" aria-label="Trêu đùa với ${escapeHtml(type.label)}" aria-describedby="${statusId}"></button>
-            <button type="button" class="pet-hit-zone pet-hit-zone--paw" data-pet-interaction="highfive" data-hint="Đập tay" aria-label="Đập tay với ${escapeHtml(type.label)}" aria-describedby="${statusId}"></button>
+            <button type="button" class="pet-direct-interaction" data-pet-direct-interaction aria-label="Tương tác trực tiếp với ${escapeHtml(type.label)}" aria-describedby="${statusId}"></button>
           </div>
           <button type="button" class="pet-widget__quest-toggle" data-pet-quest-toggle aria-label="${panelOpen ? 'Đóng' : 'Mở'} nhiệm vụ học của ${escapeHtml(type.label)}" aria-expanded="${panelOpen}" aria-controls="${panelId}" aria-describedby="${statusId}">
             <span aria-hidden="true">!</span>
@@ -322,7 +320,7 @@ export function mountPet(target, options = {}) {
       </div>`;
     mount.classList.toggle('is-panel-open', panelOpen);
     const companionHost = mount.querySelector('[data-pet-companion]');
-    import('./pet-companion.js?v=11').then(({ mountPetCompanion }) => {
+    import('./pet-companion.js?v=12').then(({ mountPetCompanion }) => {
       if (destroyed || loadToken !== companionLoadToken || !companionHost?.isConnected) return;
       petCompanionController = mountPetCompanion(companionHost, {
         mount,
@@ -391,6 +389,17 @@ export function mountPet(target, options = {}) {
 
   function onClick(event) {
     if (petCompanionController?.shouldSuppressClick()) return;
+    const directInteraction = event.target.closest('[data-pet-direct-interaction]');
+    if (directInteraction) {
+      const rect = directInteraction.getBoundingClientRect();
+      const x = rect.width ? (event.clientX - rect.left) / rect.width : 0.5;
+      const y = rect.height ? (event.clientY - rect.top) / rect.height : 0.25;
+      const kind = event.detail === 0 || y < 0.48
+        ? 'pat'
+        : x >= 0.5 ? 'tease' : 'highfive';
+      react(kind);
+      return;
+    }
     const interaction = event.target.closest('[data-pet-interaction]');
     if (interaction?.dataset.petInteraction) {
       react(interaction.dataset.petInteraction);

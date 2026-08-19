@@ -5,7 +5,7 @@
 
 import { currentUser, signInWithGoogle, signOut, ready as supabaseReady } from './supabase.js';
 import { getProfile, renderAvatar, openProfileDialog } from './profile.js';
-import { PET_ACCESSORIES, PET_TYPES, getPetEvolution, getPetMemories, getPetPreferences, setPetPreferences, renderPet } from './pet.js?v=11';
+import { PET_ACCESSORIES, PET_TYPES, getPetEvolution, getPetMemories, getPetPreferences, setPetPreferences, renderPet } from './pet.js?v=12';
 import { clearUserScopedStorage } from './account-storage.js';
 import { learningState } from './learning-state.js';
 

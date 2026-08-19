@@ -6,7 +6,7 @@ import {
   chooseNextPetState,
   clampPetPosition,
   getContextualPetAdvice,
-} from './pet-companion-state.js?v=11';
+} from './pet-companion-state.js?v=12';
 
 const POSITION_STORAGE_KEY = 'n2_pet_position_v1';
 const STATE_DURATION = Object.freeze({
@@ -135,7 +135,7 @@ export function mountPetCompanion(host, options = {}) {
   }
 
   function onPointerDown(event) {
-    if (event.button !== 0 || !event.target.closest('[data-pet-interaction]')) return;
+    if (event.button !== 0 || !event.target.closest('[data-pet-interaction], [data-pet-direct-interaction]')) return;
     clearStateTimer();
     drag = {
       pointerId: event.pointerId,
