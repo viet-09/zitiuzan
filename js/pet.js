@@ -3,8 +3,7 @@
 // settings object so changing the character never overwrites unrelated settings.
 
 import { getSettings, setSettings } from './store.js';
-import { renderPetArt } from './pet-art.js';
-import { mountPetScene } from '../vendor/pet-scene.js?v=10';
+import { renderPetArt } from './pet-art.js?v=11';
 
 export const PET_UPDATED_EVENT = 'n2:pet-updated';
 export const PET_COMPLETION_EVENT = 'n2:lesson-complete';
@@ -281,7 +280,9 @@ export function mountPet(target, options = {}) {
   let panelOpen = false;
   let reactionTimer = null;
   let statusTimer = null;
-  let petSceneController = null;
+  let petCompanionController = null;
+  let pendingCompanionReaction = null;
+  let companionLoadToken = 0;
   let destroyed = false;
 
   const statusId = `pet-widget-status-${sequence}`;
@@ -289,8 +290,9 @@ export function mountPet(target, options = {}) {
 
   function render() {
     if (destroyed) return;
-    petSceneController?.destroy();
-    petSceneController = null;
+    const loadToken = ++companionLoadToken;
+    petCompanionController?.destroy();
+    petCompanionController = null;
     const tier = getPetTier(streak);
     const type = lookup(PET_TYPES, preferences.petType);
     mount.innerHTML = `
@@ -304,8 +306,9 @@ export function mountPet(target, options = {}) {
         </section>
         <div class="pet-widget__companion">
           <span class="pet-widget__stage">
-            <span class="pet-webgl-host" data-pet-scene data-pet-type="${escapeHtml(type.id)}" aria-hidden="true"></span>
-            ${renderPet({ ...preferences, streak, evolutionId: coach.evolution.id, decorative: true })}
+            <span class="pixel-pet-host" data-pet-companion data-renderer="pixel-sprite" data-pet-state="idle" data-motion="active" data-pet-type="${escapeHtml(type.id)}" aria-hidden="true">
+              ${renderPet({ ...preferences, streak, evolutionId: coach.evolution.id, decorative: true })}
+            </span>
           </span>
           <div class="pet-widget__hit-zones" role="group" aria-label="Tương tác với ${escapeHtml(type.label)}">
             <button type="button" class="pet-hit-zone pet-hit-zone--head" data-pet-interaction="pat" data-hint="Nựng" aria-label="Nựng đầu ${escapeHtml(type.label)}" aria-describedby="${statusId}"></button>
@@ -318,11 +321,20 @@ export function mountPet(target, options = {}) {
         </div>
       </div>`;
     mount.classList.toggle('is-panel-open', panelOpen);
-    const stage = mount.querySelector('.pet-widget__stage');
-    petSceneController = mountPetScene(mount.querySelector('[data-pet-scene]'), {
-      petType: type.id,
-      onReady: () => stage?.classList.add('is-three-ready'),
-      onError: () => stage?.classList.remove('is-three-ready'),
+    const companionHost = mount.querySelector('[data-pet-companion]');
+    import('./pet-companion.js?v=11').then(({ mountPetCompanion }) => {
+      if (destroyed || loadToken !== companionLoadToken || !companionHost?.isConnected) return;
+      petCompanionController = mountPetCompanion(companionHost, {
+        mount,
+        coach,
+        onAdvice: showBubble,
+      });
+      if (pendingCompanionReaction) {
+        petCompanionController?.react(pendingCompanionReaction);
+        pendingCompanionReaction = null;
+      }
+    }).catch(() => {
+      if (companionHost) companionHost.dataset.companionReady = 'error';
     });
   }
 
@@ -338,6 +350,7 @@ export function mountPet(target, options = {}) {
       if (restoreFocus) toggle.focus();
     }
     mount.classList.toggle('is-panel-open', panelOpen);
+    petCompanionController?.setPanelOpen(panelOpen);
   }
 
   function showBubble(text) {
@@ -366,7 +379,8 @@ export function mountPet(target, options = {}) {
         void widget.offsetWidth;
       }
       widget.dataset.reaction = kind;
-      petSceneController?.react(kind);
+      if (petCompanionController) petCompanionController.react(kind);
+      else pendingCompanionReaction = kind;
       reactionTimer = window.setTimeout(() => {
         widget.dataset.reaction = '';
         reactionTimer = null;
@@ -376,6 +390,7 @@ export function mountPet(target, options = {}) {
   }
 
   function onClick(event) {
+    if (petCompanionController?.shouldSuppressClick()) return;
     const interaction = event.target.closest('[data-pet-interaction]');
     if (interaction?.dataset.petInteraction) {
       react(interaction.dataset.petInteraction);
@@ -452,9 +467,11 @@ export function mountPet(target, options = {}) {
     },
     destroy() {
       destroyed = true;
+      companionLoadToken += 1;
+      pendingCompanionReaction = null;
       if (reactionTimer) window.clearTimeout(reactionTimer);
       if (statusTimer) window.clearTimeout(statusTimer);
-      petSceneController?.destroy();
+      petCompanionController?.destroy();
       mount.removeEventListener('click', onClick);
       document.removeEventListener('click', onDocumentClick);
       document.removeEventListener('keydown', onKeyDown);

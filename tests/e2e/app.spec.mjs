@@ -127,6 +127,7 @@ test('pixel desktop companion roams, reacts, drags and keeps its learning quest'
   await expect(petArt).toHaveCount(1);
   await expect(petArt.locator('svg')).toBeVisible();
   await expect(petCompanion).toHaveAttribute('data-renderer', 'pixel-sprite');
+  await expect(petCompanion).toHaveAttribute('data-companion-ready', 'true');
   await expect(petCompanion).toHaveAttribute('data-pet-state', 'idle');
   await expect(page.locator('#pet-widget-mount')).toHaveCSS('pointer-events', 'none');
 

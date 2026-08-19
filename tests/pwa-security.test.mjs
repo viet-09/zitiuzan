@@ -34,8 +34,9 @@ test('pet motion assets are versioned consistently to bypass a stale service-wor
   assert.match(worker, /'\.\/js\/app\.js\?v=11'/);
   assert.match(worker, /'\.\/js\/pet\.js\?v=11'/);
   assert.match(worker, /'\.\/js\/pet-companion\.js\?v=11'/);
-  assert.match(worker, /fox-mascot\.glb/);
-  assert.match(worker, /rabbit-mascot\.glb/);
+  assert.match(worker, /'\.\/js\/pet-companion-state\.js\?v=11'/);
+  assert.match(worker, /'\.\/js\/pet-art\.js\?v=11'/);
+  assert.doesNotMatch(worker, /mascot\.glb/);
 });
 
 test('production CSP needs neither unsafe-eval nor a third-party module CDN', () => {

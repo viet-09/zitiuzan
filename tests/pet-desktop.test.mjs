@@ -6,7 +6,7 @@ import {
   chooseNextPetState,
   clampPetPosition,
   getContextualPetAdvice,
-} from '../js/pet-companion.js';
+} from '../js/pet-companion-state.js';
 
 test('desktop companion exposes the six calm states from the reference flow', () => {
   assert.deepEqual(PET_COMPANION_STATES, [
