@@ -136,8 +136,10 @@ test('pixel desktop companion roams, reacts, drags and keeps its learning quest'
   expect(compactPetSize.width).toBeCloseTo(74.4, 0);
   expect(compactPetSize.height).toBeCloseTo(110.4, 0);
 
-  const patInteraction = page.getByRole('button', { name: 'Nựng đầu Cáo' });
-  const interactionChrome = await patInteraction.evaluate((node) => ({
+  const directInteraction = page.getByRole('button', { name: 'Tương tác trực tiếp với Cáo' });
+  const directInteractionSize = await directInteraction.boundingBox();
+  expect(directInteractionSize).not.toBeNull();
+  const interactionChrome = await directInteraction.evaluate((node) => ({
     label: getComputedStyle(node, '::before').display,
     marker: getComputedStyle(node, '::after').display,
     background: getComputedStyle(node).backgroundColor,
@@ -148,21 +150,30 @@ test('pixel desktop companion roams, reacts, drags and keeps its learning quest'
     background: 'rgba(0, 0, 0, 0)',
   });
 
-  await patInteraction.click();
+  await directInteraction.click({ position: {
+    x: directInteractionSize.width * 0.5,
+    y: directInteractionSize.height * 0.2,
+  } });
   await expect(petWidget).toHaveAttribute('data-reaction', 'pat');
   await expect(petCompanion).toHaveAttribute('data-pet-state', 'look');
   await expect(page.locator('.pet-widget__bubble')).toContainText(/nựng|thích/i);
 
-  await page.getByRole('button', { name: 'Trêu đùa với Cáo' }).click();
+  await directInteraction.click({ position: {
+    x: directInteractionSize.width * 0.9,
+    y: directInteractionSize.height * 0.7,
+  } });
   await expect(petWidget).toHaveAttribute('data-reaction', 'tease');
   await expect(petCompanion).toHaveAttribute('data-pet-state', 'walk');
 
-  await page.getByRole('button', { name: 'Đập tay với Cáo' }).click();
+  await directInteraction.click({ position: {
+    x: directInteractionSize.width * 0.1,
+    y: directInteractionSize.height * 0.7,
+  } });
   await expect(petWidget).toHaveAttribute('data-reaction', 'highfive');
   await expect(petCompanion).toHaveAttribute('data-pet-state', 'advice');
 
   const transformBeforeDrag = await page.locator('#pet-widget-mount .streak-pet-mount').evaluate((node) => getComputedStyle(node).transform);
-  const dragTarget = page.getByRole('button', { name: 'Nựng đầu Cáo' });
+  const dragTarget = directInteraction;
   const dragBox = await dragTarget.boundingBox();
   expect(dragBox).not.toBeNull();
   await page.mouse.move(dragBox.x + dragBox.width / 2, dragBox.y + dragBox.height / 2);
