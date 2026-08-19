@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import axeCore from 'axe-core';
+import fs from 'node:fs';
 
 async function dismissAuthGateForComponentChecks(page) {
   const gate = page.locator('.auth-modal');
@@ -77,6 +78,44 @@ test('lesson outline reports local quiz progress and book modal contains focus',
   await expect(trigger).toBeFocused();
 });
 
+test('kanji cards open a pen-friendly handwriting pad', async ({ page }) => {
+  await page.setViewportSize({ width: 1024, height: 768 });
+  await page.goto('/#/lesson/k1d2');
+  await dismissAuthGateForComponentChecks(page);
+
+  const openPad = page.getByRole('button', { name: /^Luyện viết chữ / }).first();
+  await expect(openPad).toBeVisible();
+  await openPad.click();
+
+  const dialog = page.getByRole('dialog', { name: /Luyện viết/ });
+  const canvas = dialog.locator('canvas');
+  await expect(canvas).toBeVisible();
+  await expect(dialog.getByRole('button', { name: 'Xóa nét vừa viết' })).toBeVisible();
+  await expect(dialog.getByRole('button', { name: 'Làm sạch bảng viết' })).toBeVisible();
+
+  const box = await canvas.boundingBox();
+  expect(box).not.toBeNull();
+  await page.mouse.move(box.x + 50, box.y + 50);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width - 50, box.y + box.height - 50, { steps: 10 });
+  await page.mouse.up();
+  const painted = await canvas.evaluate((node) => (
+    [...node.getContext('2d').getImageData(0, 0, node.width, node.height).data]
+      .some((channel, index) => index % 4 === 3 && channel > 0)
+  ));
+  expect(painted).toBe(true);
+
+  await dialog.getByRole('button', { name: 'Làm sạch bảng viết' }).click();
+  const cleared = await canvas.evaluate((node) => (
+    [...node.getContext('2d').getImageData(0, 0, node.width, node.height).data]
+      .every((channel, index) => index % 4 !== 3 || channel === 0)
+  ));
+  expect(cleared).toBe(true);
+  await dialog.getByRole('button', { name: 'Đóng bảng luyện viết' }).click();
+  await expect(dialog).toHaveCount(0);
+  await expect(openPad).toBeFocused();
+});
+
 test('book reader keeps every source image inside one continuous page strip', async ({ page }) => {
   await page.goto('/#/lesson/k1d2');
   await dismissAuthGateForComponentChecks(page);
@@ -129,6 +168,8 @@ test('pixel desktop companion roams, reacts, drags and keeps its learning quest'
   await expect(rasterSprite).toBeVisible();
   await expect(rasterSprite).toHaveCSS('background-image', /fox-sprites\.png/);
   await expect(petArt.locator('.pixel-pet__svg')).toHaveCount(0);
+  const petShadow = await petArt.locator('xpath=..').evaluate((node) => getComputedStyle(node, '::after').display);
+  expect(petShadow).toBe('none');
   await expect(petCompanion).toHaveAttribute('data-renderer', 'pixel-sprite');
   await expect(petCompanion).toHaveAttribute('data-companion-ready', 'true');
   await expect(petCompanion).toHaveAttribute('data-pet-state', 'idle');
@@ -222,7 +263,55 @@ test('pixel desktop companion roams, reacts, drags and keeps its learning quest'
   const rabbitCompanion = page.locator('#pet-widget-mount [data-pet-companion][data-pet-type="rabbit"]');
   await expect(rabbitCompanion).toHaveAttribute('data-renderer', 'pixel-sprite');
   await expect(rabbitCompanion.locator('.pixel-pet--rabbit')).toBeVisible();
+  await expect(page.locator('#btn-account .profile-avatar--rabbit')).toBeVisible();
   await page.getByRole('combobox', { name: 'Loài' }).selectOption('fox');
+});
+
+test('profile offers two matching pet avatars and compresses oversized uploads', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('n2_profile_prompt_seen_v2', '1'));
+  await page.goto('/#/profile');
+  await dismissAuthGateForComponentChecks(page);
+  await page.getByRole('button', { name: 'Chỉnh tên / ảnh đại diện' }).click();
+
+  const dialog = page.getByRole('dialog', { name: 'Chỉnh hồ sơ' });
+  await expect(dialog.getByRole('radio')).toHaveCount(2);
+  await expect(dialog.getByRole('radio', { name: /Cáo/ })).toBeVisible();
+  await expect(dialog.getByRole('radio', { name: /Thỏ/ })).toBeVisible();
+  await expect(dialog.getByText(/tự nén/u)).toBeVisible();
+  await expect(dialog.getByText(/1,5 MB|4096 px/u)).toHaveCount(0);
+
+  const source = fs.readFileSync(new URL('../../assets/pets/fox-sprites.png', import.meta.url));
+  const oversized = Buffer.concat([source, Buffer.alloc(2_000_000)]);
+  await dialog.locator('input[type="file"]').setInputFiles({
+    name: 'avatar-rat-lon.png',
+    mimeType: 'image/png',
+    buffer: oversized,
+  });
+  await expect(dialog.locator('[data-profile-status]')).toContainText(/Đã nén/u);
+  const previewSource = await dialog.locator('.profile-avatar--upload img').getAttribute('src');
+  expect(previewSource).toMatch(/^data:image\/(?:webp|jpeg);base64,/u);
+  expect(previewSource.length).toBeLessThan(500_000);
+});
+
+test('vocabulary ruby, Japanese font and long text stay intact on mobile', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 800 });
+  await page.goto('/#/lesson/v1d3');
+  await dismissAuthGateForComponentChecks(page);
+
+  await expect(page.getByText('「おじゃまします。」', { exact: true })).toBeVisible();
+  await expect(page.locator('.vocab-list')).not.toContainText('<ruby>');
+  await expect(page.locator('.vocab-meaning:empty')).toHaveCount(0);
+  const invitation = page.locator('.vocab-item').filter({ hasText: '招待する' });
+  await expect(invitation.locator('ruby')).toHaveCount(4);
+  const japaneseFont = await invitation.locator('.vocab-word').evaluate((node) => getComputedStyle(node).fontFamily);
+  expect(japaneseFont).toContain('Zen Kaku Gothic New');
+
+  const overflow = await page.evaluate(() => ({
+    document: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    broken: [...document.querySelectorAll('.content-section, .vocab-item, .explain-word-btn')]
+      .filter((node) => node.scrollWidth - node.clientWidth > 1).length,
+  }));
+  expect(overflow).toEqual({ document: 0, broken: 0 });
 });
 
 test('mobile dashboard has no horizontal overflow and passes serious axe checks', async ({ page }) => {
