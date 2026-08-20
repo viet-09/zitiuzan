@@ -6,16 +6,18 @@ import {
   chooseNextPetState,
   clampPetPosition,
   getContextualPetAdvice,
-} from './pet-companion-state.js?v=14';
+} from './pet-companion-state.js?v=15';
+import { mountPetMotion } from './pet-motion.js?v=15';
 
 const POSITION_STORAGE_KEY = 'n2_pet_position_v1';
 const STATE_DURATION = Object.freeze({
+  wake: 1700,
   idle: 6200,
   look: 3200,
   walk: 5200,
+  play: 4800,
   sleep: 5400,
   'deep-sleep': 6200,
-  advice: 4800,
 });
 
 function storedPosition(storage) {
@@ -46,6 +48,7 @@ export function mountPetCompanion(host, options = {}) {
   let suppressClickUntil = 0;
   let panelOpen = false;
   let drag = null;
+  const spriteMotion = mountPetMotion(host, { initialState: state });
 
   function petSize() {
     const rect = owner.getBoundingClientRect();
@@ -90,7 +93,7 @@ export function mountPetCompanion(host, options = {}) {
     if (destroyed || reducedMotion || drag) return;
     stateTimer = window.setTimeout(() => {
       const next = chooseNextPetState(state, random());
-      setState(next, { announce: next === 'advice' });
+      setState(next, { announce: next === 'play' });
     }, delay);
   }
 
@@ -108,6 +111,7 @@ export function mountPetCompanion(host, options = {}) {
   function setState(next, { announce = false } = {}) {
     state = PET_COMPANION_STATES.includes(next) ? next : 'idle';
     host.dataset.petState = state;
+    spriteMotion?.setState(state);
     host.dataset.motion = reducedMotion ? 'reduced' : 'active';
     if (reducedMotion) {
       state = 'idle';
@@ -193,9 +197,9 @@ export function mountPetCompanion(host, options = {}) {
       const mapped = {
         pat: 'look',
         tease: 'walk',
-        highfive: 'advice',
-        complete: 'advice',
-        'tier-up': 'advice',
+        highfive: 'play',
+        complete: 'play',
+        'tier-up': 'play',
       }[kind] || 'look';
       setState(mapped);
     },
@@ -218,6 +222,7 @@ export function mountPetCompanion(host, options = {}) {
       document.removeEventListener('pointercancel', finishDrag);
       motionQuery.removeEventListener('change', onMotionPreference);
       window.removeEventListener('resize', onResize);
+      spriteMotion?.destroy();
       owner.classList.remove('is-dragging');
     },
   };

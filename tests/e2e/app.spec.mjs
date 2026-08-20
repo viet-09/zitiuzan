@@ -166,7 +166,7 @@ test('pixel desktop companion roams, reacts, drags and keeps its learning quest'
   await expect(petArt).toHaveCount(1);
   const rasterSprite = petArt.locator('.pixel-pet__sprite');
   await expect(rasterSprite).toBeVisible();
-  await expect(rasterSprite).toHaveCSS('background-image', /fox-sprites\.png/);
+  await expect(rasterSprite).toHaveCSS('background-image', /fox-motion-sprites\.png/);
   await expect(petArt.locator('.pixel-pet__svg')).toHaveCount(0);
   const petShadow = await petArt.locator('xpath=..').evaluate((node) => getComputedStyle(node, '::after').display);
   expect(petShadow).toBe('none');
@@ -219,7 +219,7 @@ test('pixel desktop companion roams, reacts, drags and keeps its learning quest'
     y: directInteractionSize.height * 0.7,
   } });
   await expect(petWidget).toHaveAttribute('data-reaction', 'highfive');
-  await expect(petCompanion).toHaveAttribute('data-pet-state', 'advice');
+  await expect(petCompanion).toHaveAttribute('data-pet-state', 'play');
 
   const transformBeforeDrag = await page.locator('#pet-widget-mount .streak-pet-mount').evaluate((node) => getComputedStyle(node).transform);
   const dragTarget = directInteraction;
@@ -236,7 +236,7 @@ test('pixel desktop companion roams, reacts, drags and keeps its learning quest'
     detail: { id: 'motion-check', done: true, streak: 0 },
   })));
   await expect(petWidget).toHaveAttribute('data-reaction', 'complete');
-  await expect(petCompanion).toHaveAttribute('data-pet-state', 'advice');
+  await expect(petCompanion).toHaveAttribute('data-pet-state', 'play');
 
   await page.getByRole('button', { name: 'Mở nhiệm vụ học của Cáo' }).click();
   const panel = page.getByRole('region', { name: 'Nhiệm vụ của bạn đồng hành' });
@@ -280,7 +280,7 @@ test('profile offers two matching pet avatars and compresses oversized uploads',
   await expect(dialog.getByText(/tự nén/u)).toBeVisible();
   await expect(dialog.getByText(/1,5 MB|4096 px/u)).toHaveCount(0);
 
-  const source = fs.readFileSync(new URL('../../assets/pets/fox-sprites.png', import.meta.url));
+  const source = fs.readFileSync(new URL('../../assets/pets/fox-motion-sprites.png', import.meta.url));
   const oversized = Buffer.concat([source, Buffer.alloc(2_000_000)]);
   await dialog.locator('input[type="file"]').setInputFiles({
     name: 'avatar-rat-lon.png',

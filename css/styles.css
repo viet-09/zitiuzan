@@ -2387,14 +2387,14 @@ body.furigana-off rt {
     width: 100%;
     height: 100%;
     background-repeat: no-repeat;
-    background-position: 0 0;
-    background-size: 300% 200%;
+    background-position: 75% 0;
+    background-size: 500% 400%;
     image-rendering: pixelated;
 }
 .profile-avatar--fox .profile-avatar__pet,
-.profile-preset--fox { background-image: url('../assets/pets/fox-sprites.png'); }
+.profile-preset--fox { background-image: url('../assets/pets/fox-motion-sprites.png'); }
 .profile-avatar--rabbit .profile-avatar__pet,
-.profile-preset--rabbit { background-image: url('../assets/pets/rabbit-sprites.png'); }
+.profile-preset--rabbit { background-image: url('../assets/pets/rabbit-motion-sprites.png'); }
 .profile-button__copy { display: grid; text-align: left; line-height: 1.15; }
 .profile-button__label,
 .profile-modal__eyebrow {
@@ -3828,48 +3828,26 @@ body.modal-open { overflow: hidden; }
 }
 .pixel-pet__sprite {
     --pet-facing: 1;
+    --pet-frame-x: 75%;
+    --pet-frame-y: 0%;
     position: absolute;
     left: 50%;
     bottom: 0;
     display: block;
     width: 110px;
     height: 110px;
-    background-position: 0 0;
+    background-position: var(--pet-frame-x) var(--pet-frame-y);
     background-repeat: no-repeat;
-    background-size: 300% 200%;
+    background-size: 500% 400%;
     image-rendering: pixelated;
     transform: translate3d(-50%, 0, 0) scaleX(var(--pet-facing));
     transform-origin: center bottom;
     will-change: transform;
 }
-.pixel-pet--fox .pixel-pet__sprite { background-image: url('../assets/pets/fox-sprites.png'); }
-.pixel-pet--rabbit .pixel-pet__sprite { background-image: url('../assets/pets/rabbit-sprites.png'); }
+.pixel-pet--fox .pixel-pet__sprite { background-image: url('../assets/pets/fox-motion-sprites.png'); }
+.pixel-pet--rabbit .pixel-pet__sprite { background-image: url('../assets/pets/rabbit-motion-sprites.png'); }
+.pixel-pet--fox .pixel-pet__sprite { height: 92px; }
 .pixel-pet-host[data-facing='left'] .pixel-pet__sprite { --pet-facing: -1; }
-
-.pixel-pet-host[data-pet-state='idle'] .pixel-pet__sprite {
-    background-position: 0 0;
-    animation: pixel-sprite-idle 2.4s steps(2, end) infinite;
-}
-.pixel-pet-host[data-pet-state='look'] .pixel-pet__sprite {
-    background-position: 50% 0;
-    animation: pixel-sprite-look 1.2s steps(2, end) infinite;
-}
-.pixel-pet-host[data-pet-state='walk'] .pixel-pet__sprite {
-    background-position: 100% 0;
-    animation: pixel-sprite-walk .48s steps(2, end) infinite;
-}
-.pixel-pet-host[data-pet-state='sleep'] .pixel-pet__sprite {
-    background-position: 0 100%;
-    animation: pixel-sprite-sleep 2.8s steps(2, end) infinite;
-}
-.pixel-pet-host[data-pet-state='deep-sleep'] .pixel-pet__sprite {
-    background-position: 50% 100%;
-    animation: pixel-sprite-sleep 3.2s steps(2, end) infinite;
-}
-.pixel-pet-host[data-pet-state='advice'] .pixel-pet__sprite {
-    background-position: 100% 100%;
-    animation: pixel-sprite-advice .72s steps(2, end) infinite;
-}
 
 .pet-figure::after {
     left: 20%;
