@@ -3,21 +3,26 @@ import assert from 'node:assert/strict';
 
 import {
   PET_COMPANION_STATES,
+  PET_STATE_TRANSITIONS,
   chooseNextPetState,
   clampPetPosition,
   getContextualPetAdvice,
+  getPetStatePath,
 } from '../js/pet-companion-state.js';
 
-test('desktop companion exposes the six calm states from the reference flow', () => {
+test('desktop companion exposes the calm state machine from the reference flow', () => {
   assert.deepEqual(PET_COMPANION_STATES, [
-    'idle', 'look', 'walk', 'sleep', 'deep-sleep', 'advice',
+    'wake', 'idle', 'look', 'walk', 'play', 'sleep', 'deep-sleep',
   ]);
+  assert.deepEqual(PET_STATE_TRANSITIONS.idle, ['look', 'walk', 'play', 'sleep']);
+  assert.deepEqual(PET_STATE_TRANSITIONS.sleep, ['deep-sleep', 'wake']);
+  assert.deepEqual(getPetStatePath('deep-sleep', 'look'), ['deep-sleep', 'wake', 'idle', 'look']);
 });
 
-test('autonomous state selection is deterministic and avoids an immediate repeat', () => {
+test('autonomous state selection follows only valid neighbouring transitions', () => {
   assert.equal(chooseNextPetState('idle', 0), 'look');
-  assert.equal(chooseNextPetState('idle', 0.999), 'advice');
-  assert.notEqual(chooseNextPetState('walk', 0.5), 'walk');
+  assert.equal(chooseNextPetState('idle', 0.999), 'sleep');
+  assert.equal(chooseNextPetState('walk', 0.5), 'play');
 });
 
 test('advice prefers the learner current weakness before generic encouragement', () => {
