@@ -173,6 +173,12 @@ test('pixel desktop companion roams, reacts, drags and keeps its learning quest'
   await expect(petCompanion).toHaveAttribute('data-renderer', 'pixel-sprite');
   await expect(petCompanion).toHaveAttribute('data-companion-ready', 'true');
   await expect(petCompanion).toHaveAttribute('data-pet-state', 'idle');
+  const idleFramePositions = new Set();
+  for (let sample = 0; sample < 4; sample += 1) {
+    idleFramePositions.add(await rasterSprite.evaluate((node) => getComputedStyle(node).backgroundPosition));
+    await page.waitForTimeout(480);
+  }
+  expect(idleFramePositions.size).toBeGreaterThan(1);
   await expect(page.locator('#pet-widget-mount')).toHaveCSS('pointer-events', 'none');
 
   const compactPetSize = await petCompanion.boundingBox();
