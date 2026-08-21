@@ -93,27 +93,91 @@ test('kanji cards open a pen-friendly handwriting pad', async ({ page }) => {
   await expect(dialog.getByRole('button', { name: 'Xóa nét vừa viết' })).toBeVisible();
   await expect(dialog.getByRole('button', { name: 'Làm sạch bảng viết' })).toBeVisible();
 
+  // Guided mode arrives with the lazily fetched stroke data; until it does the
+  // pad is freeform, so wait for it rather than racing it.
+  const status = dialog.locator('[data-writing-status]');
+  await expect(status).toHaveText(/^Nét 1\/\d+$/);
+
+  // A diagonal across the whole sheet is not the first stroke of any kanji, so
+  // it must leave no ink behind — that is the gate working.
   const box = await canvas.boundingBox();
   expect(box).not.toBeNull();
   await page.mouse.move(box.x + 50, box.y + 50);
   await page.mouse.down();
   await page.mouse.move(box.x + box.width - 50, box.y + box.height - 50, { steps: 10 });
   await page.mouse.up();
-  const painted = await canvas.evaluate((node) => (
-    [...node.getContext('2d').getImageData(0, 0, node.width, node.height).data]
-      .some((channel, index) => index % 4 === 3 && channel > 0)
-  ));
-  expect(painted).toBe(true);
+  await expect(status).not.toHaveText(/^Nét 2\//);
 
   await dialog.getByRole('button', { name: 'Làm sạch bảng viết' }).click();
-  const cleared = await canvas.evaluate((node) => (
-    [...node.getContext('2d').getImageData(0, 0, node.width, node.height).data]
-      .every((channel, index) => index % 4 !== 3 || channel === 0)
-  ));
-  expect(cleared).toBe(true);
+  await expect(status).toHaveText(/^Nét 1\/\d+$/);
   await dialog.getByRole('button', { name: 'Đóng bảng luyện viết' }).click();
   await expect(dialog).toHaveCount(0);
   await expect(openPad).toBeFocused();
+});
+
+test('the writing pad only accepts the next stroke, drawn the right way round', async ({ page }) => {
+  await page.setViewportSize({ width: 1024, height: 900 });
+  await page.goto('/#/lesson/k1d2');
+  await dismissAuthGateForComponentChecks(page);
+  await page.getByRole('button', { name: /^Luyện viết chữ / }).first().click();
+
+  const dialog = page.getByRole('dialog', { name: /Luyện viết/ });
+  const status = dialog.locator('[data-writing-status]');
+  await expect(status).toHaveText(/^Nét 1\/\d+$/);
+
+  const outcome = await page.evaluate(async () => {
+    const data = await (await fetch('data/kanji-strokes.json')).json();
+    const kanji = document.querySelector('.kanji-writing-card h2 span[lang="ja"]').textContent;
+    const paths = data.strokes[kanji];
+    const canvas = document.querySelector('.kanji-writing-canvas');
+    const rect = canvas.getBoundingClientRect();
+
+    const sample = (d, n = 24) => {
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('viewBox', `0 0 ${data.viewBox} ${data.viewBox}`);
+      svg.style.cssText = 'position:absolute;width:0;height:0';
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', d);
+      svg.appendChild(path);
+      document.body.appendChild(svg);
+      const total = path.getTotalLength();
+      const points = Array.from({ length: n }, (_, i) => {
+        const point = path.getPointAtLength((total * i) / (n - 1));
+        return { x: point.x / data.viewBox, y: point.y / data.viewBox };
+      });
+      svg.remove();
+      return points;
+    };
+    const draw = (points) => {
+      const fire = (type, point) => canvas.dispatchEvent(new PointerEvent(type, {
+        pointerId: 1, button: 0, buttons: 1, pointerType: 'mouse', bubbles: true, cancelable: true,
+        clientX: rect.left + point.x * rect.width,
+        clientY: rect.top + point.y * rect.height,
+      }));
+      fire('pointerdown', points[0]);
+      for (const point of points.slice(1)) fire('pointermove', point);
+      fire('pointerup', points[points.length - 1]);
+    };
+    const read = () => document.querySelector('[data-writing-status]').textContent;
+
+    const steps = { total: paths.length };
+    draw(sample(paths[0]));
+    steps.afterFirstStroke = read();
+    draw([...sample(paths[1])].reverse());
+    steps.afterBackwards = read();
+    draw(sample(paths[2]));
+    steps.afterSkippingAhead = read();
+    draw(sample(paths[1]));
+    steps.afterCorrectSecond = read();
+    return steps;
+  });
+
+  expect(outcome.total).toBeGreaterThan(3);
+  expect(outcome.afterFirstStroke).toMatch(/^Nét 2\//);
+  // Same ink, opposite direction — the whole point of the check.
+  expect(outcome.afterBackwards).toMatch(/sai chiều/);
+  expect(outcome.afterSkippingAhead).toMatch(/Chưa đúng nét này/);
+  expect(outcome.afterCorrectSecond).toMatch(/^Nét 3\//);
 });
 
 test('book reader keeps every source image inside one continuous page strip', async ({ page }) => {

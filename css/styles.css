@@ -4079,6 +4079,26 @@ body.modal-open { overflow: hidden; }
 .kanji-writing-card { width: min(620px, 100%); }
 .kanji-writing-body { display: grid; gap: 12px; }
 .kanji-writing-hint { color: var(--text-muted); font: 500 .82rem/1.45 var(--font-sans); }
+.kanji-writing-status {
+    min-height: 1.4em;
+    font: 700 .82rem/1.4 var(--font-sans);
+    color: var(--text-secondary);
+}
+.kanji-writing-status[data-tone='ok'] { color: var(--accent-green); }
+.kanji-writing-status[data-tone='done'] { color: var(--accent-green); }
+.kanji-writing-status[data-tone='error'] { color: var(--accent-red); }
+
+/* A rejected stroke vanishes from the sheet, so the sheet itself has to say
+   that something was refused rather than silently swallowed. */
+.kanji-writing-sheet.is-rejected {
+    animation: kanji-stroke-reject .32s cubic-bezier(.36, .07, .19, .97);
+}
+
+@keyframes kanji-stroke-reject {
+    0%, 100% { transform: translateX(0); border-color: var(--border-dark); }
+    25% { transform: translateX(-5px); border-color: var(--accent-red); }
+    75% { transform: translateX(5px); border-color: var(--accent-red); }
+}
 .kanji-writing-sheet {
     position: relative;
     width: min(100%, 500px);

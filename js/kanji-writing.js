@@ -1,11 +1,59 @@
 import { activateModalDialog } from './modal-dialog.js';
+import { STROKE_FEEDBACK, matchStroke, resamplePolyline } from './kanji-stroke-match.js';
 
 let activePad = null;
+let strokeDataPromise = null;
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (character) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
   }[character]));
+}
+
+/**
+ * KanjiVG stroke outlines for the whole curriculum, fetched once per session.
+ * Half a megabyte is far too much to ship in the app shell for a pad most
+ * visits never open, so it loads when the pad does.
+ */
+function loadStrokeData() {
+  if (!strokeDataPromise) {
+    strokeDataPromise = fetch('data/kanji-strokes.json')
+      .then((response) => (response.ok ? response.json() : null))
+      .catch(() => null);
+  }
+  return strokeDataPromise;
+}
+
+/**
+ * Sample an SVG path into a polyline in 0..1 character space.
+ *
+ * The browser already knows how to walk a bezier, so the data file keeps
+ * KanjiVG's `d` strings verbatim and this asks the DOM for the points instead
+ * of reimplementing curve maths.
+ */
+function samplePath(d, viewBox, count) {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', `0 0 ${viewBox} ${viewBox}`);
+  svg.style.position = 'absolute';
+  svg.style.width = '0';
+  svg.style.height = '0';
+  svg.style.overflow = 'hidden';
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', d);
+  svg.appendChild(path);
+  document.body.appendChild(svg);
+  try {
+    const total = path.getTotalLength();
+    if (!Number.isFinite(total) || total <= 0) return [];
+    return Array.from({ length: count }, (_, index) => {
+      const point = path.getPointAtLength((total * index) / (count - 1));
+      return { x: point.x / viewBox, y: point.y / viewBox };
+    });
+  } catch {
+    return [];
+  } finally {
+    svg.remove();
+  }
 }
 
 function pointerPoint(event, canvas) {
@@ -44,7 +92,8 @@ export function openKanjiWritingPad({ character = '', trigger = null } = {}) {
         <button type="button" class="modal-close" data-writing-action="close" aria-label="Đóng bảng luyện viết">×</button>
       </header>
       <div class="modal-body kanji-writing-body">
-        <p class="kanji-writing-hint">Dùng bút, ngón tay hoặc chuột. Nét bút sẽ thay đổi nhẹ theo lực nhấn.</p>
+        <p class="kanji-writing-hint" data-writing-hint>Dùng bút, ngón tay hoặc chuột. Nét bút sẽ thay đổi nhẹ theo lực nhấn.</p>
+        <p class="kanji-writing-status" data-writing-status role="status" aria-live="polite"></p>
         <div class="kanji-writing-sheet">
           <span class="kanji-writing-guide" lang="ja" aria-hidden="true">${escapeHtml(kanji)}</span>
           <canvas class="kanji-writing-canvas" width="512" height="512" aria-label="Vùng viết chữ ${escapeHtml(kanji)}"></canvas>
@@ -60,7 +109,12 @@ export function openKanjiWritingPad({ character = '', trigger = null } = {}) {
 
   const canvas = overlay.querySelector('canvas');
   const context = canvas.getContext('2d');
+  const sheet = overlay.querySelector('.kanji-writing-sheet');
+  const statusEl = overlay.querySelector('[data-writing-status]');
+  const hintEl = overlay.querySelector('[data-writing-hint]');
   const strokes = [];
+  /** Expected strokes in writing order, in 0..1 space. Empty = freeform mode. */
+  let guideStrokes = [];
   let currentStroke = null;
   let modalDialog = null;
   let closed = false;
@@ -69,18 +123,87 @@ export function openKanjiWritingPad({ character = '', trigger = null } = {}) {
   context.lineJoin = 'round';
   context.strokeStyle = '#141210';
 
+  const guided = () => guideStrokes.length > 0;
+
+  function setStatus(message, kind = '') {
+    statusEl.textContent = message;
+    statusEl.dataset.tone = kind;
+  }
+
+  function progressMessage() {
+    if (!guided()) return '';
+    if (strokes.length >= guideStrokes.length) return `Xong cả ${guideStrokes.length} nét. Viết rất tốt!`;
+    return `Nét ${strokes.length + 1}/${guideStrokes.length}`;
+  }
+
   function clearCanvas() {
     context.clearRect(0, 0, canvas.width, canvas.height);
   }
 
+  /** The next expected stroke, faint, with a dot at the point to start from. */
+  function drawGuide() {
+    if (!guided() || strokes.length >= guideStrokes.length) return;
+    const points = guideStrokes[strokes.length].map((point) => ({
+      x: point.x * canvas.width,
+      y: point.y * canvas.height,
+    }));
+    if (points.length < 2) return;
+
+    context.save();
+    context.strokeStyle = 'rgba(196, 64, 48, .34)';
+    context.lineWidth = 9;
+    context.setLineDash([14, 10]);
+    context.beginPath();
+    context.moveTo(points[0].x, points[0].y);
+    for (const point of points.slice(1)) context.lineTo(point.x, point.y);
+    context.stroke();
+
+    context.setLineDash([]);
+    context.fillStyle = 'rgba(196, 64, 48, .7)';
+    context.beginPath();
+    context.arc(points[0].x, points[0].y, 9, 0, Math.PI * 2);
+    context.fill();
+    context.restore();
+  }
+
   function redraw() {
     clearCanvas();
+    drawGuide();
     strokes.forEach((stroke) => {
       if (stroke.length === 1) drawSegment(context, stroke[0], stroke[0]);
       for (let index = 1; index < stroke.length; index += 1) {
         drawSegment(context, stroke[index - 1], stroke[index]);
       }
     });
+  }
+
+  /** Flash the sheet so a rejected stroke reads as rejected, not as a glitch. */
+  function rejectStroke(reason) {
+    setStatus(STROKE_FEEDBACK[reason] || STROKE_FEEDBACK['wrong-place'], 'error');
+    sheet.classList.remove('is-rejected');
+    // Reading offsetWidth restarts the animation when two strokes in a row miss.
+    void sheet.offsetWidth;
+    sheet.classList.add('is-rejected');
+    redraw();
+  }
+
+  function commitStroke(points) {
+    strokes.push(points);
+    redraw();
+    setStatus(progressMessage(), strokes.length >= guideStrokes.length ? 'done' : 'ok');
+  }
+
+  /** Accept the finished stroke, or throw it away with a reason why. */
+  function judgeStroke(points) {
+    if (!guided()) {
+      strokes.push(points);
+      return;
+    }
+    const expected = guideStrokes[strokes.length];
+    const drawn = points.map((point) => ({ x: point.x / canvas.width, y: point.y / canvas.height }));
+    const verdict = matchStroke(drawn, expected);
+    if (verdict.ok) commitStroke(points);
+    else rejectStroke(verdict.reason);
   }
 
   function close() {
@@ -93,10 +216,10 @@ export function openKanjiWritingPad({ character = '', trigger = null } = {}) {
 
   canvas.addEventListener('pointerdown', (event) => {
     if (event.button !== 0 && event.pointerType !== 'pen') return;
+    if (guided() && strokes.length >= guideStrokes.length) return;
     event.preventDefault();
     canvas.setPointerCapture?.(event.pointerId);
     currentStroke = [pointerPoint(event, canvas)];
-    strokes.push(currentStroke);
     drawSegment(context, currentStroke[0], currentStroke[0]);
   });
   canvas.addEventListener('pointermove', (event) => {
@@ -109,8 +232,11 @@ export function openKanjiWritingPad({ character = '', trigger = null } = {}) {
   const finishStroke = (event) => {
     if (!currentStroke) return;
     event.preventDefault();
+    const points = currentStroke;
     currentStroke = null;
     if (canvas.hasPointerCapture?.(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
+    judgeStroke(points);
+    if (!guided()) redraw();
   };
   canvas.addEventListener('pointerup', finishStroke);
   canvas.addEventListener('pointercancel', finishStroke);
@@ -120,10 +246,12 @@ export function openKanjiWritingPad({ character = '', trigger = null } = {}) {
     if (action === 'undo') {
       strokes.pop();
       redraw();
+      setStatus(progressMessage());
     } else if (action === 'clear') {
       strokes.length = 0;
       currentStroke = null;
-      clearCanvas();
+      redraw();
+      setStatus(progressMessage());
     } else if (action === 'close' || event.target === overlay) {
       close();
     }
@@ -135,6 +263,22 @@ export function openKanjiWritingPad({ character = '', trigger = null } = {}) {
     onEscape: close,
   });
   activePad = { element: overlay, close };
+
+  // Guided mode arrives asynchronously. Until it does the pad behaves exactly
+  // as it always did, so a slow network never blocks practice.
+  void loadStrokeData().then((data) => {
+    if (closed) return;
+    const paths = data?.strokes?.[kanji];
+    if (!Array.isArray(paths) || !paths.length) return;
+    const viewBox = Number(data.viewBox) || 109;
+    guideStrokes = paths
+      .map((d) => samplePath(d, viewBox, 24))
+      .filter((points) => points.length >= 2);
+    if (!guideStrokes.length) return;
+    hintEl.textContent = 'Viết theo đúng thứ tự nét. Nét sai chỗ hoặc sai chiều sẽ không được nhận.';
+    redraw();
+    setStatus(progressMessage());
+  });
+
   return activePad;
 }
-

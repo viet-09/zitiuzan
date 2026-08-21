@@ -32,6 +32,21 @@ node scripts/link-and-deploy.mjs
 
 Migration phát hành nằm trong `supabase/migrations/`. Browser chỉ có quyền đọc trực tiếp tiến độ; thay đổi hoàn thành bài và thời gian học đi qua RPC đã xác thực.
 
+## Dữ liệu nét chữ kanji
+
+`data/kanji-strokes.json` chứa đường nét theo đúng thứ tự viết cho 683 kanji của giáo trình, dùng cho bảng luyện viết (`js/kanji-writing.js` + `js/kanji-stroke-match.js`). File được tải lười khi mở bảng luyện viết, không nằm trong app shell.
+
+Nguồn: **KanjiVG** (https://kanjivg.tagaini.net), Copyright (C) Ulrich Apel, giấy phép **CC BY-SA 3.0**. Đường nét được trích nguyên văn nên vẫn thuộc giấy phép đó — thông tin ghi công nằm trong chính file JSON (khối `license`).
+
+Tạo lại khi giáo trình thêm kanji mới:
+
+```powershell
+node scripts/build-kanji-strokes.mjs
+node scripts/build-kanji-strokes.mjs --refetch   # bỏ qua cache tạm
+```
+
+Script cảnh báo nếu số nét trong `data/book/kanji.json` lệch với KanjiVG — lệch nghĩa là một trong hai nguồn sai, và bảng luyện viết sẽ đòi số nét mà thẻ kanji phủ nhận.
+
 ## Audio nghe (GitHub Release)
 
 Audio bài nghe và audio đề thi nằm trên GitHub Release `audio-v1` của repo, không nằm trong git tree và không còn nằm trong Supabase Storage. Client tự dựng URL (`js/audio-source.js`) nên không cần signed URL hay Edge Function nào.

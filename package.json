@@ -8,6 +8,7 @@
     "test:e2e": "playwright test",
     "build:vendor": "node scripts/build-vendor.mjs",
     "build:pets": "node scripts/build-pet-atlas.mjs",
+    "build:kanji-strokes": "node scripts/build-kanji-strokes.mjs",
     "validate:data": "node scripts/validate-book-data.mjs",
     "check": "npm test && npm run validate:data",
     "verify:schema": "node scripts/verify-schema.mjs",

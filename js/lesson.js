@@ -22,8 +22,8 @@ import { completeLessonOnce, toggleLessonCompletion } from './completion.js';
 import { learningState } from './learning-state.js';
 import { buildBookViewerModel, renderBookViewerStrip } from './book-viewer.js';
 import { activateModalDialog } from './modal-dialog.js';
-import { openKanjiWritingPad } from './kanji-writing.js?v=23';
-import { announceLessonCompleted } from './pet.js?v=23';
+import { openKanjiWritingPad } from './kanji-writing.js?v=24';
+import { announceLessonCompleted } from './pet.js?v=24';
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (char) => ({
@@ -407,8 +407,8 @@ function pageHtml(found, lessonId, content) {
         ${titleEn ? `<p class="lesson-title-en" lang="en">${escapeHtml(titleEn)}</p>` : ''}
       </header>
       <nav class="lesson-local-nav" aria-label="Mục lục bài học">
-        <a href="#lesson-content">Nội dung</a>
-        <a href="#lesson-practice" data-lesson-practice-link>Luyện tập</a>
+        <button type="button" data-action="jump-to" data-target="lesson-content">Nội dung</button>
+        <button type="button" data-action="jump-to" data-target="lesson-practice" data-lesson-practice-link>Luyện tập</button>
         <button type="button" data-action="ask-tutor">Gia sư</button>
         <span class="lesson-local-progress"><strong data-lesson-progress-text>0/0 câu</strong><progress max="1" value="0" data-lesson-progress aria-label="Tiến độ câu luyện tập"></progress></span>
       </nav>
@@ -523,8 +523,29 @@ function updateLessonProgress(scope) {
   if (block) block.id = 'lesson-practice';
   if (link) {
     link.hidden = !block;
-    link.setAttribute('aria-disabled', String(!block));
+    link.disabled = !block;
   }
+}
+
+/**
+ * Scroll to a section of the lesson.
+ *
+ * These used to be `<a href="#lesson-practice">`, which in a hash-routed app
+ * is not an in-page anchor at all: it rewrites location.hash, the router fails
+ * to parse it as a route and falls back to the dashboard. Clicking "Luyện tập"
+ * therefore threw the learner out of the lesson entirely.
+ */
+function jumpToSection(scope, targetId) {
+  const target = scope?.querySelector(`#${CSS.escape(String(targetId || ''))}`);
+  if (!target) return;
+  // Instant, like the anchors these buttons replaced. A smooth scroll is
+  // driven by animation frames, so it silently does nothing whenever the tab
+  // is not painting — and a 3000px animated jump is disorienting anyway.
+  target.scrollIntoView({ block: 'start' });
+  // Move focus too, so the jump works for keyboard and screen-reader users
+  // instead of only moving the viewport.
+  if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
+  target.focus({ preventScroll: true });
 }
 
 function lessonContext(found, content) {
@@ -669,6 +690,7 @@ export function renderLesson(root, id) {
     if (!button) return;
     const action = button.dataset.action;
     if (action === 'back') navigate('#/');
+    else if (action === 'jump-to') jumpToSection(button.closest('.lesson-page'), button.dataset.target);
     else if (action === 'toggle-furigana') { setFurigana(!getFurigana()); paint(); }
     else if (action === 'toggle-complete') {
       const found = findLesson(id);
