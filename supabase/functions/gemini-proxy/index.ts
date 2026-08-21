@@ -37,7 +37,7 @@ const DEFAULT_MODEL = Deno.env.get('GEMINI_MODEL') ?? 'gemini-3.5-flash-lite';
 // from this allowlist — never forward an arbitrary client-supplied string
 // into the upstream URL. Kept in sync with js/gemini.js's MODEL_SUGGESTIONS;
 // gemini-2.0-flash (fully deprecated) and gemini-2.5-flash (not available to
-// this project's API keys) were removed after both broke evaluate-ai.
+// this project's API keys) were removed after both broke live AI calls.
 const ALLOWED_MODELS = new Set(['gemini-3.5-flash-lite', 'gemini-3.5-flash']);
 
 const MAX_TEXT_CHARS = 4000;

@@ -16,6 +16,9 @@ let _cleanup = null;
 let _currentRoute = { name: 'dashboard', params: [] };
 let _renderEpoch = 0;
 
+/** Fired on <window> after every route render, once the new route is active. */
+export const ROUTE_CHANGED_EVENT = 'n2:route-changed';
+
 function parseHash(hash) {
   const raw = String(hash || '').replace(/^#/, '');
   const parts = raw.split('/').filter(Boolean); // '' | '/' -> []
@@ -64,6 +67,14 @@ function scrollAppToTop() {
 }
 
 function updateRouteMetadata(routeName) {
+  // Chat-heavy routes restyle the masthead from CSS; keep the active route on
+  // the root element so no page has to reach up and mutate the shell itself,
+  // and announce the swap so shell-level layout can remeasure.
+  try {
+    document.documentElement.dataset.route = routeName;
+    window.dispatchEvent(new CustomEvent(ROUTE_CHANGED_EVENT, { detail: { route: routeName } }));
+  } catch (err) { /* no DOM */ }
+
   const labels = {
     dashboard: 'Tổng quan',
     lesson: 'Bài học',

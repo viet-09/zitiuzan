@@ -48,7 +48,7 @@ if (gemini) {
 }
 
 // 2. Deploy Edge Functions
-const FUNCTIONS = ['evaluate-ai', 'gemini-proxy', 'mint-live-token', 'exam-fetch', 'exam-review', 'exam-review-explain', 'lesson-audio-url'];
+const FUNCTIONS = ['gemini-proxy', 'mint-live-token', 'exam-fetch', 'exam-review', 'exam-review-explain', 'lesson-audio-url'];
 for (const fn of FUNCTIONS) {
   supabase(['functions', 'deploy', fn, '--project-ref', ref, '--no-verify-jwt=false'], `functions deploy ${fn}`);
 }

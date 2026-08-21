@@ -10,8 +10,8 @@ import {
   getContextualPetAdvice,
   getPetBounds,
   getPetStatePath,
-} from './pet-companion-state.js?v=17';
-import { getClipDuration, isPetClipLooping, mountPetMotion } from './pet-motion.js?v=17';
+} from './pet-companion-state.js?v=18';
+import { getClipDuration, isPetClipLooping, mountPetMotion } from './pet-motion.js?v=18';
 
 const POSITION_STORAGE_KEY = 'n2_pet_position_v1';
 const BOTTOM_INSET = 74;
@@ -67,7 +67,7 @@ export function mountPetCompanion(host, options = {}) {
 
   function petSize() {
     const rect = owner.getBoundingClientRect();
-    return { width: rect.width || 74, height: rect.height || 110 };
+    return { width: rect.width || 56, height: rect.height || 83 };
   }
 
   function travelOptions() {

@@ -4,16 +4,13 @@
 // first-visit choice (Google vs. offline) lives in js/auth.js instead.
 
 import { fetchLeaderboard, currentUser, signInWithGoogle, ready as supabaseReady } from './supabase.js';
+import { renderAvatar } from './profile-avatar.js';
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (ch) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
   }[ch]));
 }
-
-const PRESET_SYMBOLS = {
-  neko: '🐱', kitsune: '🦊', usagi: '🐰', sakura: '🌸',
-};
 
 function formatHours(ms) {
   const value = Number(ms) || 0;
@@ -22,23 +19,23 @@ function formatHours(ms) {
   return `${hours.toFixed(1)}h`;
 }
 
-function formatAverage(ms) {
+function formatToday(ms) {
   const value = Number(ms) || 0;
   if (value <= 0) return '—';
-  const minutes = value / 60_000;
-  if (minutes < 1) return `${Math.round(value / 1000)}s`;
-  return `${Math.round(minutes)} phút`;
+  const minutes = Math.round(value / 60_000);
+  if (minutes < 60) return `${Math.max(1, minutes)} phút`;
+  return `${(value / 3_600_000).toFixed(1)}h`;
 }
 
+// The same renderer as the account button and the profile page, so a learner's
+// row on the board shows exactly the pet they picked for their avatar.
+// Uploaded photos never leave the device, so the leaderboard view nulls
+// avatar_data for them; normalizeProfile then falls back to the preset pet.
 function avatarCell(row) {
-  if (row?.avatar_type === 'preset') {
-    const sym = PRESET_SYMBOLS[row.avatar_data] || '🐱';
-    return `<span class="lb-avatar">${escapeHtml(sym)}</span>`;
-  }
-  if (row?.avatar_type === 'upload' && typeof row.avatar_data === 'string') {
-    return `<img class="lb-avatar lb-avatar-img" alt="" src="${escapeHtml(row.avatar_data)}">`;
-  }
-  return `<span class="lb-avatar">👤</span>`;
+  return renderAvatar(
+    { avatarType: row?.avatar_type, avatarData: row?.avatar_data },
+    { className: 'lb-avatar' }
+  );
 }
 
 /** Render the leaderboard page into `root`. */
@@ -65,9 +62,9 @@ async function paint(el) {
   // skip the doomed request instead of showing a misleading "no one yet".
   const rows = user ? await fetchLeaderboard(50) : [];
   const body = !user
-    ? '<tr><td colspan="7" class="lb-empty">Đăng nhập để xem bảng xếp hạng cùng bạn bè.</td></tr>'
+    ? '<tr><td colspan="6" class="lb-empty">Đăng nhập để xem bảng xếp hạng cùng bạn bè.</td></tr>'
     : rows.length === 0
-    ? '<tr><td colspan="7" class="lb-empty">Chưa có ai trên bảng xếp hạng — hoàn thành bài học đầu tiên để lên hạng!</td></tr>'
+    ? '<tr><td colspan="6" class="lb-empty">Chưa có ai trên bảng xếp hạng — hoàn thành bài học đầu tiên để lên hạng!</td></tr>'
     : rows.map((row) => `
         <tr${user && row.user_id === user.id ? ' class="lb-self"' : ''}>
           <td class="lb-rank">${escapeHtml(String(row.rank ?? '—'))}</td>
@@ -76,9 +73,8 @@ async function paint(el) {
           </td>
           <td class="lb-completion">${escapeHtml(String(row.completion_percent ?? 0))}%</td>
           <td class="lb-hours">${escapeHtml(formatHours(row.total_study_ms))}</td>
-          <td class="lb-avg">${escapeHtml(formatAverage(row.avg_study_ms))}</td>
+          <td class="lb-today">${escapeHtml(formatToday(row.today_study_ms))}</td>
           <td class="lb-streak">${escapeHtml(String(row.streak ?? 0))} 🔥</td>
-          <td class="lb-level">${escapeHtml(row.ai_level || '—')}</td>
         </tr>
       `).join('');
 
@@ -90,7 +86,7 @@ async function paint(el) {
     <div class="lb-table-wrap">
       <table class="lb-table">
         <thead>
-          <tr><th>#</th><th>Học viên</th><th>Hoàn thành</th><th>Tổng giờ học</th><th>TB/buổi</th><th>Streak</th><th>Level</th></tr>
+          <tr><th>#</th><th>Học viên</th><th>Hoàn thành</th><th>Tổng giờ học</th><th>Hôm nay</th><th>Streak</th></tr>
         </thead>
         <tbody>${body}</tbody>
       </table>

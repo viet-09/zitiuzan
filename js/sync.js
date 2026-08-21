@@ -274,7 +274,7 @@ export async function pullFromCloud(userId) {
   if (!sb || !userId) return;
 
   const [profileRes, progressRes, reviewsRes] = await Promise.all([
-    sb.from('user_profiles').select('display_name,avatar_type,avatar_data,streak,last_study_date,furigana,exam_target_date,total_score,ai_level').eq('user_id', userId).maybeSingle(),
+    sb.from('user_profiles').select('display_name,avatar_type,avatar_data,streak,last_study_date,furigana,exam_target_date').eq('user_id', userId).maybeSingle(),
     sb.from('learning_progress').select('lesson_id').eq('user_id', userId),
     sb.from('learning_reviews').select('review_key,lesson_id,category_id,prompt,correct_answer,options,correct_index,selected_answer,source,attempts,correct_attempts,lapses,interval_days,last_result,last_reviewed_at,due_at').eq('user_id', userId),
   ]);

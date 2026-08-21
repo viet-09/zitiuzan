@@ -15,21 +15,25 @@ create table if not exists public.user_profiles (
   avatar_data          text not null default 'neko',
   streak               integer not null default 0 check (streak >= 0),
   last_study_date      date,
-  total_score          integer not null default 0 check (total_score >= 0),
-  ai_level             text not null default 'N5' check (ai_level in ('N5','N4','N3','N2','N1')),
-  ai_level_updated_at  timestamptz,
   tutor_memory         text not null default '',
   furigana             boolean not null default true,
-  -- Real (not estimated) study time, accumulated via record_study_time() —
-  -- see js/study-time.js. total_study_ms sums the tab-visible time spent on
-  -- lesson pages; study_session_count increments once per lesson visit
-  -- (not per flush), so total_study_ms/study_session_count is a meaningful
-  -- average time per study session.
+  -- Real (not estimated) study time, credited by heartbeat_study_session()
+  -- from server timestamps — see js/study-time.js.
   total_study_ms       bigint not null default 0 check (total_study_ms >= 0),
-  study_session_count  integer not null default 0 check (study_session_count >= 0),
   created_at           timestamptz not null default now(),
   updated_at           timestamptz not null default now()
 );
+
+-- Retired columns. The app teaches a single JLPT level (N2), so a per-learner
+-- level is noise; ai_level/ai_level_updated_at were only ever written by an
+-- Edge Function no client called. study_session_count fed a per-session
+-- average the leaderboard no longer shows, and total_score fed a points
+-- display that never shipped — the board ranks on completed lessons.
+alter table public.user_profiles
+  drop column if exists ai_level,
+  drop column if exists ai_level_updated_at,
+  drop column if exists study_session_count,
+  drop column if exists total_score;
 
 -- Auto-create empty profile row on signup so the rest of the code can
 -- always upsert against an existing row.
@@ -206,69 +210,13 @@ create table if not exists public.kanji_gloss_cache (
   primary key (user_id, key)
 );
 
--- ---------------------------------------------------------------------------
--- 7. leaderboard RPC — sanitized projection, gated to authenticated
--- ---------------------------------------------------------------------------
--- A SECURITY DEFINER view bypasses RLS implicitly. This explicit, narrow RPC
--- exposes only the safe aggregate fields below.
-drop view if exists public.leaderboard cascade;
-create or replace function public.get_leaderboard(p_limit integer default 50)
-returns table (
-  rank bigint,
-  user_id uuid,
-  display_name text,
-  avatar_type text,
-  avatar_data text,
-  streak integer,
-  ai_level text,
-  completed_count bigint,
-  completion_percent integer,
-  total_study_ms bigint,
-  avg_study_ms bigint
-)
-language sql stable security definer set search_path = public as $$
-  select ranked.rank, ranked.user_id, ranked.display_name, ranked.avatar_type,
-    ranked.avatar_data, ranked.streak, ranked.ai_level, ranked.completed_count,
-    ranked.completion_percent, ranked.total_study_ms, ranked.avg_study_ms
-  from (
-    select
-      row_number() over (order by coalesce(lp.completed_count, 0) desc, up.streak desc, up.created_at asc) as rank,
-      up.user_id,
-      up.display_name,
-      up.avatar_type,
-      case when up.avatar_type = 'upload' then null else up.avatar_data end as avatar_data,
-      up.streak,
-      up.ai_level,
-      coalesce(lp.completed_count, 0) as completed_count,
-      least(100, round(
-        coalesce(lp.completed_count, 0) * 100.0
-        / nullif((select count(*) from public.curriculum_lessons), 0)
-      ))::int as completion_percent,
-      up.total_study_ms,
-      case when up.study_session_count > 0 then up.total_study_ms / up.study_session_count else 0 end as avg_study_ms
-    from public.user_profiles up
-    left join (
-      select progress.user_id, count(distinct progress.lesson_id) as completed_count
-      from public.learning_progress as progress
-      group by progress.user_id
-    ) lp on lp.user_id = up.user_id
-    where auth.uid() is not null
-      and (coalesce(lp.completed_count, 0) > 0 or up.streak > 0)
-  ) as ranked
-  order by ranked.rank
-  limit least(100, greatest(1, coalesce(p_limit, 50)));
-$$;
-
-revoke all on function public.get_leaderboard(integer) from public, anon;
-grant execute on function public.get_leaderboard(integer) to authenticated;
 
 -- ---------------------------------------------------------------------------
--- 7b. record_study_time — accumulates real (tab-visible) study time from
--- js/study-time.js. Always operates on auth.uid(), never a client-supplied
--- user_id, so a caller can only inflate their own stats. p_new_session
--- should be true exactly once per lesson visit (the first flush of that
--- visit) so study_session_count counts VISITS, not flush ticks, keeping
--- total_study_ms / study_session_count a meaningful per-session average.
+-- 7. record_study_time — legacy client-timed study duration. Superseded by
+-- the server-timed session heartbeat below and revoked from every browser
+-- role; it exists only because supabase/rollback/ re-grants it to restore the
+-- previous client. Always operates on auth.uid(), never a client-supplied
+-- user_id, so even then a caller can only inflate their own stats.
 -- ---------------------------------------------------------------------------
 create or replace function public.record_study_time(p_duration_ms integer, p_new_session boolean default false)
 returns void
@@ -282,7 +230,6 @@ begin
   end if;
   update public.user_profiles
   set total_study_ms = total_study_ms + p_duration_ms,
-      study_session_count = study_session_count + case when p_new_session then 1 else 0 end,
       updated_at = now()
   where user_id = auth.uid();
 end;
@@ -337,11 +284,10 @@ declare
   v_user uuid := auth.uid();
   v_now timestamptz := clock_timestamp();
   v_last timestamptz;
-  v_credited bigint;
   v_delta bigint;
 begin
   if v_user is null then raise exception 'Authentication required'; end if;
-  select last_heartbeat, credited_ms into v_last, v_credited
+  select last_heartbeat into v_last
     from public.study_sessions
     where id = p_session_id and user_id = v_user and closed_at is null
     for update;
@@ -357,7 +303,6 @@ begin
   if v_delta >= 1000 then
     update public.user_profiles
       set total_study_ms = total_study_ms + v_delta,
-          study_session_count = study_session_count + case when v_credited = 0 then 1 else 0 end,
           updated_at = now()
       where user_id = v_user;
   end if;
@@ -371,7 +316,76 @@ grant execute on function public.start_study_session(text) to authenticated;
 grant execute on function public.heartbeat_study_session(uuid, boolean) to authenticated;
 
 -- ---------------------------------------------------------------------------
--- 8. touch_user_streak — atomic day-bump streak (Asia/Tokyo timezone).
+-- 8. leaderboard RPC — sanitized projection, gated to authenticated
+-- ---------------------------------------------------------------------------
+-- Defined after study_sessions because the projection reads today's credited
+-- session time. A SECURITY DEFINER view bypasses RLS implicitly; this explicit,
+-- narrow RPC exposes only the safe aggregate fields below.
+--
+-- There is deliberately no JLPT level here: the whole app is one N2 course, so
+-- ranking learners by level said nothing that completion percent does not.
+drop view if exists public.leaderboard cascade;
+drop function if exists public.get_leaderboard(integer);
+create or replace function public.get_leaderboard(p_limit integer default 50)
+returns table (
+  rank bigint,
+  user_id uuid,
+  display_name text,
+  avatar_type text,
+  avatar_data text,
+  streak integer,
+  completed_count bigint,
+  completion_percent integer,
+  total_study_ms bigint,
+  today_study_ms bigint
+)
+language sql stable security definer set search_path = public as $$
+  select ranked.rank, ranked.user_id, ranked.display_name, ranked.avatar_type,
+    ranked.avatar_data, ranked.streak, ranked.completed_count,
+    ranked.completion_percent, ranked.total_study_ms, ranked.today_study_ms
+  from (
+    select
+      row_number() over (order by coalesce(lp.completed_count, 0) desc, up.streak desc, up.created_at asc) as rank,
+      up.user_id,
+      up.display_name,
+      up.avatar_type,
+      case when up.avatar_type = 'upload' then null else up.avatar_data end as avatar_data,
+      up.streak,
+      coalesce(lp.completed_count, 0) as completed_count,
+      least(100, round(
+        coalesce(lp.completed_count, 0) * 100.0
+        / nullif((select count(*) from public.curriculum_lessons), 0)
+      ))::int as completion_percent,
+      up.total_study_ms,
+      coalesce(ts.today_ms, 0)::bigint as today_study_ms
+    from public.user_profiles up
+    left join (
+      select progress.user_id, count(distinct progress.lesson_id) as completed_count
+      from public.learning_progress as progress
+      group by progress.user_id
+    ) lp on lp.user_id = up.user_id
+    -- "Today" follows the same Asia/Tokyo day boundary as the streak, so both
+    -- stats roll over together. A session opened before midnight counts
+    -- against the day it started, which is where the learner watched it tick.
+    left join (
+      select sessions.user_id, sum(sessions.credited_ms) as today_ms
+      from public.study_sessions as sessions
+      where (sessions.started_at at time zone 'Asia/Tokyo')::date
+            = (now() at time zone 'Asia/Tokyo')::date
+      group by sessions.user_id
+    ) ts on ts.user_id = up.user_id
+    where auth.uid() is not null
+      and (coalesce(lp.completed_count, 0) > 0 or up.streak > 0)
+  ) as ranked
+  order by ranked.rank
+  limit least(100, greatest(1, coalesce(p_limit, 50)));
+$$;
+
+revoke all on function public.get_leaderboard(integer) from public, anon;
+grant execute on function public.get_leaderboard(integer) to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- 9. touch_user_streak — atomic day-bump streak (Asia/Tokyo timezone).
 -- Always operates on auth.uid(); the parameter is kept for backwards
 -- compatibility but is silently overridden so a malicious caller cannot
 -- touch another user's streak.
@@ -423,7 +437,7 @@ revoke all on function public.touch_user_streak(uuid) from public, anon;
 grant execute on function public.touch_user_streak(uuid) to authenticated;
 
 -- Atomic, idempotent completion mutation. Direct progress writes are revoked
--- below so score/streak/progress cannot diverge and unknown lesson ids cannot
+-- below so streak and progress cannot diverge and unknown lesson ids cannot
 -- be used to game the leaderboard.
 create or replace function public.set_lesson_completion(
   p_lesson_id text,
@@ -452,9 +466,6 @@ begin
       on conflict (user_id, lesson_id) do nothing
       returning lesson_id into v_changed;
     if v_changed is not null then
-      update public.user_profiles
-        set total_score = total_score + 10, updated_at = now()
-        where user_id = v_user;
       select touched.streak, touched.last_date into v_streak, v_last
         from public.touch_user_streak(v_user) as touched;
     end if;
@@ -462,11 +473,6 @@ begin
     delete from public.learning_progress
       where user_id = v_user and lesson_id = p_lesson_id
       returning lesson_id into v_changed;
-    if v_changed is not null then
-      update public.user_profiles
-        set total_score = greatest(total_score - 10, 0), updated_at = now()
-        where user_id = v_user;
-    end if;
   end if;
 
   select profile.streak, profile.last_study_date into v_streak, v_last
@@ -478,35 +484,9 @@ $$;
 revoke all on function public.set_lesson_completion(text, text, boolean) from public, anon;
 grant execute on function public.set_lesson_completion(text, text, boolean) to authenticated;
 
--- ---------------------------------------------------------------------------
--- 9. bump_score — atomic score increment, clamped.
--- Same auth.uid() enforcement as touch_user_streak.
--- ---------------------------------------------------------------------------
-create or replace function public.bump_score(p_user_id uuid, p_delta int)
-returns int
-language plpgsql security definer set search_path = public as $$
-declare
-  v_target uuid := coalesce(p_user_id, auth.uid());
-  v_new    int;
-begin
-  if v_target <> auth.uid() then
-    raise exception 'bump_score: target must equal auth.uid()';
-  end if;
-  if p_delta is null or p_delta < -1000 or p_delta > 1000 then
-    raise exception 'bump_score: delta out of range (-1000..1000)';
-  end if;
-
-  update public.user_profiles
-    set total_score = greatest(total_score + p_delta, 0),
-        updated_at = now()
-    where user_id = v_target
-    returning total_score into v_new;
-  return v_new;
-end;
-$$;
-
-revoke all on function public.bump_score(uuid, int) from public, anon, authenticated;
-grant execute on function public.bump_score(uuid, int) to service_role;
+-- The points system it served was never surfaced anywhere in the client, so
+-- the score column and this RPC are gone; ranking uses completed lessons.
+drop function if exists public.bump_score(uuid, int);
 
 -- ---------------------------------------------------------------------------
 -- 10. Row Level Security

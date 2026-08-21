@@ -186,10 +186,11 @@ test('pixel desktop companion roams, reacts, drags and keeps its learning quest'
   expect(idleRigOffsets.size).toBeGreaterThan(1);
   await expect(page.locator('#pet-widget-mount')).toHaveCSS('pointer-events', 'none');
 
+  // 0.75 of the drawn 74.4x110.4 mount — see --pet-scale in css/styles.css.
   const compactPetSize = await petCompanion.boundingBox();
   expect(compactPetSize).not.toBeNull();
-  expect(compactPetSize.width).toBeCloseTo(74.4, 0);
-  expect(compactPetSize.height).toBeCloseTo(110.4, 0);
+  expect(compactPetSize.width).toBeCloseTo(55.8, 0);
+  expect(compactPetSize.height).toBeCloseTo(82.8, 0);
 
   const questMarkSize = await page.locator('.pet-widget__quest-toggle span').boundingBox();
   expect(questMarkSize).not.toBeNull();
@@ -278,6 +279,39 @@ test('pixel desktop companion roams, reacts, drags and keeps its learning quest'
   await page.getByRole('combobox', { name: 'Loài' }).selectOption('fox');
 });
 
+test('the tutor conversation fills one viewport instead of scrolling the page', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.goto('/#/tutor');
+  await dismissAuthGateForComponentChecks(page);
+
+  // The display masthead steps aside on chat routes so the transcript, its
+  // toolbar and the input row all fit above the fold together.
+  await expect(page.locator('.masthead-title')).toBeHidden();
+  const geometry = await page.evaluate(() => ({
+    documentHeight: document.documentElement.scrollHeight,
+    viewportHeight: window.innerHeight,
+    wrapBottom: document.querySelector('.chat-wrap').getBoundingClientRect().bottom,
+    messages: document.querySelector('.chat-messages').getBoundingClientRect().height,
+    navTop: document.querySelector('.bottom-nav').getBoundingClientRect().top,
+  }));
+  expect(geometry.documentHeight).toBeLessThanOrEqual(geometry.viewportHeight + 1);
+  expect(geometry.wrapBottom).toBeLessThanOrEqual(geometry.navTop + 1);
+  expect(geometry.messages).toBeGreaterThan(400);
+
+  await expect(page.getByRole('textbox', { name: /câu trả lời/i })).toBeInViewport();
+});
+
+test('the voice route keeps its own settings entry point once the masthead collapses', async ({ page }) => {
+  await page.goto('/#/voice');
+  await dismissAuthGateForComponentChecks(page);
+
+  await expect(page.locator('.masthead-tools')).toBeHidden();
+  const settings = page.locator('.voice-page').getByRole('button', { name: /Cài đặt/ });
+  await expect(settings).toBeVisible();
+  await settings.click();
+  await expect(page.getByRole('dialog', { name: /Cài đặt AI/ })).toBeVisible();
+});
+
 test('profile offers two matching pet avatars and compresses oversized uploads', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('n2_profile_prompt_seen_v2', '1'));
   await page.goto('/#/profile');
@@ -334,8 +368,8 @@ test('mobile dashboard has no horizontal overflow and passes serious axe checks'
   await expect(mobilePet).toHaveAttribute('data-renderer', 'pixel-sprite');
   const mobilePetSize = await mobilePet.boundingBox();
   expect(mobilePetSize).not.toBeNull();
-  expect(mobilePetSize.width).toBeCloseTo(64.8, 0);
-  expect(mobilePetSize.height).toBeCloseTo(96, 0);
+  expect(mobilePetSize.width).toBeCloseTo(48.6, 0);
+  expect(mobilePetSize.height).toBeCloseTo(72, 0);
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(1);
 

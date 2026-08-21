@@ -3,7 +3,7 @@
 
 import { VOICE_TOPICS } from './config.js';
 import { renderFurigana } from './furigana.js';
-import { askJSON, askAudio } from './gemini.js';
+import { askJSON, askAudio, openSettings } from './gemini.js';
 import {
   getSettings,
   getVoiceTranscript,
@@ -855,12 +855,23 @@ function renderView() {
   }
 }
 
+/** The chat routes collapse the masthead tools, so each voice view carries its
+ *  own settings button. One binder covers whichever view was just painted. */
+function bindVoiceSettingsButtons() {
+  rootEl.querySelectorAll('[data-voice-settings]').forEach((btn) => {
+    btn.addEventListener('click', () => openSettings());
+  });
+}
+
 function renderTopicPicker() {
   const savedTopic = state.transcript.find((turn) => turn.topicId)?.topicId;
   const savedTopicLabel = VOICE_TOPICS.find((topic) => topic.id === savedTopic)?.label || state.topic?.label || '';
   rootEl.innerHTML = `
     <section class="voice-page">
-      <h1 class="section-title" data-route-heading>🎙️ Luyện hội thoại theo chủ đề</h1>
+      <div class="lesson-toolbar">
+        <h1 class="section-title" data-route-heading>🎙️ Luyện hội thoại theo chủ đề</h1>
+        <button type="button" class="chat-settings-btn" data-voice-settings>⚙ Cài đặt</button>
+      </div>
       <p class="vi-sentence">Chọn một chủ đề bên dưới để bắt đầu trò chuyện cùng gia sư AI bằng tiếng Nhật.</p>
       ${state.transcript.length ? `<button type="button" class="voice-resume-btn" id="voice-resume-btn">Tiếp tục hội thoại đã lưu${savedTopicLabel ? ` · ${esc(savedTopicLabel)}` : ''}</button>` : ''}
       <div class="topic-grid">
@@ -878,6 +889,7 @@ function renderTopicPicker() {
     btn.addEventListener('click', () => startConversation(btn.getAttribute('data-topic-id')));
   });
   rootEl.querySelector('#voice-resume-btn')?.addEventListener('click', resumeConversation);
+  bindVoiceSettingsButtons();
 }
 
 function renderConversationView() {
@@ -915,6 +927,7 @@ function renderConversationView() {
       <div class="lesson-toolbar">
         <button type="button" class="tts-btn back-btn" id="voice-back-btn">← Đổi chủ đề</button>
         <span class="lesson-meta">${esc(topic.label)} · <span lang="ja">${esc(topic.jp)}</span></span>
+        <button type="button" class="chat-settings-btn" data-voice-settings>⚙ Cài đặt</button>
       </div>
       ${state.transport === 'live' ? `
         <section class="live-call-panel" aria-label="Trạng thái cuộc gọi trực tiếp">
@@ -980,6 +993,8 @@ function renderConversationView() {
 
   const endBtn = rootEl.querySelector('#voice-end-btn');
   if (endBtn) endBtn.addEventListener('click', endAndReview);
+
+  bindVoiceSettingsButtons();
 
   const wrap = rootEl.querySelector('#voice-chat-wrap');
   if (wrap) wrap.scrollTop = wrap.scrollHeight;

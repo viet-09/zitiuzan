@@ -28,19 +28,4 @@ await build({
 const supabaseOutputPath = path.join(root, 'vendor', 'supabase.js');
 stripTrailingWhitespace(supabaseOutputPath);
 
-await build({
-  entryPoints: [path.join(root, 'js', 'pet-scene.js')],
-  outfile: path.join(root, 'vendor', 'pet-scene.js'),
-  bundle: true,
-  format: 'esm',
-  minify: true,
-  sourcemap: false,
-  target: ['es2022'],
-  legalComments: 'none',
-  treeShaking: true,
-});
-
-const petSceneOutputPath = path.join(root, 'vendor', 'pet-scene.js');
-stripTrailingWhitespace(petSceneOutputPath);
-
-console.log('Built vendor/supabase.js and vendor/pet-scene.js');
+console.log('Built vendor/supabase.js');
