@@ -7,6 +7,7 @@
 import { renderFurigana } from './furigana.js';
 import { getClient, currentUser } from './supabase.js';
 import { examHistoryStore } from './exam-history.js';
+import { examAudioUrls } from './audio-source.js';
 
 const SECTION_LABELS = {
   vocab_grammar: '文字・語彙・文法',
@@ -43,7 +44,8 @@ const state = {
   history: [],
   historyLoading: false,
   retest: { answers: new Map() },
-  audioPartIndex: 0, // which entry of state.content.audioUrls is currently loaded
+  audioUrls: [],     // release URLs for the current sitting, in playback order
+  audioPartIndex: 0, // which entry of state.audioUrls is currently loaded
   explainLoading: false,
   explainError: '',
 };
@@ -149,6 +151,9 @@ async function pickExam(level, sitting, token) {
     state.level = level;
     state.sitting = sitting;
     state.content = data;
+    // Audio is public on a GitHub Release, so its URLs are derived here rather
+    // than signed by exam-fetch — see js/audio-source.js.
+    state.audioUrls = examAudioUrls(level, sitting);
     resetForNewExam();
     state.activeSectionId = firstSectionIdForPhase(0);
     state.view = 'taking';
@@ -211,11 +216,11 @@ function playFirstListeningPart() {
 }
 
 /** Large listening files are split into multiple parts (see
- * scripts/upload-exam-audio.mjs + exam-fetch's resolveAudioUrls) — advance
+ * js/audio-source.js's examAudioUrls) — advance
  * to the next part and keep playing when the current one ends, so the
  * audio reads as one continuous track to the test-taker. */
 function handleAudioPartEnded() {
-  const urls = state.content?.audioUrls || [];
+  const urls = state.audioUrls;
   if (state.audioPartIndex >= urls.length - 1) return;
   state.audioPartIndex += 1;
   const el = rootEl?.querySelector('audio[data-exam-audio]');
@@ -443,7 +448,7 @@ function renderTracker(visibleSections) {
 }
 
 function renderAudioPlayer() {
-  const urls = Array.isArray(state.content?.audioUrls) ? state.content.audioUrls : [];
+  const urls = Array.isArray(state.audioUrls) ? state.audioUrls : [];
   if (urls.length === 0) return '<p class="dash-empty-state">🎧 Chưa có file nghe cho đề này.</p>';
   const src = urls[state.audioPartIndex] || urls[0];
   const partHint = urls.length > 1 ? ` File dài được chia làm ${urls.length} phần — hết phần này sẽ tự phát tiếp phần sau, không cần bấm gì.` : '';

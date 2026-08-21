@@ -105,39 +105,9 @@ Deno.serve(async (req) => {
   if (error) return jsonResponse({ error: 'Failed to load exam' }, 500);
   if (!data) return jsonResponse({ error: 'Exam not found' }, 404);
 
-  const sanitized = sanitizeContent(data.content as Record<string, unknown>);
-  const audioUrls = await resolveAudioUrls(serviceClient, level, sitting);
-
-  return jsonResponse({ ...sanitized, audioUrls });
+  // Listening audio is not served from here any more: it lives on a public
+  // GitHub Release and the client derives its URLs (see js/audio-source.js),
+  // which saves a Storage list plus one signing round trip per exam load.
+  return jsonResponse(sanitizeContent(data.content as Record<string, unknown>));
 });
 
-/** Listening audio is owned/copyrighted source — never public. Files over
- * Supabase's 50MB/object Storage ceiling are uploaded as ordered parts
- * (`{sitting}-part1.mp3`, `-part2.mp3`, ...) instead of one big object —
- * see scripts/upload-exam-audio.mjs. This lists whichever shape exists for
- * a sitting and returns short-lived (2h) signed URLs in playback order.
- * Missing audio degrades gracefully — the client just won't render a player. */
-async function resolveAudioUrls(
-  serviceClient: ReturnType<typeof createClient>,
-  level: string,
-  sitting: string,
-): Promise<string[]> {
-  const folder = level.toLowerCase();
-  const { data: objects } = await serviceClient.storage.from('exam-audio').list(folder, { limit: 1000 });
-  const escapedSitting = sitting.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const pattern = new RegExp(`^${escapedSitting}(?:-part(\\d+))?\\.mp3$`);
-
-  const matches = (objects ?? [])
-    .map((o) => ({ name: o.name, part: Number(pattern.exec(o.name)?.[1] ?? 0) }))
-    .filter((o) => pattern.test(o.name))
-    .sort((a, b) => a.part - b.part);
-
-  const urls: string[] = [];
-  for (const m of matches) {
-    const { data: signed } = await serviceClient.storage
-      .from('exam-audio')
-      .createSignedUrl(`${folder}/${m.name}`, 2 * 60 * 60);
-    if (signed?.signedUrl) urls.push(signed.signedUrl);
-  }
-  return urls;
-}

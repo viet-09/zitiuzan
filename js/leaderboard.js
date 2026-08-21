@@ -5,6 +5,7 @@
 
 import { fetchLeaderboard, currentUser, signInWithGoogle, ready as supabaseReady } from './supabase.js';
 import { renderAvatar } from './profile-avatar.js';
+import { getProfile } from './profile.js';
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (ch) => ({
@@ -28,14 +29,19 @@ function formatToday(ms) {
 }
 
 // The same renderer as the account button and the profile page, so a learner's
-// row on the board shows exactly the pet they picked for their avatar.
-// Uploaded photos never leave the device, so the leaderboard view nulls
-// avatar_data for them; normalizeProfile then falls back to the preset pet.
-function avatarCell(row) {
-  return renderAvatar(
-    { avatarType: row?.avatar_type, avatarData: row?.avatar_data },
-    { className: 'lb-avatar' }
-  );
+// row on the board shows exactly the pet they picked.
+//
+// Your own row reads the local profile instead of the server row. An uploaded
+// photo never leaves the device, so the board's projection nulls avatar_data
+// for it and every upload would otherwise render as the fallback pet — your
+// own face included. Reading locally also means the row matches the account
+// button the moment you change it, without waiting for the push to land.
+function avatarCell(row, selfId) {
+  const isSelf = selfId && row?.user_id === selfId;
+  const source = isSelf
+    ? getProfile()
+    : { avatarType: row?.avatar_type, avatarData: row?.avatar_data };
+  return renderAvatar(source, { className: 'lb-avatar' });
 }
 
 // Last standings this session, so returning to the page — or any re-render
@@ -56,7 +62,7 @@ function boardTemplate({ user, rows }) {
         <tr${row.user_id === user.id ? ' class="lb-self"' : ''}>
           <td class="lb-rank">${escapeHtml(String(row.rank ?? '—'))}</td>
           <td class="lb-id">
-            <div class="lb-id-cell">${avatarCell(row)}<span>${escapeHtml(row.display_name || 'Học viên')}</span></div>
+            <div class="lb-id-cell">${avatarCell(row, user.id)}<span>${escapeHtml(row.display_name || 'Học viên')}</span></div>
           </td>
           <td class="lb-completion">${escapeHtml(String(row.completion_percent ?? 0))}%</td>
           <td class="lb-hours">${escapeHtml(formatHours(row.total_study_ms))}</td>

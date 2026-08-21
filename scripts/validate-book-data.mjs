@@ -453,7 +453,7 @@ function validateListeningLesson(value, _id, location) {
       if (requireString(track.src, `${itemLocation}.src`, { nonEmpty: true })) {
         sources.push(track.src);
         if (!/^cd[12]\/\d{2}\.mp3$/.test(track.src)) {
-          fail('AUDIO_PATH', `${itemLocation}.src`, 'Expected a private lesson-audio storage key such as cd1/02.mp3.');
+          fail('AUDIO_PATH', `${itemLocation}.src`, 'Expected a release audio key such as cd1/02.mp3 (see js/audio-source.js).');
         }
       }
     });

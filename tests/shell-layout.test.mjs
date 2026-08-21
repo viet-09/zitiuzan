@@ -78,7 +78,12 @@ test('the leaderboard shows each learner the avatar their account renders', () =
   const css = read('css/styles.css');
 
   assert.match(leaderboard, /import \{ renderAvatar \} from '\.\/profile-avatar\.js'/);
-  assert.match(leaderboard, /renderAvatar\(\s*\{ avatarType: row\?\.avatar_type, avatarData: row\?\.avatar_data \}/);
+  assert.match(leaderboard, /avatarType: row\?\.avatar_type, avatarData: row\?\.avatar_data/);
+  // Your own row reads the local profile: the board's projection nulls
+  // avatar_data for uploads, so a photo would otherwise render as the pet.
+  assert.match(leaderboard, /const isSelf = selfId && row\?\.user_id === selfId;/);
+  assert.match(leaderboard, /isSelf\s*\?\s*getProfile\(\)/);
+  assert.match(leaderboard, /avatarCell\(row, user\.id\)/);
   // The old emoji table drifted from the fox/rabbit presets the account uses.
   assert.doesNotMatch(leaderboard, /PRESET_SYMBOLS/);
   assert.doesNotMatch(leaderboard, /🐱|🦊|🐰|🌸/);

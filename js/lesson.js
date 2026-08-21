@@ -21,7 +21,7 @@ import { toggleLessonCompletion } from './completion.js';
 import { learningState } from './learning-state.js';
 import { buildBookViewerModel, renderBookViewerStrip } from './book-viewer.js';
 import { activateModalDialog } from './modal-dialog.js';
-import { openKanjiWritingPad } from './kanji-writing.js?v=18';
+import { openKanjiWritingPad } from './kanji-writing.js?v=19';
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (char) => ({
@@ -547,7 +547,7 @@ export function renderLesson(root, id) {
     }
     root.innerHTML = pageHtml(found, id, getBookContent(id));
     updateLessonProgress(root.querySelector('.lesson-page'));
-    void hydrateLessonAudio(root);
+    hydrateLessonAudio(root);
   };
 
   // Shared popup lifecycle for both tap-a-word (definition) and tap-a-sentence

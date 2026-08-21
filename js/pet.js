@@ -3,7 +3,7 @@
 // settings object so changing the character never overwrites unrelated settings.
 
 import { getSettings, setSettings } from './store.js';
-import { renderPetArt } from './pet-art.js?v=18';
+import { renderPetArt } from './pet-art.js?v=19';
 
 export const PET_UPDATED_EVENT = 'n2:pet-updated';
 export const PET_COMPLETION_EVENT = 'n2:lesson-complete';
@@ -320,7 +320,7 @@ export function mountPet(target, options = {}) {
       </div>`;
     mount.classList.toggle('is-panel-open', panelOpen);
     const companionHost = mount.querySelector('[data-pet-companion]');
-    import('./pet-companion.js?v=18').then(({ mountPetCompanion }) => {
+    import('./pet-companion.js?v=19').then(({ mountPetCompanion }) => {
       if (destroyed || loadToken !== companionLoadToken || !companionHost?.isConnected) return;
       petCompanionController = mountPetCompanion(companionHost, {
         mount,

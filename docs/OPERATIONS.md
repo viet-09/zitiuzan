@@ -32,6 +32,24 @@ node scripts/link-and-deploy.mjs
 
 Migration phát hành nằm trong `supabase/migrations/`. Browser chỉ có quyền đọc trực tiếp tiến độ; thay đổi hoàn thành bài và thời gian học đi qua RPC đã xác thực.
 
+## Audio nghe (GitHub Release)
+
+Audio bài nghe và audio đề thi nằm trên GitHub Release `audio-v1` của repo, không nằm trong git tree và không còn nằm trong Supabase Storage. Client tự dựng URL (`js/audio-source.js`) nên không cần signed URL hay Edge Function nào.
+
+Cần thêm vào `.env.local`:
+
+- `GITHUB_TOKEN` — classic PAT có scope `repo`, hoặc fine-grained token có `Contents: read and write` trên repo này.
+
+```powershell
+node scripts/upload-audio-github.mjs --dry-run
+node scripts/upload-audio-github.mjs
+node scripts/upload-audio-github.mjs --bitrate=64k   # nén mono trước khi up
+```
+
+Script tự tạo release nếu chưa có, và ghi đè asset trùng tên nên chạy lại an toàn. Sitting nào không tìm được file nguồn sẽ được cảnh báo và bỏ qua — app hiển thị "Chưa có file nghe cho đề này".
+
+CSP đã cho phép `https://github.com` và `https://objects.githubusercontent.com` trong `media-src` (cả `index.html` và `vercel.json`) — release URL redirect sang host thứ hai.
+
 ## Vercel
 
 Triển khai production từ thư mục gốc:

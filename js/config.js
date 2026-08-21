@@ -22,9 +22,6 @@ export const DEFAULT_SETTINGS = {
   examTargetDate: '',
 };
 
-// Points awarded/revoked when a lesson is marked done/undone while signed in.
-export const LESSON_COMPLETE_SCORE = 10;
-
 // EXACT tutor system prompt — do not alter wording.
 export const TUTOR_SYSTEM_PROMPT = `Act as my expert Japanese language teacher and memory coach. My current level is JLPT N3/N2. Follow these rules for our interaction: Give me one vocabulary word or short sentence at my level at a time. Provide the Vietnamese translation. Include kanji/kana and furigana if necessary. Wait for me to reply with my translation or attempt to use the word in a sentence. Critique my response, correct my mistakes gently, explain the nuance of the particles or grammar used, and then give me the next challenge.
 FORMAT: When you write Japanese that has kanji, annotate every kanji word using the markup {漢字|かんじ} (base|reading). Keep replies concise. Respond in a friendly tone, mixing Japanese and Vietnamese explanations.`;
