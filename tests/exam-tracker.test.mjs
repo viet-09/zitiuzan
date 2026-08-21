@@ -59,9 +59,28 @@ test('the tracker stays a compact card at every width', () => {
   // ~185px in the band between the phone rules and the fixed sidebar.
   assert.match(css, /--exam-tracker-width: \d{3}px;/);
   assert.match(css, /\.exam-tracker \{[\s\S]*?max-width: var\(--exam-tracker-width\)/);
-  assert.match(css, /min-width: 1300px\)[\s\S]*?width: var\(--exam-tracker-width\)/);
 
   // The phone block may only tighten the padding now — no second grid to drift.
   const phoneBlock = /@media \(max-width: 600px\) \{([\s\S]*?)\n\}/.exec(css)?.[1] ?? '';
   assert.doesNotMatch(phoneBlock, /\.exam-tracker-grid|\.exam-tracker-cell/);
+});
+
+test('the pinned sheet reserves the strip it covers instead of sitting on the questions', () => {
+  const css = read('css/styles.css');
+
+  // It pins from 1000px, not 1300px, so the answer-sheet-on-the-right layout
+  // is what most screens get rather than a card shoved above the questions.
+  assert.match(css, /@media \(min-width: 1000px\) \{[\s\S]*?\.exam-tracker \{[\s\S]*?position: fixed/);
+
+  // position: fixed takes the sheet out of flow, so the exam column has to
+  // give the strip back — at 1360px the old layout overlapped it by 32px.
+  const reserve = /:root\[data-route='exam'\] #app \{([\s\S]*?)\}/.exec(css)?.[1] ?? '';
+  assert.match(reserve, /padding-right: max\(/);
+  assert.match(reserve, /var\(--exam-tracker-width\)/);
+  assert.match(reserve, /50vw/);
+
+  // Derived from the layout tokens, not a magic number, so widening either the
+  // column or the sheet keeps them apart on its own.
+  assert.match(css, /--container-max: \d+px;/);
+  assert.match(css, /\.container \{[\s\S]*?max-width: var\(--container-max\)/);
 });

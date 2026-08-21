@@ -10,8 +10,8 @@ import {
   getContextualPetAdvice,
   getPetBounds,
   getPetStatePath,
-} from './pet-companion-state.js?v=21';
-import { getClipDuration, isPetClipLooping, mountPetMotion } from './pet-motion.js?v=21';
+} from './pet-companion-state.js?v=22';
+import { getClipDuration, isPetClipLooping, mountPetMotion } from './pet-motion.js?v=22';
 
 const POSITION_STORAGE_KEY = 'n2_pet_position_v1';
 const BOTTOM_INSET = 74;

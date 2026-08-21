@@ -42,6 +42,10 @@
     --radius: 3px;
     --radius-lg: 4px;
     --bottom-nav-height: 76px;
+    --container-max: 1000px;
+    --container-pad: 20px;
+    /* Five ~34px cells plus gaps and padding — see .exam-tracker. */
+    --exam-tracker-width: 212px;
 }
 
 /* ---------- Reset ---------- */
@@ -102,9 +106,9 @@ a {
 
 /* ---------- Layout ---------- */
 .container {
-    max-width: 1000px;
+    max-width: var(--container-max);
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 var(--container-pad);
 }
 
 /* ==========================================================================
@@ -3045,12 +3049,11 @@ body.furigana-off rt {
 /* Fixed top-right placement only kicks in once the viewport is wide enough
    that it lands in the empty margin beside .container's 1000px column
    (@media below) — otherwise it would float on top of the questions. */
+/* Answer sheet, always five columns of small squares. Capped at every width:
+   the grid is five equal columns, so letting the panel run the full content
+   width stretched each square to ~185px — an answer sheet the size of the
+   paper. The cap is what keeps it a glanceable card. */
 .exam-tracker {
-    /* Five ~34px cells plus gaps and padding. Capped at every width: the grid
-       below is five equal columns, so letting the panel run the full content
-       width stretched each square to ~185px — an answer sheet the size of the
-       paper. The cap is what keeps it a glanceable card instead. */
-    --exam-tracker-width: 212px;
     position: static;
     width: 100%;
     max-width: var(--exam-tracker-width);
@@ -3061,16 +3064,29 @@ body.furigana-off rt {
     background: var(--paper-2);
 }
 
-@media (min-width: 1300px) {
+/* Once there is room, the sheet pins to the right of the questions where a
+   real answer sheet sits, rather than pushing them down the page. */
+@media (min-width: 1000px) {
     .exam-tracker {
         position: fixed;
         top: 90px;
-        right: 20px;
+        right: var(--container-pad);
         width: var(--exam-tracker-width);
         max-height: calc(100vh - 110px);
         overflow-y: auto;
         margin-bottom: 0;
         z-index: 20;
+    }
+
+    /* The sheet is pinned to the viewport, not to the column, so the page has
+       to give back the strip it covers. Wide screens already have that strip
+       free in the centring margin, which is what max() falls back to — only
+       the band where the column reaches the sheet needs real padding. */
+    :root[data-route='exam'] #app {
+        padding-right: max(
+            var(--container-pad),
+            calc((var(--container-max) / 2) + var(--exam-tracker-width) + (2 * var(--container-pad)) - 50vw)
+        );
     }
 }
 
