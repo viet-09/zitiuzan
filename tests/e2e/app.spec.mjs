@@ -312,6 +312,30 @@ test('the voice route keeps its own settings entry point once the masthead colla
   await expect(page.getByRole('dialog', { name: /Cài đặt AI/ })).toBeVisible();
 });
 
+test('listening audio is not blocked by the policy on its way to the release host', async ({ page }) => {
+  // A release URL 302s to a signed host GitHub has already renamed once, and
+  // the redirect target is re-checked against media-src — which is how every
+  // lesson and exam went silent while the src attributes looked perfectly
+  // fine. Offline this test simply sees no request, so it never flakes.
+  const blocked = [];
+  await page.addInitScript(() => {
+    window.__cspViolations = [];
+    document.addEventListener('securitypolicyviolation', (event) => {
+      window.__cspViolations.push({ directive: event.violatedDirective, uri: event.blockedURI });
+    });
+  });
+
+  await page.goto('/#/lesson/l1d1');
+  await dismissAuthGateForComponentChecks(page);
+
+  const players = page.locator('audio[data-lesson-audio-key]');
+  await expect(players.first()).toHaveAttribute('src', /releases\/download\/audio-v1\/lesson-cd1-\d{2}\.mp3$/);
+
+  await page.waitForTimeout(3_000);
+  blocked.push(...await page.evaluate(() => window.__cspViolations.filter((v) => v.directive.startsWith('media-src'))));
+  expect(blocked, blocked.map((v) => v.uri).join(' | ')).toEqual([]);
+});
+
 test('profile offers two matching pet avatars and compresses oversized uploads', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('n2_profile_prompt_seen_v2', '1'));
   await page.goto('/#/profile');

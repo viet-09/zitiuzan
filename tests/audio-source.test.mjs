@@ -63,8 +63,13 @@ test('the app is allowed to load release audio and no longer signs it', () => {
   for (const source of [csp, vercel]) {
     const mediaSrc = /media-src ([^;"]+)/.exec(source)?.[1] ?? '';
     assert.match(mediaSrc, /https:\/\/github\.com/);
-    // The release URL 302s to this host, so both have to be allowed.
-    assert.match(mediaSrc, /https:\/\/objects\.githubusercontent\.com/);
+    // A release URL 302s to a signed asset host that GitHub has renamed at
+    // least once (objects -> release-assets.githubusercontent.com), and Chrome
+    // re-checks media-src against the redirect target. Allowing the whole
+    // githubusercontent.com space is what keeps playback from breaking the
+    // next time that host changes.
+    assert.match(mediaSrc, /https:\/\/\*\.githubusercontent\.com/);
+    assert.doesNotMatch(mediaSrc, /objects\.githubusercontent\.com/);
   }
 
   // The signing Edge Function and its Storage uploaders are gone with it.
