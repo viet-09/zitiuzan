@@ -2645,9 +2645,7 @@ body.furigana-off rt {
     .week-card { padding: 14px; min-width: 0; }
     .category-block { min-width: 0; }
     .lessons-grid { grid-template-columns: minmax(0, 1fr); }
-    .exam-tracker-grid { grid-template-columns: repeat(auto-fill, minmax(30px, 1fr)); gap: 4px; }
     .exam-tracker { padding: 8px; margin-bottom: 10px; }
-    .exam-tracker-cell { font-size: 10px; }
     .account-avatar-btn { top: 8px; right: 8px; width: 30px; height: 30px; }
     .exam-timer-bar { padding: 8px 10px; gap: 8px; }
     .exam-timer-phase { font-size: 11px; }
@@ -3048,10 +3046,16 @@ body.furigana-off rt {
    that it lands in the empty margin beside .container's 1000px column
    (@media below) — otherwise it would float on top of the questions. */
 .exam-tracker {
+    /* Five ~34px cells plus gaps and padding. Capped at every width: the grid
+       below is five equal columns, so letting the panel run the full content
+       width stretched each square to ~185px — an answer sheet the size of the
+       paper. The cap is what keeps it a glanceable card instead. */
+    --exam-tracker-width: 212px;
     position: static;
-    width: auto;
+    width: 100%;
+    max-width: var(--exam-tracker-width);
     margin-bottom: 14px;
-    padding: 12px;
+    padding: 10px;
     border: 1px solid var(--border-dark);
     border-radius: var(--radius);
     background: var(--paper-2);
@@ -3062,7 +3066,7 @@ body.furigana-off rt {
         position: fixed;
         top: 90px;
         right: 20px;
-        width: 176px;
+        width: var(--exam-tracker-width);
         max-height: calc(100vh - 110px);
         overflow-y: auto;
         margin-bottom: 0;
@@ -3083,7 +3087,7 @@ body.furigana-off rt {
 .exam-tracker-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 6px;
+    gap: 5px;
 }
 
 .exam-tracker-cell {
@@ -3096,8 +3100,11 @@ body.furigana-off rt {
     background: var(--bg-card);
     color: var(--text-secondary);
     font-family: var(--font-sans);
-    font-size: 11px;
+    /* Fits the widest label a listening phase produces ("4.12"). */
+    font-size: 10px;
     font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
     cursor: pointer;
     padding: 0;
 }

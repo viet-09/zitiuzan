@@ -430,16 +430,46 @@ function sectionProgress(section) {
   return { total, done };
 }
 
+/** The 問題 number out of a part label like "問題12", else its position. */
+function partOrdinal(part, index) {
+  const digits = /(\d+)/.exec(String(part ?? ''));
+  return digits ? digits[1] : String(index + 1);
+}
+
 /** Answer-sheet-style navigator: every question in the visible sections as a
- * small cell, green once answered — click jumps straight to that question. */
+ * small cell, green once answered — click jumps straight to that question.
+ *
+ * 聴解 restarts its numbering inside every 問題, so five sections of "1 2 3 4 5"
+ * end up stacked on top of each other and no cell says which question it is.
+ * There the label is prefixed with its 問題 (1.1, 1.2 … 2.1). 言語知識・読解 runs
+ * 1..72 straight through, where a bare number is already unambiguous and much
+ * easier to scan, so the prefix is added only when it actually disambiguates.
+ */
+export function buildTrackerEntries(visibleSections) {
+  const entries = (visibleSections || []).flatMap((section) => (section.parts || []).flatMap((part, partIndex) =>
+    (part.questions || []).map((q) => ({
+      sectionId: section.id,
+      part: part.part,
+      number: q.number,
+      ordinal: partOrdinal(part.part, partIndex),
+    }))
+  ));
+  const repeats = new Set(entries.map((entry) => entry.number)).size !== entries.length;
+  return entries.map((entry) => ({
+    ...entry,
+    label: repeats ? `${entry.ordinal}.${entry.number}` : String(entry.number),
+  }));
+}
+
 function renderTracker(visibleSections) {
-  const cells = visibleSections.flatMap((section) => section.parts.flatMap((part) =>
-    part.questions.map((q) => {
-      const key = qKey(section.id, part.part, q.number);
-      const answered = questionAnswered(section.id, part.part, q.number);
-      return `<button type="button" class="exam-tracker-cell${answered ? ' is-answered' : ''}" data-action="exam-jump" data-key="${esc(key)}" title="Câu ${esc(q.number)}${answered ? ' — đã làm' : ' — chưa làm'}">${esc(q.number)}</button>`;
-    })
-  )).join('');
+  const cells = buildTrackerEntries(visibleSections).map(({ sectionId, part, number, label }) => {
+    const key = qKey(sectionId, part, number);
+    const answered = questionAnswered(sectionId, part, number);
+    // The title always spells the position out in full, prefix or not.
+    const title = `${part} · Câu ${number}${answered ? ' — đã làm' : ' — chưa làm'}`;
+    return `<button type="button" class="exam-tracker-cell${answered ? ' is-answered' : ''}" data-action="exam-jump" data-key="${esc(key)}" title="${esc(title)}">${esc(label)}</button>`;
+  }).join('');
+
   return `
     <aside class="exam-tracker" aria-label="Theo dõi câu đã làm">
       <h4 class="exam-tracker-title">Theo dõi</h4>

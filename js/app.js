@@ -2,7 +2,7 @@
 // Loads lesson data, wires the header/nav controls, and starts the hash router.
 
 import { setLessons, resetBookContent, mergeBookContent, setTutorContext, setQuestionClassification, setLessonImages, setVietnameseExplanations, getStreak } from './store.js';
-import { mountPet } from './pet.js?v=20';
+import { mountPet } from './pet.js?v=21';
 import { getCurrentRoute, initRouter, navigate } from './router.js';
 import { initFuriganaToggle } from './furigana.js';
 import { openSettings } from './gemini.js';
@@ -25,7 +25,7 @@ import { openSignInGate } from './auth.js';
 import { onAuthChange, ready as supabaseReady, currentUser } from './supabase.js';
 import { flushCompletionQueue, flushReviewQueue, maybeMigrateLocalData, maybeSeedProfileFromGoogle, pullFromCloud, pushProfile, syncReviewRemote } from './sync.js';
 import { REVIEW_RECORDED_EVENT } from './learning-state.js';
-import { mountAppViewportFit } from './viewport-fit.js?v=20';
+import { mountAppViewportFit } from './viewport-fit.js?v=21';
 
 function registerServiceWorker() {
     if (!('serviceWorker' in navigator) || location.protocol === 'file:') return;
