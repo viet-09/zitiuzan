@@ -13,6 +13,7 @@ import {
   setSettings,
 } from './store.js';
 import { getProfile, normalizeProfile, saveProfile } from './profile.js';
+import { isSafeImageDataUrl } from './profile-avatar.js';
 import { migrateLegacyStorage } from './account-storage.js';
 import { learningState } from './learning-state.js';
 import { mergeReviewCollections, reviewFromRow, reviewToRow } from './review-sync.js';
@@ -56,15 +57,15 @@ const LEGACY_KEYS = {
   n2_profile_v2: {
     table: 'user_profiles',
     map(value, userId) {
-      // Uploaded photos stay local-only (see js/profile.js) — only the
-      // display name and, for preset avatars, the preset id are migrated.
+      // The avatar migrates with the name — a photo picked before this account
+      // existed should not be lost just because it lived in localStorage.
       const profile = normalizeProfile(value);
-      const patch = { user_id: userId, display_name: profile.name };
-      if (profile.avatarType === 'preset') {
-        patch.avatar_type = 'preset';
-        patch.avatar_data = profile.avatarData;
-      }
-      return patch;
+      return {
+        user_id: userId,
+        display_name: profile.name,
+        avatar_type: profile.avatarType,
+        avatar_data: profile.avatarData,
+      };
     },
   },
   n2_settings_v2: {
@@ -265,21 +266,26 @@ export async function flushCompletionQueue(userId) {
   writeCompletionQueue([...others, ...failed]);
 }
 
+/** Ceiling for a stored avatar, matched by a CHECK constraint on the row. */
+export const AVATAR_DATA_MAX = 200_000;
+
 /**
  * Decide what the local profile should look like after a cloud pull.
  *
- * An uploaded photo never leaves the device (see pushProfile), so the server
- * row can only ever carry a preset id for it. Copying that row straight over a
- * local upload is what snapped a freshly chosen picture back to the pet sprite
- * — and because the pull runs on every sign-in and token refresh, the photo
- * never survived. This device's own image therefore wins: the only way out of
- * upload mode is picking a preset here.
+ * The server row is authoritative now that photos sync, so a picture chosen on
+ * another device arrives here. The one exception is the window between
+ * saveProfile writing locally and pushProfile landing: the row still says
+ * 'upload' but carries no bytes yet, and copying that over would snap the
+ * fresh photo back to the pet sprite. The pull runs on every sign-in and token
+ * refresh, so that window is hit often enough to matter.
  *
  * @param {{display_name?: string, avatar_type?: string, avatar_data?: string}} row
  * @param {{avatarType?: string, avatarData?: string}} local
  */
 export function mergeProfileFromCloud(row, local) {
-  const keepLocalPhoto = local?.avatarType === 'upload';
+  const remotePhoto = row?.avatar_type === 'upload' && isSafeImageDataUrl(row?.avatar_data);
+  const localPhoto = local?.avatarType === 'upload' && isSafeImageDataUrl(local?.avatarData);
+  const keepLocalPhoto = row?.avatar_type === 'upload' && !remotePhoto && localPhoto;
   return {
     name: row?.display_name ?? '',
     avatarType: keepLocalPhoto ? 'upload' : row?.avatar_type,
@@ -394,11 +400,11 @@ export async function pushTouchStreak(userId) {
  * `user_id` is always derived from the authed session — never trusted
  * from the caller. The trigger + RLS WITH CHECK still guards writes.
  *
- * Uploaded photos are local-only by design (see js/profile.js's own promise
- * to the user that a chosen photo never leaves the device) — avatar_data is
- * only forwarded for the 'preset' type, which is just an emoji id, never the
- * image bytes. The leaderboard view nulls avatar_data for 'upload' rows too
- * as defense-in-depth.
+ * The avatar travels with the account: a chosen photo is stored on the row so
+ * the same picture shows on every device the learner signs in from, and on the
+ * leaderboard for everyone else. js/profile.js has already cropped it to 256px
+ * and re-encoded it, so what goes up is tens of KB — the length guard here and
+ * the matching CHECK constraint keep it that way.
  */
 export async function pushProfile(userId, { displayName, avatarType, avatarData, examTargetDate }) {
   const sb = await getClient();
@@ -408,6 +414,9 @@ export async function pushProfile(userId, { displayName, avatarType, avatarData,
   if (typeof displayName === 'string') patch.display_name = displayName.slice(0, 40);
   if (avatarType === 'preset' || avatarType === 'upload') patch.avatar_type = avatarType;
   if (avatarType === 'preset' && typeof avatarData === 'string' && avatarData.length <= 64) {
+    patch.avatar_data = avatarData;
+  }
+  if (avatarType === 'upload' && isSafeImageDataUrl(avatarData) && avatarData.length <= AVATAR_DATA_MAX) {
     patch.avatar_data = avatarData;
   }
   if (examTargetDate === '' || (typeof examTargetDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(examTargetDate))) {

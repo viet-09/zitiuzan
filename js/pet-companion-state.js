@@ -43,11 +43,48 @@ export const PET_STATE_TRANSITIONS = Object.freeze({
 // States the pet must not be yanked out of instantly; it gets up first.
 export const PET_RESTING_STATES = Object.freeze(['settle', 'sleep', 'doze']);
 
+/**
+ * What the companion says when it pops a bubble. Four lines meant one of them
+ * came round every couple of minutes, so it stopped reading as a companion and
+ * started reading as a banner. These are grouped only for editing — at runtime
+ * they are one flat pool.
+ */
 const GENERIC_ADVICE = Object.freeze([
+  // How to study
   'Ôn lại một lỗi sai hôm nay sẽ nhẹ hơn học lại cả chương ngày mai.',
-  'Đọc thành tiếng một câu Nhật giúp trí nhớ bám lâu hơn.',
   'Ba phút ôn đúng hạn vẫn có giá trị hơn một buổi học quá sức.',
   'Khi phân vân, hãy giải thích đáp án bằng lời của chính bạn.',
+  'Học lúc hơi buồn ngủ vẫn hơn là không học — nhưng đừng học lúc đang cáu.',
+  'Làm sai rồi mới xem đáp án nhớ lâu hơn xem đáp án rồi mới làm.',
+  'Đóng sách lại và tự nhớ ra được mới là thuộc.',
+  'Một bài ngắn làm xong hơn một chương dài bỏ dở.',
+  'Chép lại câu sai nguyên văn, mai đọc lại sẽ thấy ngay mình nhầm ở đâu.',
+
+  // Japanese, specifically
+  'Đọc thành tiếng một câu Nhật giúp trí nhớ bám lâu hơn.',
+  'Học kanji theo từ, đừng học theo chữ lẻ — 生 một mình chẳng nói lên điều gì.',
+  'Trợ từ sai thì cả câu lệch nghĩa. は và が đáng để bạn chậm lại vài giây.',
+  'Nghe không kịp thường không phải vì nhanh, mà vì tai chưa quen chỗ nối âm.',
+  'Gặp từ lạ, đoán nghĩa từ kanji trước rồi hãy tra — đoán trúng sẽ nhớ rất lâu.',
+  'Tự nhủ trong đầu bằng tiếng Nhật lúc đi đường cũng là luyện nói.',
+  'Đọc lướt lấy ý chính trước, đọc kỹ sau — đề đọc N2 tính cả thời gian.',
+  'Nghe một đoạn hai lần: lần đầu hiểu ý, lần sau bắt từng từ.',
+  'Chép một câu mẫu vào sổ còn hơn chép mười quy tắc ngữ pháp.',
+  'Kính ngữ nghe rối vì bạn học riêng lẻ — nghe cả hội thoại sẽ tự thấy quy luật.',
+
+  // Pacing and encouragement
+  'Hôm nay học ít cũng được, miễn là ngày mai bạn vẫn quay lại.',
+  'Streak gãy một hôm không xoá được những gì bạn đã nhớ.',
+  'Tiến bộ ở N2 thường âm thầm: một hôm bỗng đọc hiểu mà không kịp nhận ra.',
+  'Nghỉ mắt hai phút rồi học tiếp vẫn nhanh hơn cố xong trong mệt mỏi.',
+  'Không ai nhớ hết 2000 kanji trong một tuần. Cứ mỗi ngày vài chữ thôi.',
+  'Bạn đang ở đúng chỗ khó nhất — qua được N2 là quen tay rồi.',
+
+  // The companion being a companion
+  'Tôi ngồi đây canh chừng, bạn cứ tập trung nhé.',
+  'Cuộn xuống làm nốt phần luyện tập đi, tôi đợi.',
+  'Bạn học lâu rồi đấy — uống ngụm nước đã.',
+  'Nếu thấy nản, mở lại bài bạn từng thấy khó tháng trước mà xem.',
 ]);
 
 function unitInterval(value) {
@@ -123,11 +160,30 @@ export function getPetStatePath(from = 'idle', to = 'idle') {
   return ['idle'];
 }
 
-export function getContextualPetAdvice(coach = {}, randomValue = Math.random) {
+/**
+ * Everything the companion could say right now: whatever the current quest is
+ * about, plus the standing pool. The quest reason used to short-circuit this
+ * entirely, so as long as a learner had one due weakness — which is most of
+ * the time — the pet repeated that single sentence and nothing else.
+ */
+export function getPetAdvicePool(coach = {}) {
   const reason = String(coach?.quest?.reason || '').trim();
-  if (reason) return reason;
+  return reason ? [reason, ...GENERIC_ADVICE] : [...GENERIC_ADVICE];
+}
+
+/**
+ * Pick a line, avoiding the one just shown so two bubbles in a row never say
+ * the same thing.
+ * @param {object} coach current coach state
+ * @param {number|Function} randomValue a 0..1 value, or a generator for one
+ * @param {string} previous the line shown last, excluded when there is a choice
+ */
+export function getContextualPetAdvice(coach = {}, randomValue = Math.random, previous = '') {
+  const pool = getPetAdvicePool(coach);
+  const choices = pool.filter((line) => line !== previous);
+  const options = choices.length ? choices : pool;
   const value = typeof randomValue === 'function' ? randomValue() : randomValue;
-  return GENERIC_ADVICE[Math.floor(unitInterval(value) * GENERIC_ADVICE.length)];
+  return options[Math.floor(unitInterval(value) * options.length)];
 }
 
 const EDGE_INSET = 8;

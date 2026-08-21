@@ -31,11 +31,10 @@ function formatToday(ms) {
 // The same renderer as the account button and the profile page, so a learner's
 // row on the board shows exactly the pet they picked.
 //
-// Your own row reads the local profile instead of the server row. An uploaded
-// photo never leaves the device, so the board's projection nulls avatar_data
-// for it and every upload would otherwise render as the fallback pet — your
-// own face included. Reading locally also means the row matches the account
-// button the moment you change it, without waiting for the push to land.
+// Your own row reads the local profile instead of the server row, so it
+// matches the account button the moment you change it rather than after the
+// push lands. Everyone else's avatar comes straight off the board, which now
+// carries real photos as well as preset pets.
 function avatarCell(row, selfId) {
   const isSelf = selfId && row?.user_id === selfId;
   const source = isSelf

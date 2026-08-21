@@ -8,6 +8,7 @@ import {
   setTutorContext,
   clearTutorHistory,
   isDone,
+  getStreak,
 } from './store.js';
 import { navigate, getCurrentRoute, isRouteActive } from './router.js';
 import { buildFuriganaMarkup, renderFurigana, setFurigana, getFurigana } from './furigana.js';
@@ -17,11 +18,12 @@ import { getQuestionClassification, getLessonImages, getVietnameseExplanation } 
 import { questionTypeInfo } from './question-types.js';
 import { hydrateLessonAudio } from './lesson-audio.js';
 import { startLessonTimer } from './study-time.js';
-import { toggleLessonCompletion } from './completion.js';
+import { completeLessonOnce, toggleLessonCompletion } from './completion.js';
 import { learningState } from './learning-state.js';
 import { buildBookViewerModel, renderBookViewerStrip } from './book-viewer.js';
 import { activateModalDialog } from './modal-dialog.js';
-import { openKanjiWritingPad } from './kanji-writing.js?v=22';
+import { openKanjiWritingPad } from './kanji-writing.js?v=23';
+import { announceLessonCompleted } from './pet.js?v=23';
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (char) => ({
@@ -468,7 +470,40 @@ function handleQuiz(button, lessonId, categoryId) {
         <button type="button" class="study-btn" data-action="ask-tutor">Hỏi gia sư về lỗi này</button>
       </div>`);
   }
-  updateLessonProgress(container.closest('.lesson-page'));
+  const page = container.closest('.lesson-page');
+  updateLessonProgress(page);
+  void maybeAutoComplete(page, lessonId, categoryId);
+}
+
+/**
+ * Finishing every practice question is the learner saying they are done with
+ * the lesson, so record it instead of making them hunt for the button.
+ *
+ * The toolbar is patched in place rather than repainted: `is-answered` lives
+ * only in the DOM, so a re-render here would blank the quiz they just
+ * finished.
+ */
+async function maybeAutoComplete(scope, lessonId, categoryId) {
+  if (!scope || !lessonId) return;
+  const questions = scope.querySelectorAll('.quiz-question');
+  const answered = scope.querySelectorAll('.quiz-question.is-answered');
+  if (!questions.length || answered.length < questions.length) return;
+
+  const { changed } = await completeLessonOnce({ lessonId, categoryId });
+  if (!changed) return;
+  // The companion celebrates a completion from the dashboard too; earning it
+  // by finishing the practice deserves the same reaction.
+  announceLessonCompleted({ id: lessonId, done: true, streak: Number((getStreak() || {}).streak) || 0 });
+  if (!scope.isConnected) return;
+
+  const button = scope.querySelector('[data-action="toggle-complete"]');
+  if (button) {
+    button.classList.add('is-done');
+    button.setAttribute('aria-pressed', 'true');
+    button.textContent = 'Bỏ đánh dấu';
+  }
+  const status = scope.querySelector('[data-lesson-progress-text]');
+  if (status) status.textContent = `${questions.length}/${questions.length} câu · đã hoàn thành`;
 }
 
 function updateLessonProgress(scope) {

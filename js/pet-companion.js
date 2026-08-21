@@ -10,8 +10,8 @@ import {
   getContextualPetAdvice,
   getPetBounds,
   getPetStatePath,
-} from './pet-companion-state.js?v=22';
-import { getClipDuration, isPetClipLooping, mountPetMotion } from './pet-motion.js?v=22';
+} from './pet-companion-state.js?v=23';
+import { getClipDuration, isPetClipLooping, mountPetMotion } from './pet-motion.js?v=23';
 
 const POSITION_STORAGE_KEY = 'n2_pet_position_v1';
 const BOTTOM_INSET = 74;
@@ -64,6 +64,7 @@ export function mountPetCompanion(host, options = {}) {
   let drag = null;
   let facing = 'right';
   let lastInteraction = now();
+  let lastAdvice = '';
 
   function petSize() {
     const rect = owner.getBoundingClientRect();
@@ -141,7 +142,10 @@ export function mountPetCompanion(host, options = {}) {
     // Two scheduler turns on the same action keep one flowing loop; only a real
     // interaction replays a clip the pet is already in.
     spriteMotion?.play(state, { restart: restart || state !== previous });
-    if (announce) options.onAdvice?.(getContextualPetAdvice(coach, random()));
+    if (announce) {
+      lastAdvice = getContextualPetAdvice(coach, random(), lastAdvice);
+      options.onAdvice?.(lastAdvice);
+    }
 
     if (reducedMotion) {
       applyPosition(0);

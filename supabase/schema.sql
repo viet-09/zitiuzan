@@ -12,7 +12,11 @@ create table if not exists public.user_profiles (
   user_id              uuid primary key references auth.users(id) on delete cascade,
   display_name         text not null default '',
   avatar_type          text not null default 'preset' check (avatar_type in ('preset','upload')),
-  avatar_data          text not null default 'neko',
+  -- Either a preset pet id, or the learner's own photo as a data URL. The
+  -- photo is synced so every learner sees the same avatar on any device and
+  -- on the leaderboard; js/profile.js crops it to 256px and re-encodes to
+  -- WebP first, which lands around 10-30 KB.
+  avatar_data          text not null default 'fox',
   streak               integer not null default 0 check (streak >= 0),
   last_study_date      date,
   tutor_memory         text not null default '',
@@ -23,6 +27,12 @@ create table if not exists public.user_profiles (
   created_at           timestamptz not null default now(),
   updated_at           timestamptz not null default now()
 );
+
+-- A 256px WebP avatar is tens of KB; this only stops a hand-rolled client
+-- from parking megabytes in a row every account reads.
+alter table public.user_profiles drop constraint if exists user_profiles_avatar_data_len;
+alter table public.user_profiles add constraint user_profiles_avatar_data_len
+  check (char_length(avatar_data) <= 200000);
 
 -- Retired columns. The app teaches a single JLPT level (N2), so a per-learner
 -- level is noise; ai_level/ai_level_updated_at were only ever written by an
@@ -349,7 +359,10 @@ language sql stable security definer set search_path = public as $$
       up.user_id,
       up.display_name,
       up.avatar_type,
-      case when up.avatar_type = 'upload' then null else up.avatar_data end as avatar_data,
+      -- Avatars are shared on purpose: the board shows every learner the same
+      -- picture their account shows. Photos used to be nulled out here because
+      -- they never left the device that chose them.
+      up.avatar_data,
       up.streak,
       coalesce(lp.completed_count, 0) as completed_count,
       least(100, round(
@@ -499,8 +512,9 @@ alter table public.tutor_messages       enable row level security;
 alter table public.voice_messages       enable row level security;
 alter table public.kanji_gloss_cache    enable row level security;
 
--- user_profiles: only the row owner can read the raw row (including
--- avatar_data). Leaderboard view provides the public projection for everyone.
+-- user_profiles: only the row owner can read the raw row. get_leaderboard is
+-- the public projection, and it is what shares display_name and avatar_data
+-- with other learners — nothing else in the row is exposed.
 drop policy if exists "profile read self or public" on public.user_profiles;
 drop policy if exists "profile read self" on public.user_profiles;
 create policy "profile read self"

@@ -1,6 +1,8 @@
 // js/profile.js
-// Local-only user profile (display name + preset/uploaded avatar) and its UI.
-// Uploaded images are validated in the browser and are never sent over the network.
+// User profile (display name + preset/uploaded avatar) and its UI.
+// Uploaded images are validated, cropped and re-encoded in the browser before
+// they are stored, then synced with the account so the same avatar follows the
+// learner across devices and shows on the leaderboard (see js/sync.js).
 
 import { activateModalDialog } from './modal-dialog.js';
 import {
@@ -162,7 +164,7 @@ function canvasToBlob(canvas, type, quality) {
 
 /**
  * Decode, center-crop and compress an avatar File locally. Input size is not
- * restricted: only the compact 256px result is persisted in localStorage.
+ * restricted: only the compact 256px result is persisted and synced.
  * SVG/GIF are intentionally rejected: static raster formats avoid script payloads
  * and keep localStorage usage predictable.
  */
@@ -206,7 +208,7 @@ export async function validateAvatarFile(file) {
     if (!output || output.type !== 'image/webp') output = await canvasToBlob(canvas, 'image/jpeg', 0.86);
     if (!output) throw new Error('Không thể nén ảnh trên trình duyệt này.');
     const dataUrl = await readFileAsDataUrl(output);
-    if (!isSafeImageDataUrl(dataUrl)) throw new Error('Ảnh sau khi nén vẫn quá lớn để lưu trên thiết bị.');
+    if (!isSafeImageDataUrl(dataUrl)) throw new Error('Ảnh sau khi nén vẫn quá lớn để lưu.');
 
     return {
       dataUrl,
@@ -247,7 +249,7 @@ function makePresetChoices(profile, groupName) {
 
 function avatarPreviewMarkup(profile) {
   const label = profile.avatarType === 'upload'
-    ? 'Ảnh đã chọn — chỉ lưu trên thiết bị này'
+    ? 'Ảnh đã chọn — sẽ đồng bộ với tài khoản của bạn'
     : presetById(profile.avatarData).label;
   return `
     <div class="profile-preview__avatar">${renderAvatar(profile)}</div>
@@ -286,7 +288,7 @@ export function openProfileDialog(options = {}) {
       </header>
       <form class="profile-form" novalidate>
         <div class="modal-body">
-          <p id="${helpId}" class="profile-modal__help">Tên và ảnh chỉ được lưu trong trình duyệt này. Ảnh không bao giờ được tải lên mạng.</p>
+          <p id="${helpId}" class="profile-modal__help">Tên và ảnh đại diện được đồng bộ với tài khoản — bạn đăng nhập ở máy nào cũng thấy, và học viên khác sẽ thấy trên bảng xếp hạng.</p>
           <label class="profile-field" for="${nameId}">
             <span class="profile-field__label">Tên hiển thị</span>
             <input id="${nameId}" name="name" type="text" maxlength="${PROFILE_LIMITS.nameLength}" autocomplete="nickname" value="${escapeHtml(initial.name)}" placeholder="Ví dụ: Minh">
@@ -296,7 +298,7 @@ export function openProfileDialog(options = {}) {
             <div class="profile-presets">${makePresetChoices(initial, groupName)}</div>
             <label class="profile-upload" for="${uploadId}">
               <span class="profile-upload__label">Hoặc chọn ảnh từ thiết bị</span>
-              <span class="profile-upload__hint">JPG, PNG hoặc WebP · ảnh lớn sẽ tự nén và cắt vuông trên thiết bị</span>
+              <span class="profile-upload__hint">JPG, PNG hoặc WebP · ảnh lớn sẽ tự nén và cắt vuông trước khi tải lên</span>
               <input id="${uploadId}" name="avatarFile" type="file" accept="image/jpeg,image/png,image/webp">
             </label>
           </fieldset>

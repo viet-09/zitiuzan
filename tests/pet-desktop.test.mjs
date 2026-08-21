@@ -10,6 +10,7 @@ import {
   choosePetWaypoint,
   clampPetPosition,
   getContextualPetAdvice,
+  getPetAdvicePool,
   getPetBounds,
   getPetEnergy,
   getPetStatePath,
@@ -70,11 +71,27 @@ test('a lively pet picks activities by weight and never repeats one back to back
   assert.equal(chooseNextPetState('look', { idleMs: 0, random: () => 0.4 }), 'idle');
 });
 
-test('advice prefers the learner current weakness before generic encouragement', () => {
-  assert.equal(getContextualPetAdvice({
-    quest: { reason: '2 lỗi ngữ pháp đang đến hạn.' },
-  }, 0.5), '2 lỗi ngữ pháp đang đến hạn.');
-  assert.match(getContextualPetAdvice({}, 0), /lỗi sai|ôn/i);
+test('advice draws on a wide pool led by the learner current weakness', () => {
+  const reason = '2 lỗi ngữ pháp đang đến hạn.';
+  const pool = getPetAdvicePool({ quest: { reason } });
+
+  // The quest still leads, but it is one line among many rather than the only
+  // thing the companion is able to say.
+  assert.equal(pool[0], reason);
+  assert.ok(pool.length >= 20, `pool is only ${pool.length} lines`);
+  assert.equal(new Set(pool).size, pool.length, 'no duplicate lines');
+  assert.equal(getContextualPetAdvice({ quest: { reason } }, 0), reason);
+  assert.match(getContextualPetAdvice({}, 0), /\S/);
+});
+
+test('two bubbles in a row never repeat the same line', () => {
+  const reason = '2 lỗi ngữ pháp đang đến hạn.';
+  // 0 always lands on the first entry, so without the guard this repeats.
+  assert.equal(getContextualPetAdvice({ quest: { reason } }, 0, reason) === reason, false);
+
+  // With nothing else to choose from, saying it again beats saying nothing.
+  const single = getContextualPetAdvice({}, 0);
+  assert.equal(typeof getContextualPetAdvice({}, 0, single), 'string');
 });
 
 test('the travel area covers the screen and keeps the whole pet visible', () => {

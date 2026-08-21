@@ -2,7 +2,7 @@
 // Loads lesson data, wires the header/nav controls, and starts the hash router.
 
 import { setLessons, resetBookContent, mergeBookContent, setTutorContext, setQuestionClassification, setLessonImages, setVietnameseExplanations, getStreak } from './store.js';
-import { mountPet } from './pet.js?v=22';
+import { mountPet } from './pet.js?v=23';
 import { getCurrentRoute, initRouter, navigate } from './router.js';
 import { initFuriganaToggle } from './furigana.js';
 import { openSettings } from './gemini.js';
@@ -25,7 +25,7 @@ import { openSignInGate } from './auth.js';
 import { onAuthChange, ready as supabaseReady, currentUser } from './supabase.js';
 import { flushCompletionQueue, flushReviewQueue, maybeMigrateLocalData, maybeSeedProfileFromGoogle, pullFromCloud, pushProfile, syncReviewRemote } from './sync.js';
 import { REVIEW_RECORDED_EVENT } from './learning-state.js';
-import { mountAppViewportFit } from './viewport-fit.js?v=22';
+import { mountAppViewportFit } from './viewport-fit.js?v=23';
 
 function registerServiceWorker() {
     if (!('serviceWorker' in navigator) || location.protocol === 'file:') return;
@@ -240,8 +240,8 @@ async function bootstrap() {
         });
 
         // Keep the leaderboard's display name/avatar current whenever the
-        // profile dialog is saved while signed in. Uploaded photos are never
-        // forwarded — see pushProfile in js/sync.js.
+        // profile dialog is saved while signed in — photos included, so the
+        // avatar follows the account (see pushProfile in js/sync.js).
         window.addEventListener(PROFILE_UPDATED_EVENT, async (event) => {
             const profile = event.detail?.profile;
             if (!profile) return;
