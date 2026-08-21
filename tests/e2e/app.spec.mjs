@@ -166,19 +166,24 @@ test('pixel desktop companion roams, reacts, drags and keeps its learning quest'
   await expect(petArt).toHaveCount(1);
   const rasterSprite = petArt.locator('.pixel-pet__sprite');
   await expect(rasterSprite).toBeVisible();
-  await expect(rasterSprite).toHaveCSS('background-image', /fox-motion-sprites\.png/);
+  await expect(rasterSprite).toHaveCSS('background-image', /fox-motion-atlas\.png/);
   await expect(petArt.locator('.pixel-pet__svg')).toHaveCount(0);
   const petShadow = await petArt.locator('xpath=..').evaluate((node) => getComputedStyle(node, '::after').display);
   expect(petShadow).toBe('none');
   await expect(petCompanion).toHaveAttribute('data-renderer', 'pixel-sprite');
   await expect(petCompanion).toHaveAttribute('data-companion-ready', 'true');
   await expect(petCompanion).toHaveAttribute('data-pet-state', 'idle');
+  // Sample across a whole idle loop: the pose changes, and the rig keeps the
+  // sprite breathing between pose changes.
   const idleFramePositions = new Set();
-  for (let sample = 0; sample < 4; sample += 1) {
+  const idleRigOffsets = new Set();
+  for (let sample = 0; sample < 9; sample += 1) {
     idleFramePositions.add(await rasterSprite.evaluate((node) => getComputedStyle(node).backgroundPosition));
-    await page.waitForTimeout(480);
+    idleRigOffsets.add(await petCompanion.evaluate((node) => node.style.getPropertyValue('--pet-stretch')));
+    await page.waitForTimeout(900);
   }
   expect(idleFramePositions.size).toBeGreaterThan(1);
+  expect(idleRigOffsets.size).toBeGreaterThan(1);
   await expect(page.locator('#pet-widget-mount')).toHaveCSS('pointer-events', 'none');
 
   const compactPetSize = await petCompanion.boundingBox();
@@ -218,14 +223,14 @@ test('pixel desktop companion roams, reacts, drags and keeps its learning quest'
     y: directInteractionSize.height * 0.7,
   } });
   await expect(petWidget).toHaveAttribute('data-reaction', 'tease');
-  await expect(petCompanion).toHaveAttribute('data-pet-state', 'walk');
+  await expect(petCompanion).toHaveAttribute('data-pet-state', 'play');
 
   await directInteraction.click({ position: {
     x: directInteractionSize.width * 0.1,
     y: directInteractionSize.height * 0.7,
   } });
   await expect(petWidget).toHaveAttribute('data-reaction', 'highfive');
-  await expect(petCompanion).toHaveAttribute('data-pet-state', 'play');
+  await expect(petCompanion).toHaveAttribute('data-pet-state', 'cheer');
 
   const transformBeforeDrag = await page.locator('#pet-widget-mount .streak-pet-mount').evaluate((node) => getComputedStyle(node).transform);
   const dragTarget = directInteraction;
@@ -242,7 +247,7 @@ test('pixel desktop companion roams, reacts, drags and keeps its learning quest'
     detail: { id: 'motion-check', done: true, streak: 0 },
   })));
   await expect(petWidget).toHaveAttribute('data-reaction', 'complete');
-  await expect(petCompanion).toHaveAttribute('data-pet-state', 'play');
+  await expect(petCompanion).toHaveAttribute('data-pet-state', 'cheer');
 
   await page.getByRole('button', { name: 'Mở nhiệm vụ học của Cáo' }).click();
   const panel = page.getByRole('region', { name: 'Nhiệm vụ của bạn đồng hành' });

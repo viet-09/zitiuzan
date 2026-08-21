@@ -2387,14 +2387,14 @@ body.furigana-off rt {
     width: 100%;
     height: 100%;
     background-repeat: no-repeat;
-    background-position: 75% 0;
-    background-size: 500% 400%;
+    background-position: 0 0;
+    background-size: 400% 400%;
     image-rendering: pixelated;
 }
 .profile-avatar--fox .profile-avatar__pet,
-.profile-preset--fox { background-image: url('../assets/pets/fox-motion-sprites.png'); }
+.profile-preset--fox { background-image: url('../assets/pets/fox-motion-atlas.png'); }
 .profile-avatar--rabbit .profile-avatar__pet,
-.profile-preset--rabbit { background-image: url('../assets/pets/rabbit-motion-sprites.png'); }
+.profile-preset--rabbit { background-image: url('../assets/pets/rabbit-motion-atlas.png'); }
 .profile-button__copy { display: grid; text-align: left; line-height: 1.15; }
 .profile-button__label,
 .profile-modal__eyebrow {
@@ -3789,7 +3789,7 @@ body.modal-open { overflow: hidden; }
     height: 110.4px;
     pointer-events: none;
     transform: translate3d(14px, calc(100dvh - var(--bottom-nav-height) - 120px), 0);
-    transition: transform var(--pet-travel-duration, 0ms) linear;
+    transition: transform var(--pet-travel-duration, 0ms) cubic-bezier(.42, 0, .3, 1);
     will-change: transform;
 }
 .streak-pet-mount.is-dragging { transition-duration: 0ms !important; }
@@ -3832,19 +3832,31 @@ body.modal-open { overflow: hidden; }
     left: 50%;
     bottom: 0;
     display: block;
-    width: 110px;
-    height: 110px;
-    background-position: var(--pet-frame-x, 75%) var(--pet-frame-y, 0%);
+    width: 116px;
+    height: 112px;
+    background-position: var(--pet-frame-x, 0%) var(--pet-frame-y, 0%);
     background-repeat: no-repeat;
-    background-size: 500% 400%;
+    /* One 4x4 atlas cell per action frame — see scripts/build-pet-atlas.mjs. */
+    background-size: 400% 400%;
     image-rendering: pixelated;
-    transform: translate3d(-50%, 0, 0) scaleX(var(--pet-facing));
+    /* The rig vars carry the in-between motion the sprite sheet cannot: lift,
+       rock and breath, all written by js/pet-motion.js on the host element. */
+    transform:
+        translate3d(-50%, var(--pet-bob, 0px), 0)
+        rotate(var(--pet-tilt, 0deg))
+        scaleX(var(--pet-facing))
+        scale(var(--pet-squash, 1), var(--pet-stretch, 1));
     transform-origin: center bottom;
     will-change: transform;
 }
-.pixel-pet--fox .pixel-pet__sprite { background-image: url('../assets/pets/fox-motion-sprites.png'); }
-.pixel-pet--rabbit .pixel-pet__sprite { background-image: url('../assets/pets/rabbit-motion-sprites.png'); }
-.pixel-pet--fox .pixel-pet__sprite { height: 92px; }
+.pixel-pet--fox .pixel-pet__sprite {
+    width: 121px;
+    background-image: url('../assets/pets/fox-motion-atlas.png');
+}
+.pixel-pet--rabbit .pixel-pet__sprite {
+    width: 111px;
+    background-image: url('../assets/pets/rabbit-motion-atlas.png');
+}
 .pixel-pet-host[data-facing='left'] .pixel-pet__sprite { --pet-facing: -1; }
 
 .pet-figure::after {
@@ -3932,28 +3944,6 @@ body.modal-open { overflow: hidden; }
 @keyframes pixel-pet-shadow {
     0%, 100% { opacity: .72; transform: scaleX(1); }
     50% { opacity: .52; transform: scaleX(.88); }
-}
-
-@keyframes pixel-sprite-idle {
-    0%, 100% { transform: translate3d(-50%, 0, 0) scaleX(var(--pet-facing)); }
-    50% { transform: translate3d(-50%, -2px, 0) scaleX(var(--pet-facing)); }
-}
-@keyframes pixel-sprite-look {
-    0%, 34%, 100% { transform: translate3d(-50%, 0, 0) scaleX(var(--pet-facing)); }
-    35%, 66% { transform: translate3d(calc(-50% + 2px), 0, 0) scaleX(var(--pet-facing)); }
-    67%, 84% { transform: translate3d(calc(-50% - 2px), 0, 0) scaleX(var(--pet-facing)); }
-}
-@keyframes pixel-sprite-walk {
-    0%, 100% { transform: translate3d(-50%, 0, 0) scaleX(var(--pet-facing)); }
-    50% { transform: translate3d(-50%, -3px, 0) scaleX(var(--pet-facing)); }
-}
-@keyframes pixel-sprite-sleep {
-    0%, 100% { transform: translate3d(-50%, 1px, 0) scaleX(var(--pet-facing)); }
-    50% { transform: translate3d(-50%, 0, 0) scaleX(var(--pet-facing)); }
-}
-@keyframes pixel-sprite-advice {
-    0%, 100% { transform: translate3d(-50%, 0, 0) scaleX(var(--pet-facing)); }
-    50% { transform: translate3d(-50%, -2px, 0) scaleX(var(--pet-facing)); }
 }
 
 @media (max-width: 600px) {

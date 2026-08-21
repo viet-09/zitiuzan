@@ -26,20 +26,31 @@ test('pet motion assets are versioned consistently to bypass a stale service-wor
   const worker = read('sw.js');
   const app = read('js/app.js');
 
-  assert.match(index, /href="css\/styles\.css\?v=16"/);
-  assert.match(index, /src="js\/app\.js\?v=16"/);
-  assert.match(app, /from '\.\/pet\.js\?v=16'/);
-  assert.match(worker, /n2-journal-v16/);
-  assert.match(worker, /'\.\/css\/styles\.css\?v=16'/);
-  assert.match(worker, /'\.\/js\/app\.js\?v=16'/);
-  assert.match(worker, /'\.\/js\/pet\.js\?v=16'/);
-  assert.match(worker, /'\.\/js\/pet-companion\.js\?v=16'/);
-  assert.match(worker, /'\.\/js\/pet-companion-state\.js\?v=16'/);
-  assert.match(worker, /'\.\/js\/pet-motion\.js\?v=16'/);
-  assert.match(worker, /'\.\/js\/pet-art\.js\?v=16'/);
-  assert.match(worker, /'\.\/js\/kanji-writing\.js\?v=16'/);
-  assert.match(worker, /'\.\/assets\/pets\/fox-motion-sprites\.png'/);
-  assert.match(worker, /'\.\/assets\/pets\/rabbit-motion-sprites\.png'/);
+  // The cache name is the single source of truth; every shell entry has to
+  // carry the same version or a released atlas can be served from a stale one.
+  const version = worker.match(/const CACHE_NAME = 'n2-journal-v(\d+)'/)?.[1];
+  assert.ok(version, 'sw.js must declare a numbered cache');
+
+  const stamped = (value) => `${value.replaceAll('.', '\\.')}\\?v=${version}`;
+  assert.match(index, new RegExp(`href="${stamped('css/styles.css')}"`));
+  assert.match(index, new RegExp(`src="${stamped('js/app.js')}"`));
+  assert.match(app, new RegExp(`from '\\./${stamped('pet.js')}'`));
+  for (const module of [
+    'css/styles.css', 'js/app.js', 'js/pet.js', 'js/pet-companion.js',
+    'js/pet-companion-state.js', 'js/pet-motion.js', 'js/pet-art.js', 'js/kanji-writing.js',
+  ]) {
+    assert.match(worker, new RegExp(`'\\./${stamped(module)}'`),
+      `${module} is missing from the v${version} app shell`);
+  }
+  for (const source of worker.matchAll(/'\.\/(?:js|css)\/[\w.-]+\?v=(\d+)'/g)) {
+    assert.equal(source[1], version, 'every shell module shares one cache version');
+  }
+
+  // The runtime reads the generated atlas, so that is what has to be cached.
+  assert.match(worker, /'\.\/assets\/pets\/fox-motion-atlas\.png'/);
+  assert.match(worker, /'\.\/assets\/pets\/rabbit-motion-atlas\.png'/);
+  assert.match(read('css/styles.css'), /pets\/fox-motion-atlas\.png/);
+  assert.doesNotMatch(read('css/styles.css'), /pets\/fox-motion-sprites\.png/);
   assert.doesNotMatch(worker, /mascot\.glb/);
 });
 

@@ -3,22 +3,32 @@
 
 import {
   PET_COMPANION_STATES,
+  PET_RESTING_STATES,
+  choosePetWaypoint,
   chooseNextPetState,
   clampPetPosition,
   getContextualPetAdvice,
-} from './pet-companion-state.js?v=16';
-import { mountPetMotion } from './pet-motion.js?v=16';
+  getPetBounds,
+  getPetStatePath,
+} from './pet-companion-state.js?v=17';
+import { getClipDuration, isPetClipLooping, mountPetMotion } from './pet-motion.js?v=17';
 
 const POSITION_STORAGE_KEY = 'n2_pet_position_v1';
-const STATE_DURATION = Object.freeze({
-  wake: 1700,
-  idle: 6200,
-  look: 3200,
-  walk: 5200,
-  play: 4800,
-  sleep: 5400,
-  'deep-sleep': 6200,
+const BOTTOM_INSET = 74;
+const PANEL_WIDTH = 300;
+const TOP_INSET = 56;
+
+// How long a looping action runs before the scheduler picks the next one.
+// One-shot clips (look, play, cheer, settle, wake) end themselves.
+const LOOP_DURATION = Object.freeze({
+  idle: 5200,
+  drowsy: 7400,
+  sleep: 9000,
+  doze: 12_000,
 });
+
+// Poses passed through on the way to a state are held only briefly.
+const LINK_DURATION = 260;
 
 function storedPosition(storage) {
   try {
@@ -39,45 +49,61 @@ export function mountPetCompanion(host, options = {}) {
   if (!owner) return null;
 
   const random = typeof options.random === 'function' ? options.random : Math.random;
+  const now = typeof options.now === 'function' ? options.now : () => Date.now();
   const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
   let reducedMotion = motionQuery.matches;
   let coach = options.coach || {};
   let state = 'idle';
   let stateTimer = 0;
+  let queuedPath = [];
+  let pendingAnnounce = false;
+  let pendingRestart = false;
   let destroyed = false;
   let suppressClickUntil = 0;
   let panelOpen = false;
   let drag = null;
-  const spriteMotion = mountPetMotion(host, { initialState: state });
+  let facing = 'right';
+  let lastInteraction = now();
 
   function petSize() {
     const rect = owner.getBoundingClientRect();
-    return { width: rect.width || 124, height: rect.height || 184 };
+    return { width: rect.width || 74, height: rect.height || 110 };
   }
 
-  function defaultPosition() {
-    const size = petSize();
+  function travelOptions() {
     return {
-      x: 14,
-      y: Math.max(8, window.innerHeight - size.height - 88),
+      bottomInset: BOTTOM_INSET,
+      topInset: TOP_INSET,
+      rightPanelWidth: panelOpen ? PANEL_WIDTH : 0,
     };
   }
 
-  let position = storedPosition(window.localStorage) || defaultPosition();
+  function viewport() {
+    return { width: window.innerWidth, height: window.innerHeight };
+  }
 
-  function boundedPosition(next = position, overrides = {}) {
-    return clampPetPosition(next, {
-      width: window.innerWidth,
-      height: window.innerHeight,
-    }, petSize(), {
-      bottomInset: 74,
-      rightPanelWidth: panelOpen ? 300 : 0,
-      ...overrides,
-    });
+  function bounds() {
+    return getPetBounds(viewport(), petSize(), travelOptions());
+  }
+
+  function boundedPosition(next) {
+    return clampPetPosition(next, viewport(), petSize(), travelOptions());
+  }
+
+  function defaultPosition() {
+    const area = bounds();
+    return { x: area.minX + 6, y: area.maxY };
+  }
+
+  let position = boundedPosition(storedPosition(window.localStorage) || defaultPosition());
+
+  function setFacing(next) {
+    facing = next === 'left' ? 'left' : 'right';
+    host.dataset.facing = facing;
   }
 
   function applyPosition(duration = 0) {
-    position = boundedPosition();
+    position = boundedPosition(position);
     owner.style.setProperty('--pet-travel-duration', `${Math.max(0, duration)}ms`);
     owner.style.transform = `translate3d(${position.x}px, ${position.y}px, 0)`;
   }
@@ -88,42 +114,90 @@ export function mountPetCompanion(host, options = {}) {
     stateTimer = 0;
   }
 
-  function scheduleNext(delay = STATE_DURATION[state]) {
+  function scheduleNext(delay) {
     clearStateTimer();
     if (destroyed || reducedMotion || drag) return;
-    stateTimer = window.setTimeout(() => {
-      const next = chooseNextPetState(state, random());
-      setState(next, { announce: next === 'play' });
-    }, delay);
+    stateTimer = window.setTimeout(() => advance(), Math.max(0, delay));
   }
 
-  function roam(duration) {
-    const size = petSize();
-    const maxX = Math.max(14, window.innerWidth - size.width - 18);
-    const direction = random() > 0.5 ? 1 : -1;
-    const distance = 72 + Math.round(random() * Math.min(220, window.innerWidth * 0.28));
-    position = boundedPosition({ ...position, x: position.x + direction * distance });
-    if (position.x <= 0 || position.x >= maxX - 2) host.dataset.facing = direction > 0 ? 'left' : 'right';
-    else host.dataset.facing = direction > 0 ? 'right' : 'left';
-    applyPosition(duration);
+  function idleMs() {
+    return Math.max(0, now() - lastInteraction);
   }
 
-  function setState(next, { announce = false } = {}) {
+  function roam() {
+    const waypoint = choosePetWaypoint(position, bounds(), { random, facing });
+    setFacing(waypoint.facing);
+    position = { x: waypoint.x, y: waypoint.y };
+    applyPosition(waypoint.duration);
+    return waypoint.duration;
+  }
+
+  /** Play one action now. `walk` also books the stroll it animates through. */
+  function enterState(next, { announce = false, restart = false } = {}) {
+    const previous = state;
     state = PET_COMPANION_STATES.includes(next) ? next : 'idle';
     host.dataset.petState = state;
-    spriteMotion?.setState(state);
-    host.dataset.motion = reducedMotion ? 'reduced' : 'active';
+    host.dataset.resting = PET_RESTING_STATES.includes(state) ? 'true' : 'false';
+    // Two scheduler turns on the same action keep one flowing loop; only a real
+    // interaction replays a clip the pet is already in.
+    spriteMotion?.play(state, { restart: restart || state !== previous });
+    if (announce) options.onAdvice?.(getContextualPetAdvice(coach, random()));
+
     if (reducedMotion) {
-      state = 'idle';
-      host.dataset.petState = state;
       applyPosition(0);
       return;
     }
-    const duration = STATE_DURATION[state];
-    if (state === 'walk') roam(duration - 300);
-    else applyPosition(180);
-    if (announce) options.onAdvice?.(getContextualPetAdvice(coach, random()));
-    scheduleNext(duration);
+    if (state === 'walk') {
+      scheduleNext(roam() + 140);
+      return;
+    }
+    applyPosition(0);
+    // A one-shot clip normally reports its own ending; the timer is the safety
+    // net for when frames are throttled, so the pet can never freeze mid-action.
+    scheduleNext(LOOP_DURATION[state] || getClipDuration(state) + 400);
+  }
+
+  /** Step the behaviour forward: finish a queued pose chain, else pick anew. */
+  function advance(preferred) {
+    if (destroyed || reducedMotion || drag) return;
+    if (queuedPath.length) {
+      const step = queuedPath.shift();
+      const isFinalStep = queuedPath.length === 0;
+      const restart = pendingRestart;
+      pendingRestart = false;
+      enterState(step, { announce: isFinalStep && pendingAnnounce, restart });
+      if (isFinalStep) pendingAnnounce = false;
+      else if (isPetClipLooping(step)) scheduleNext(LINK_DURATION);
+      return;
+    }
+    const next = preferred && PET_COMPANION_STATES.includes(preferred)
+      ? preferred
+      : chooseNextPetState(state, { idleMs: idleMs(), random });
+    enterState(next, { announce: next === 'play' || next === 'cheer' });
+  }
+
+  /** Reach a state through the shortest valid pose chain — never by cutting. */
+  function transitionTo(target, { announce = false } = {}) {
+    clearStateTimer();
+    const path = getPetStatePath(state, target).slice(1);
+    queuedPath = path.length ? path : [target];
+    pendingAnnounce = announce;
+    pendingRestart = true;
+    advance();
+  }
+
+  const spriteMotion = mountPetMotion(host, {
+    initialState: state,
+    onClipEnd: (finished, next) => {
+      // A one-shot clip stopped animating; hand back to the scheduler instead
+      // of letting the pet freeze on its last pose.
+      if (destroyed || drag || finished !== state) return;
+      advance(next);
+    },
+  });
+
+  function noteInteraction() {
+    lastInteraction = now();
   }
 
   function finishDrag(event) {
@@ -135,12 +209,16 @@ export function mountPetCompanion(host, options = {}) {
       suppressClickUntil = Date.now() + 420;
       savePosition(window.localStorage, position);
     }
-    setState('idle');
+    noteInteraction();
+    transitionTo('look');
   }
 
   function onPointerDown(event) {
     if (event.button !== 0 || !event.target.closest('[data-pet-interaction], [data-pet-direct-interaction]')) return;
     clearStateTimer();
+    queuedPath = [];
+    pendingRestart = false;
+    noteInteraction();
     drag = {
       pointerId: event.pointerId,
       startX: event.clientX,
@@ -159,18 +237,17 @@ export function mountPetCompanion(host, options = {}) {
     if (Math.hypot(deltaX, deltaY) > 6) drag.moved = true;
     if (!drag.moved) return;
     event.preventDefault();
-    position = boundedPosition({
-      x: drag.origin.x + deltaX,
-      y: drag.origin.y + deltaY,
-    });
+    position = boundedPosition({ x: drag.origin.x + deltaX, y: drag.origin.y + deltaY });
     applyPosition(0);
   }
 
   function onMotionPreference(event) {
     reducedMotion = event.matches;
+    host.dataset.motion = reducedMotion ? 'reduced' : 'active';
     clearStateTimer();
-    setState('idle');
-    if (!reducedMotion) scheduleNext(5600);
+    queuedPath = [];
+    enterState('idle');
+    if (!reducedMotion) scheduleNext(LOOP_DURATION.idle);
   }
 
   function onResize() {
@@ -179,9 +256,10 @@ export function mountPetCompanion(host, options = {}) {
 
   host.dataset.renderer = 'pixel-sprite';
   host.dataset.petState = state;
+  host.dataset.resting = 'false';
   host.dataset.motion = reducedMotion ? 'reduced' : 'active';
-  host.dataset.facing = 'right';
   host.dataset.companionReady = 'true';
+  setFacing('right');
   owner.addEventListener('pointerdown', onPointerDown);
   document.addEventListener('pointermove', onPointerMove, { passive: false });
   document.addEventListener('pointerup', finishDrag);
@@ -189,19 +267,18 @@ export function mountPetCompanion(host, options = {}) {
   motionQuery.addEventListener('change', onMotionPreference);
   window.addEventListener('resize', onResize);
   applyPosition(0);
-  if (!reducedMotion) scheduleNext(6200 + Math.round(random() * 2800));
+  if (!reducedMotion) scheduleNext(2600 + Math.round(random() * 2400));
 
   return {
     react(kind) {
-      clearStateTimer();
-      const mapped = {
+      noteInteraction();
+      transitionTo({
         pat: 'look',
-        tease: 'walk',
-        highfive: 'play',
-        complete: 'play',
-        'tier-up': 'play',
-      }[kind] || 'look';
-      setState(mapped);
+        tease: 'play',
+        highfive: 'cheer',
+        complete: 'cheer',
+        'tier-up': 'cheer',
+      }[kind] || 'look');
     },
     updateCoach(nextCoach = {}) {
       coach = nextCoach;
