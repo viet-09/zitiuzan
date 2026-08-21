@@ -38,35 +38,22 @@ function avatarCell(row) {
   );
 }
 
-/** Render the leaderboard page into `root`. */
-export function renderLeaderboard(root) {
-  root.innerHTML = `
-    <h2 class="sr-only" data-route-heading>Bảng xếp hạng</h2>
-    <section class="leaderboard leaderboard-page" id="leaderboard-page" aria-label="Bảng xếp hạng">
-      <p class="dash-empty-state">Đang tải…</p>
-    </section>
-  `;
-  paint(root.querySelector('#leaderboard-page'));
-  return { preserveScroll: false };
-}
+// Last standings this session, so returning to the page — or any re-render
+// the shell triggers — paints the board immediately and refreshes underneath,
+// instead of blinking through "Đang tải…" while the same request runs again.
+let cachedBoard = null;
 
-async function paint(el) {
-  if (!el) return;
-  await supabaseReady();  // let config fetch settle so the auth button renders
-  const user = await currentUser();
+function boardTemplate({ user, rows }) {
   const authBlock = user
     ? `<p class="lb-signedin">Đã đăng nhập: <strong>${escapeHtml(user.email || user.id)}</strong></p>`
     : `<button type="button" class="auth-pill" data-action="sign-in-google">Đăng nhập bằng Google để đồng bộ</button>`;
 
-  // Anonymous reads are rejected by RLS (leaderboard is authenticated-only) —
-  // skip the doomed request instead of showing a misleading "no one yet".
-  const rows = user ? await fetchLeaderboard(50) : [];
   const body = !user
     ? '<tr><td colspan="6" class="lb-empty">Đăng nhập để xem bảng xếp hạng cùng bạn bè.</td></tr>'
     : rows.length === 0
     ? '<tr><td colspan="6" class="lb-empty">Chưa có ai trên bảng xếp hạng — hoàn thành bài học đầu tiên để lên hạng!</td></tr>'
     : rows.map((row) => `
-        <tr${user && row.user_id === user.id ? ' class="lb-self"' : ''}>
+        <tr${row.user_id === user.id ? ' class="lb-self"' : ''}>
           <td class="lb-rank">${escapeHtml(String(row.rank ?? '—'))}</td>
           <td class="lb-id">
             <div class="lb-id-cell">${avatarCell(row)}<span>${escapeHtml(row.display_name || 'Học viên')}</span></div>
@@ -78,7 +65,7 @@ async function paint(el) {
         </tr>
       `).join('');
 
-  el.innerHTML = `
+  return `
     <header class="lb-head">
       <h3 class="subheading">Bảng xếp hạng</h3>
       <div class="lb-auth">${authBlock}</div>
@@ -92,14 +79,45 @@ async function paint(el) {
       </table>
     </div>
   `;
+}
+
+function bindAuthButton(el) {
   const btn = el.querySelector('[data-action="sign-in-google"]');
-  if (btn) {
-    btn.addEventListener('click', () => {
-      btn.disabled = true;
-      signInWithGoogle().catch((err) => {
-        console.warn('[leaderboard] sign-in failed:', err);
-        btn.disabled = false;
-      });
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    btn.disabled = true;
+    signInWithGoogle().catch((err) => {
+      console.warn('[leaderboard] sign-in failed:', err);
+      btn.disabled = false;
     });
-  }
+  });
+}
+
+/** Render the leaderboard page into `root`. */
+export function renderLeaderboard(root) {
+  root.innerHTML = `
+    <h2 class="sr-only" data-route-heading>Bảng xếp hạng</h2>
+    <section class="leaderboard leaderboard-page" id="leaderboard-page" aria-label="Bảng xếp hạng">
+      ${cachedBoard ? boardTemplate(cachedBoard) : '<p class="dash-empty-state">Đang tải…</p>'}
+    </section>
+  `;
+  const el = root.querySelector('#leaderboard-page');
+  if (cachedBoard) bindAuthButton(el);
+  paint(el);
+  return { preserveScroll: false };
+}
+
+async function paint(el) {
+  if (!el) return;
+  await supabaseReady();  // let config fetch settle so the auth button renders
+  const user = await currentUser();
+  // Anonymous reads are rejected by RLS (leaderboard is authenticated-only) —
+  // skip the doomed request instead of showing a misleading "no one yet".
+  const rows = user ? await fetchLeaderboard(50) : [];
+  // The learner may have left while those two round trips were in flight;
+  // writing into a detached node would only resurrect a stale board.
+  if (!el.isConnected) return;
+  cachedBoard = { user, rows };
+  el.innerHTML = boardTemplate(cachedBoard);
+  bindAuthButton(el);
 }

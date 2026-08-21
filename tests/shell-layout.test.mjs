@@ -100,3 +100,28 @@ test('the leaderboard reports time studied today and no longer ranks by level', 
   assert.match(leaderboard, /colspan="6"/);
   assert.doesNotMatch(leaderboard, /colspan="7"/);
 });
+
+test('a signed-in tab regaining focus does not resync and repaint the whole route', () => {
+  const app = read('js/app.js');
+
+  // supabase-js re-emits SIGNED_IN / TOKEN_REFRESHED on visibilitychange and
+  // on token rotation; the old handler ran the full pull and then navigate()
+  // every single time, which is what made pages blink at random.
+  assert.match(app, /let syncedUserId = null;/);
+  assert.match(app, /if \(syncedUserId === authedUser\.id\) return;/);
+  assert.match(app, /syncedUserId = null;[\s\S]{0,120}openSignInGate\(\);/);
+
+  // The book payload lands seconds after first paint; only the two routes
+  // built from it may be repainted when it does.
+  assert.match(app, /const BOOK_CONTENT_ROUTES = new Set\(\['dashboard', 'lesson'\]\);/);
+  assert.match(app, /BOOK_CONTENT_ROUTES\.has\(getCurrentRoute\(\)\.name\)\) navigate/);
+});
+
+test('the leaderboard repaints from its last standings instead of a loading flash', () => {
+  const leaderboard = read('js/leaderboard.js');
+
+  assert.match(leaderboard, /let cachedBoard = null;/);
+  assert.match(leaderboard, /cachedBoard \? boardTemplate\(cachedBoard\) : '<p class="dash-empty-state">Đang tải…<\/p>'/);
+  // Two network round trips run before the repaint; the learner may be gone.
+  assert.match(leaderboard, /if \(!el\.isConnected\) return;/);
+});

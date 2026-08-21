@@ -3,7 +3,7 @@
 
 import { setLessons, resetBookContent, mergeBookContent, setTutorContext, setQuestionClassification, setLessonImages, setVietnameseExplanations, getStreak } from './store.js';
 import { mountPet } from './pet.js?v=18';
-import { initRouter, navigate } from './router.js';
+import { getCurrentRoute, initRouter, navigate } from './router.js';
 import { initFuriganaToggle } from './furigana.js';
 import { openSettings } from './gemini.js';
 import { renderDashboard } from './dashboard.js';
@@ -178,6 +178,9 @@ async function loadEnrichment(categories) {
     }));
 }
 
+// Routes whose markup is built from the lazily loaded book payload.
+const BOOK_CONTENT_ROUTES = new Set(['dashboard', 'lesson']);
+
 async function bootstrap() {
     registerServiceWorker();
     setCurrentDate();
@@ -206,11 +209,20 @@ async function bootstrap() {
 
         if (!sb) return;
 
+        // supabase-js re-emits SIGNED_IN / TOKEN_REFRESHED every time the tab
+        // regains focus and whenever the access token rotates. Everything below
+        // is idempotent, so replaying it for an account already synced buys
+        // nothing and costs a full route re-render — which is what made pages
+        // like the leaderboard blink back to their loading state at random.
+        let syncedUserId = null;
         onAuthChange(async (authedUser) => {
             if (!authedUser) {
+                syncedUserId = null;
                 openSignInGate();
                 return;
             }
+            if (syncedUserId === authedUser.id) return;
+            syncedUserId = authedUser.id;
             markProfilePromptSeen();
             try {
                 const migrated = await maybeMigrateLocalData();
@@ -269,7 +281,10 @@ async function bootstrap() {
     );
 
     void loadBookContent().then(() => {
-        navigate(location.hash || '#/');
+        // Only these two routes read lesson bodies out of the book payload.
+        // Repainting anything else once it lands throws away the page the user
+        // is already reading — and re-runs its network calls — for no gain.
+        if (BOOK_CONTENT_ROUTES.has(getCurrentRoute().name)) navigate(location.hash || '#/');
     });
 }
 

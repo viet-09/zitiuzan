@@ -12,7 +12,7 @@ import {
   writeStreak,
   setSettings,
 } from './store.js';
-import { normalizeProfile, saveProfile } from './profile.js';
+import { getProfile, normalizeProfile, saveProfile } from './profile.js';
 import { migrateLegacyStorage } from './account-storage.js';
 import { learningState } from './learning-state.js';
 import { mergeReviewCollections, reviewFromRow, reviewToRow } from './review-sync.js';
@@ -266,6 +266,28 @@ export async function flushCompletionQueue(userId) {
 }
 
 /**
+ * Decide what the local profile should look like after a cloud pull.
+ *
+ * An uploaded photo never leaves the device (see pushProfile), so the server
+ * row can only ever carry a preset id for it. Copying that row straight over a
+ * local upload is what snapped a freshly chosen picture back to the pet sprite
+ * — and because the pull runs on every sign-in and token refresh, the photo
+ * never survived. This device's own image therefore wins: the only way out of
+ * upload mode is picking a preset here.
+ *
+ * @param {{display_name?: string, avatar_type?: string, avatar_data?: string}} row
+ * @param {{avatarType?: string, avatarData?: string}} local
+ */
+export function mergeProfileFromCloud(row, local) {
+  const keepLocalPhoto = local?.avatarType === 'upload';
+  return {
+    name: row?.display_name ?? '',
+    avatarType: keepLocalPhoto ? 'upload' : row?.avatar_type,
+    avatarData: keepLocalPhoto ? local.avatarData : row?.avatar_data,
+  };
+}
+
+/**
  * Pull the authed user's data from Supabase and seed the in-memory caches
  * so the rest of the app can keep reading from store.js as before.
  */
@@ -291,11 +313,7 @@ export async function pullFromCloud(userId) {
     // Mirror the server's name/avatar locally so a second device (or a
     // fresh browser profile) shows the same identity without re-asking.
     if (typeof profileRes.data.display_name === 'string' && profileRes.data.display_name) {
-      saveProfile({
-        name: profileRes.data.display_name,
-        avatarType: profileRes.data.avatar_type,
-        avatarData: profileRes.data.avatar_data,
-      });
+      saveProfile(mergeProfileFromCloud(profileRes.data, getProfile()));
     }
   }
   if (progressRes.data) {
