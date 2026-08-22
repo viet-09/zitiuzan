@@ -2657,8 +2657,87 @@ body.furigana-off rt {
     .exam-advance-top { padding: 6px 10px; min-height: 30px; font-size: 9px; }
 }
 
+/* --- Whole-lesson writing sheet ---------------------------------------- */
+.kanji-section-actions { margin-bottom: 16px; }
+
+.kanji-sheet-card { width: min(1180px, 100%); }
+.kanji-sheet-body { display: grid; gap: 10px; }
+.kanji-sheet-hint { color: var(--text-muted); font: 500 .82rem/1.5 var(--font-sans); }
+.kanji-sheet-status { min-height: 1.4em; font: 700 .82rem/1.4 var(--font-sans); color: var(--text-secondary); }
+.kanji-sheet-status[data-tone='ok'] { color: var(--accent-green); }
+.kanji-sheet-status[data-tone='error'] { color: var(--accent-red); }
+
+.kanji-sheet-rows {
+    /* The sheet is meant to be zoomed into, so it scrolls in both directions
+       rather than shrinking squares below a writable size. */
+    overflow: auto;
+    max-height: min(70vh, 720px);
+    border: 2px solid var(--border-dark);
+    background: #fffdf8;
+}
+.kanji-sheet-row { display: flex; align-items: stretch; border-bottom: 1px solid var(--border-color); }
+.kanji-sheet-row:last-child { border-bottom: 0; }
+
+.kanji-sheet-label {
+    flex: 0 0 78px;
+    display: grid;
+    place-content: center;
+    gap: 2px;
+    padding: 4px;
+    border-right: 2px solid var(--border-dark);
+    text-align: center;
+}
+.kanji-sheet-char { font: 700 1.5rem/1 var(--font-jp); }
+.kanji-sheet-hanviet { color: var(--accent-red); font: 700 .62rem/1.2 var(--font-sans); text-transform: capitalize; }
+
+.kanji-sheet-cells { display: flex; }
+.kanji-sheet-cell {
+    flex: 0 0 62px;
+    width: 62px;
+    height: 62px;
+    border-right: 1px solid var(--border-color);
+    /* The faint cross a genkō-yōshi square has, to place the character by. */
+    background-image:
+        linear-gradient(to right, transparent calc(50% - .5px), color-mix(in srgb, var(--border-color) 85%, transparent) 50%, transparent calc(50% + .5px)),
+        linear-gradient(to bottom, transparent calc(50% - .5px), color-mix(in srgb, var(--border-color) 85%, transparent) 50%, transparent calc(50% + .5px));
+    touch-action: none;
+}
+.kanji-sheet-cell.is-model {
+    display: grid;
+    place-items: center;
+    font: 700 2rem/1 var(--font-jp);
+    background-color: var(--paper-2);
+}
+canvas.kanji-sheet-cell { cursor: crosshair; }
+canvas.kanji-sheet-cell[data-role='guided'] { background-color: color-mix(in srgb, var(--accent-red) 4%, transparent); }
+canvas.kanji-sheet-cell.is-rejected { animation: kanji-stroke-reject .32s cubic-bezier(.36, .07, .19, .97); }
+
+@media (max-width: 600px) {
+    .kanji-sheet-label { flex-basis: 58px; }
+    .kanji-sheet-char { font-size: 1.2rem; }
+}
+
+/* Âm Hán Việt, sitting with the on/kun readings it belongs beside. */
+.kanji-hanviet {
+    margin-top: 2px;
+    color: var(--accent-red);
+    font: 700 .78rem/1.4 var(--font-sans);
+    letter-spacing: .02em;
+}
+.kanji-hanviet[hidden] { display: none; }
+
 /* --- "Ôn lại": AI practice written from the lesson's own material -------- */
 .lesson-revision { margin-top: 28px; }
+.lesson-revision-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.lesson-revision-head .subheading { margin: 0; }
+.lesson-revision-head button[hidden] { display: none; }
+.lesson-revision-head button:disabled { opacity: .55; cursor: progress; }
 .lesson-revision-status,
 .lesson-revision-lead {
     margin-bottom: 14px;

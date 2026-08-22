@@ -42,6 +42,19 @@ Luật lọc/chống trùng nằm ở `supabase/functions/_shared/lesson-review-
 
 Muốn soạn lại một bài: xoá dòng tương ứng trong `lesson_review_quiz`, lần mở bài kế tiếp sẽ sinh lại.
 
+## Âm Hán Việt
+
+`data/kanji-hanviet.json` — âm Hán Việt của 665/683 kanji trong giáo trình, hiện dưới mỗi thẻ kanji và trong tờ luyện viết.
+
+Không dùng thẳng Unihan `kVietnamese` được: trường đó **trộn âm Nôm** (寄→"gửi", 冷→"lạnh", 未→"mùi", 鋭→"nhọn") và thiếu cả những chữ rất thường gặp (愛, 米). Nên script chạy **hai lượt AI diễn đạt khác nhau**, và chỉ giữ âm nào (a) hai lượt khớp nhau, hoặc (b) một lượt khớp Unihan. 18 chữ còn tranh chấp bị bỏ trống thay vì đoán — trong đó 込 và 畑 là kokuji, vốn không có âm Hán Việt.
+
+```powershell
+node scripts/build-kanji-hanviet.mjs --unihan-only   # không gọi AI
+node scripts/build-kanji-hanviet.mjs                 # dựng lại đầy đủ
+```
+
+Tốn ~12 lượt Gemini; hết quota `flash` thì script tự chuyển sang `flash-lite`.
+
 ## Dữ liệu nét chữ kanji
 
 `data/kanji-strokes.json` chứa đường nét theo đúng thứ tự viết cho 683 kanji của giáo trình, dùng cho bảng luyện viết (`js/kanji-writing.js` + `js/kanji-stroke-match.js`). File được tải lười khi mở bảng luyện viết, không nằm trong app shell.

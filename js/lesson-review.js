@@ -40,7 +40,7 @@ export function lessonDigest(lesson, content) {
  * Fetch (or trigger generation of) the review set for a lesson.
  * @returns {Promise<{questions: Array, error: string}>}
  */
-export async function fetchLessonReview({ lessonId, lesson, content, practice }) {
+export async function fetchLessonReview({ lessonId, lesson, content, practice, refresh = false }) {
   const sb = await getClient();
   if (!sb || !lessonId) return { questions: [], error: 'offline' };
 
@@ -50,6 +50,9 @@ export async function fetchLessonReview({ lessonId, lesson, content, practice })
         lesson_id: lessonId,
         content: lessonDigest(lesson, content),
         existing_prompts: existingPrompts(practice),
+        // Asks the function to write a different set and replace the shared
+        // one, instead of handing back what is already cached.
+        refresh: Boolean(refresh),
       },
     });
     if (error) throw error;

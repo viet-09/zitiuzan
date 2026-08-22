@@ -22,9 +22,11 @@ import { completeLessonOnce, toggleLessonCompletion } from './completion.js';
 import { learningState } from './learning-state.js';
 import { buildBookViewerModel, renderBookViewerStrip } from './book-viewer.js';
 import { activateModalDialog } from './modal-dialog.js';
-import { openKanjiWritingPad } from './kanji-writing.js?v=26';
-import { announceLessonCompleted } from './pet.js?v=26';
+import { openKanjiWritingPad } from './kanji-writing.js?v=27';
+import { openKanjiSheet } from './kanji-sheet.js?v=27';
+import { announceLessonCompleted } from './pet.js?v=27';
 import { fetchLessonReview, MIN_REVIEW_QUESTIONS } from './lesson-review.js';
+import { formatHanViet, hanVietOf, loadHanViet } from './kanji-hanviet.js';
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (char) => ({
@@ -186,6 +188,7 @@ function renderKanji(lessonId, content) {
         ${item?.kun ? `<span class="kanji-kun">訓: ${escapeHtml(item.kun)}</span>` : ''}
         ${Number.isFinite(Number(item?.strokes)) ? `<span>${escapeHtml(item.strokes)} nét</span>` : ''}
       </div>
+      <p class="kanji-hanviet" data-hanviet-for="${escapeHtml(item?.char || '')}" hidden></p>
       ${(() => { const vi = getVietnameseExplanation(lessonId, index); return vi ? `<p class="kanji-vi">${escapeHtml(vi)}</p>` : ''; })()}
       <ul class="kanji-word-list">
         ${(Array.isArray(item?.words) ? item.words : []).map((word) => `<li>${wordButton(word?.jp || '', word?.reading || '')}${word?.en ? `<span class="book-meaning" lang="en">${escapeHtml(word.en)}</span>` : ''}</li>`).join('')}
@@ -195,6 +198,7 @@ function renderKanji(lessonId, content) {
   return `
     <section class="content-section kanji-section">
       <h2 class="section-heading">Hán tự</h2>
+      ${kanjiList.length ? '<div class="kanji-section-actions"><button type="button" class="study-btn" data-action="practice-sheet">✎ Luyện viết cả bài</button></div>' : ''}
       ${renderImagesSection(lessonId)}
       <div class="kanji-grid">${cards || '<p class="text-muted">Không có mục Hán tự trong bài này.</p>'}</div>
       ${review.length ? `<section class="review-kanji"><h3 class="subheading" lang="ja">よめるかな？</h3><div class="review-kanji-list">${review.map((item) => wordButton(item?.char || '', [item?.on, item?.kun].filter(Boolean).join(' / '))).join('')}</div></section>` : ''}
@@ -416,7 +420,10 @@ function pageHtml(found, lessonId, content) {
       </nav>
       <div class="lesson-body" id="lesson-content">${renderBookContent(category?.id, content, lessonId)}</div>
       <section class="quiz-block lesson-revision" id="lesson-revision" data-lesson-revision aria-labelledby="lesson-revision-heading">
-        <h3 class="subheading" id="lesson-revision-heading">Ôn lại</h3>
+        <header class="lesson-revision-head">
+          <h3 class="subheading" id="lesson-revision-heading">Ôn lại</h3>
+          <button type="button" class="profile-skip-btn" data-action="refresh-revision" hidden>↻ Làm mới</button>
+        </header>
         <p class="lesson-revision-status" data-revision-status role="status" aria-live="polite">Đang soạn câu ôn thêm cho bài này…</p>
       </section>
       <div class="lesson-footer-actions">
@@ -642,7 +649,25 @@ export function renderLesson(root, id) {
     root.innerHTML = pageHtml(found, id, bookContent);
     updateLessonProgress(root.querySelector('.lesson-page'));
     hydrateLessonAudio(root);
+    void hydrateHanViet(root);
     void hydrateRevision(root, found, id, bookContent);
+  };
+
+  /**
+   * Fill in the âm Hán Việt under each kanji. Lazy, and silent for characters
+   * the build could not confirm a reading for — see js/kanji-hanviet.js.
+   */
+  const hydrateHanViet = async (root) => {
+    const slots = [...root.querySelectorAll('[data-hanviet-for]')];
+    if (!slots.length) return;
+    await loadHanViet();
+    for (const slot of slots) {
+      if (!slot.isConnected) continue;
+      const reading = formatHanViet(hanVietOf(slot.dataset.hanvietFor));
+      if (!reading) continue;
+      slot.textContent = reading;
+      slot.hidden = false;
+    }
   };
 
   /**
@@ -650,25 +675,39 @@ export function renderLesson(root, id) {
    * shares, so this is almost always one cheap read; only the first visit to a
    * lesson anywhere pays for generation.
    */
-  const hydrateRevision = async (root, found, id, content) => {
+  const hydrateRevision = async (root, found, id, content, { refresh = false } = {}) => {
     const section = root.querySelector('[data-lesson-revision]');
-    const status = section?.querySelector('[data-revision-status]');
-    if (!section || !status) return;
+    if (!section) return;
+    const refreshBtn = section.querySelector('[data-action="refresh-revision"]');
+
+    // Clear whatever is showing so a refresh cannot leave the old set on
+    // screen next to the new one.
+    section.querySelector('.lesson-revision-lead')?.remove();
+    section.querySelector('.quiz-section')?.remove();
+    let status = section.querySelector('[data-revision-status]');
+    if (!status) {
+      section.insertAdjacentHTML('beforeend', '<p class="lesson-revision-status" data-revision-status role="status" aria-live="polite"></p>');
+      status = section.querySelector('[data-revision-status]');
+    }
+    status.textContent = refresh ? 'Đang soạn bộ câu mới…' : 'Đang soạn câu ôn thêm cho bài này…';
+    if (refreshBtn) refreshBtn.disabled = true;
 
     const { questions, error } = await fetchLessonReview({
       lessonId: id,
       lesson: found?.lesson,
       content,
       practice: content?.practice,
+      refresh,
     });
     // paint() replaces the page wholesale, so a detached section is the signal
     // that this result belongs to a render nobody is looking at any more.
     if (!section.isConnected) return;
+    if (refreshBtn) refreshBtn.disabled = false;
 
     if (!questions.length) {
       status.textContent = error === 'offline'
         ? 'Phần ôn lại cần kết nối mạng.'
-        : 'Chưa soạn được phần ôn lại cho bài này. Mở lại bài sau nhé.';
+        : 'Chưa soạn được phần ôn lại cho bài này. Thử lại sau nhé.';
       return;
     }
 
@@ -677,6 +716,7 @@ export function renderLesson(root, id) {
       <p class="lesson-revision-lead">${questions.length} câu luyện thêm, soạn riêng từ nội dung bài này — không trùng với phần 練習 ở trên.</p>
       <div class="quiz-section">${questions.map((question, index) => renderRevisionItem(question, id, index)).join('')}</div>`);
 
+    if (refreshBtn) refreshBtn.hidden = false;
     const link = root.querySelector('[data-lesson-revision-link]');
     if (link) link.hidden = false;
   };
@@ -766,6 +806,13 @@ export function renderLesson(root, id) {
     const action = button.dataset.action;
     if (action === 'back') navigate('#/');
     else if (action === 'jump-to') jumpToSection(button.closest('.lesson-page'), button.dataset.target);
+    else if (action === 'practice-sheet') {
+      const chars = (getBookContent(id)?.kanji || []).map((item) => item?.char || '');
+      openKanjiSheet({ characters: chars, title: findLesson(id)?.lesson?.title || '', trigger: button });
+    }
+    else if (action === 'refresh-revision') {
+      void hydrateRevision(root, findLesson(id), id, getBookContent(id), { refresh: true });
+    }
     else if (action === 'toggle-furigana') { setFurigana(!getFurigana()); paint(); }
     else if (action === 'toggle-complete') {
       const found = findLesson(id);

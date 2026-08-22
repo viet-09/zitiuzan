@@ -3,7 +3,7 @@
 // that lesson's own material, on top of the questions printed in the book.
 //
 // POST /functions/v1/lesson-review-quiz
-// Body: { lesson_id: "g1d1", content: {...}, existing_prompts: ["…"] }
+// Body: { lesson_id: "g1d1", content: {...}, existing_prompts: ["…"], refresh?: true }
 // Response: { lessonId, questions: [{prompt, options, answerIndex, note}], cached }
 //
 // The result is stored in public.lesson_review_quiz, which is shared by every
@@ -106,7 +106,7 @@ Deno.serve(async (req) => {
   const { data: { user }, error: userErr } = await scoped.auth.getUser();
   if (userErr || !user) return jsonResponse({ error: 'Invalid session' }, 401);
 
-  let raw: { lesson_id?: unknown; content?: unknown; existing_prompts?: unknown } = {};
+  let raw: { lesson_id?: unknown; content?: unknown; existing_prompts?: unknown; refresh?: unknown } = {};
   try {
     raw = await req.json();
   } catch {
@@ -121,14 +121,18 @@ Deno.serve(async (req) => {
   });
 
   // Shared cache first: the overwhelming majority of requests end here, which
-  // is what keeps this affordable on the free tier.
+  // is what keeps this affordable on the free tier. `refresh` is the learner
+  // asking for a different set, so it skips the read — but it still pays the
+  // cooldown below, because it spends real quota on everyone's behalf.
+  const refresh = raw.refresh === true;
   const { data: cached } = await service
     .from('lesson_review_quiz')
     .select('questions')
     .eq('lesson_id', lessonId)
     .maybeSingle();
-  if (cached?.questions && Array.isArray(cached.questions) && cached.questions.length) {
-    return jsonResponse({ lessonId, questions: cached.questions, cached: true });
+  const previous = Array.isArray(cached?.questions) ? cached.questions : [];
+  if (!refresh && previous.length) {
+    return jsonResponse({ lessonId, questions: previous, cached: true });
   }
 
   if (!hasGeminiKeys()) return jsonResponse({ error: 'Server misconfigured: missing Gemini key' }, 500);
@@ -142,11 +146,17 @@ Deno.serve(async (req) => {
 
   const content = typeof raw.content === 'string' ? raw.content : JSON.stringify(raw.content ?? '');
   if (content.trim().length < 40) return jsonResponse({ error: 'Lesson content is empty' }, 400);
-  const existing = Array.isArray(raw.existing_prompts)
+  const fromBook = Array.isArray(raw.existing_prompts)
     ? raw.existing_prompts.filter((p): p is string => typeof p === 'string').map((p) => p.slice(0, 400))
     : [];
+  // A refresh has to differ from the set being replaced as well, or "làm mới"
+  // hands back the same questions in a new order.
+  const previousPrompts = previous
+    .map((question: unknown) => (question && typeof question === 'object' ? String((question as { prompt?: unknown }).prompt ?? '') : ''))
+    .filter(Boolean);
+  const existing = [...fromBook, ...previousPrompts];
 
-  const want = targetQuestionCount(existing.length);
+  const want = targetQuestionCount(fromBook.length);
   const prompt = buildPrompt(content, existing, want);
 
   const attempt = await withGeminiKeyFailover<ReturnType<typeof sanitiseQuestions>>(async (key) => {

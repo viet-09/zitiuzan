@@ -246,8 +246,10 @@ export function openKanjiWritingPad({ character = '', trigger = null } = {}) {
     if (event.button !== 0 && event.pointerType !== 'pen') return;
     if (guided() && strokes.length >= guideStrokes.length) return;
     event.preventDefault();
-    canvas.setPointerCapture?.(event.pointerId);
+    // Same reason as js/kanji-sheet.js: a throwing capture must not cost the
+    // learner their stroke.
     currentStroke = [pointerPoint(event, canvas)];
+    try { canvas.setPointerCapture?.(event.pointerId); } catch { /* draw without it */ }
     drawSegment(context, currentStroke[0], currentStroke[0]);
   });
   canvas.addEventListener('pointermove', (event) => {
@@ -262,7 +264,9 @@ export function openKanjiWritingPad({ character = '', trigger = null } = {}) {
     event.preventDefault();
     const points = currentStroke;
     currentStroke = null;
-    if (canvas.hasPointerCapture?.(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
+    try {
+      if (canvas.hasPointerCapture?.(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
+    } catch { /* never held it */ }
     judgeStroke(points);
     if (!guided()) redraw();
   };
