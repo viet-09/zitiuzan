@@ -73,3 +73,29 @@ test('known readings are the Hán Việt one, not the Nôm reading Unihan carrie
     assert.equal(hanviet.readings[character], reading, `${character} should read ${reading}`);
   }
 });
+
+test('both writing surfaces take the whole screen', () => {
+  const css = read('css/styles.css');
+  const full = /\.kanji-sheet-card,\s*\n\.kanji-writing-card \{([\s\S]*?)\}/.exec(css)?.[1] ?? '';
+  assert.match(full, /width: 100dvw/);
+  assert.match(full, /height: 100dvh/);
+  assert.match(full, /max-width: none/);
+  assert.match(full, /max-height: none/);
+  // A later media query used to cap the pad again; the cap has to be gone or
+  // the phone would get a nearly-full-screen card instead of a full one.
+  assert.doesNotMatch(css, /\.kanji-writing-card \{ max-height/);
+});
+
+test('a pen drag cannot select the row it is drawn across', () => {
+  const css = read('css/styles.css');
+  const sheet = read('js/kanji-sheet.js');
+  const pad = read('js/kanji-writing.js');
+
+  // Dragging across squares reads as a text drag: the row highlights blue and
+  // the copy menu appears in the middle of a stroke.
+  assert.match(css, /\.kanji-sheet-cell,\s*\n\.kanji-writing-canvas,\s*\n\.kanji-writing-sheet \{[\s\S]*?user-select: none/);
+  for (const [name, source] of [['sheet', sheet], ['pad', pad]]) {
+    assert.match(source, /addEventListener\('selectstart', \(event\) => event\.preventDefault\(\)\)/, name);
+    assert.match(source, /addEventListener\('dragstart', \(event\) => event\.preventDefault\(\)\)/, name);
+  }
+});

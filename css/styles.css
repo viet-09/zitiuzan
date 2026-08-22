@@ -2660,18 +2660,43 @@ body.furigana-off rt {
 /* --- Whole-lesson writing sheet ---------------------------------------- */
 .kanji-section-actions { margin-bottom: 16px; }
 
-.kanji-sheet-card { width: min(1180px, 100%); }
-.kanji-sheet-body { display: grid; gap: 10px; }
+/* Writing wants the whole screen: the sheet is a grid of squares you draw
+   inside, and every pixel the modal chrome takes is a pixel the pen loses. */
+.kanji-sheet-overlay,
+.kanji-writing-overlay { padding: 0; }
+.kanji-sheet-card,
+.kanji-writing-card {
+    width: 100dvw;
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    border: 0;
+    border-radius: 0;
+}
+.kanji-sheet-body,
+.kanji-writing-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    /* Dragging a pen across squares is a text drag as far as the browser is
+       concerned, so a stroke would leave the row highlighted blue and pop up
+       the copy menu. Nothing here is meant to be selected. */
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+
+.kanji-sheet-body { display: flex; flex-direction: column; gap: 8px; }
 .kanji-sheet-hint { color: var(--text-muted); font: 500 .82rem/1.5 var(--font-sans); }
 .kanji-sheet-status { min-height: 1.4em; font: 700 .82rem/1.4 var(--font-sans); color: var(--text-secondary); }
 .kanji-sheet-status[data-tone='ok'] { color: var(--accent-green); }
 .kanji-sheet-status[data-tone='error'] { color: var(--accent-red); }
 
 .kanji-sheet-rows {
-    /* The sheet is meant to be zoomed into, so it scrolls in both directions
-       rather than shrinking squares below a writable size. */
+    /* Fills whatever the header, hint and footer leave, and scrolls in both
+       directions rather than shrinking squares below a writable size. */
+    flex: 1 1 auto;
+    min-height: 0;
     overflow: auto;
-    max-height: min(70vh, 720px);
     border: 2px solid var(--border-dark);
     background: #fffdf8;
 }
@@ -2692,9 +2717,9 @@ body.furigana-off rt {
 
 .kanji-sheet-cells { display: flex; }
 .kanji-sheet-cell {
-    flex: 0 0 62px;
-    width: 62px;
-    height: 62px;
+    flex: 0 0 var(--kanji-cell-size, 76px);
+    width: var(--kanji-cell-size, 76px);
+    height: var(--kanji-cell-size, 76px);
     border-right: 1px solid var(--border-color);
     /* The faint cross a genkō-yōshi square has, to place the character by. */
     background-image:
@@ -2709,10 +2734,21 @@ body.furigana-off rt {
     background-color: var(--paper-2);
 }
 canvas.kanji-sheet-cell { cursor: crosshair; }
+/* Belt and braces for the surfaces the pen actually lands on: Safari still
+   starts a selection from a canvas even when an ancestor forbids it. */
+.kanji-sheet-cell,
+.kanji-writing-canvas,
+.kanji-writing-sheet {
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    touch-action: none;
+}
 canvas.kanji-sheet-cell[data-role='guided'] { background-color: color-mix(in srgb, var(--accent-red) 4%, transparent); }
 canvas.kanji-sheet-cell.is-rejected { animation: kanji-stroke-reject .32s cubic-bezier(.36, .07, .19, .97); }
 
 @media (max-width: 600px) {
+    .kanji-sheet-rows { --kanji-cell-size: 62px; }
     .kanji-sheet-label { flex-basis: 58px; }
     .kanji-sheet-char { font-size: 1.2rem; }
 }
@@ -4147,8 +4183,7 @@ body.modal-open { overflow: hidden; }
 }
 .kanji-writing-trigger:hover { transform: rotate(3deg) translateY(-1px); }
 
-.kanji-writing-card { width: min(620px, 100%); }
-.kanji-writing-body { display: grid; gap: 12px; }
+.kanji-writing-body { display: flex; flex-direction: column; gap: 12px; }
 .kanji-writing-hint { color: var(--text-muted); font: 500 .82rem/1.45 var(--font-sans); }
 .kanji-writing-status {
     min-height: 1.4em;
@@ -4172,9 +4207,10 @@ body.modal-open { overflow: hidden; }
 }
 .kanji-writing-sheet {
     position: relative;
-    width: min(100%, 500px);
+    /* Square, as large as the free height allows. */
+    width: min(100%, 74dvh);
     aspect-ratio: 1;
-    justify-self: center;
+    align-self: center;
     overflow: hidden;
     border: 2px solid var(--border-dark);
     background-color: #fffdf8;
@@ -4210,8 +4246,7 @@ body.modal-open { overflow: hidden; }
 .kanji-writing-actions { flex-wrap: wrap; }
 
 @media (max-width: 520px) {
-    .kanji-writing-overlay { padding: 8px; }
-    .kanji-writing-card { max-height: calc(100dvh - 16px); }
+    /* The card is full-screen at every width now; only the chrome tightens. */
     .kanji-writing-card .modal-header { padding-block: 12px; }
     .kanji-writing-card .modal-body { padding: 12px; }
     .kanji-writing-actions { padding: 10px 12px; }

@@ -14,6 +14,7 @@
 import { activateModalDialog } from './modal-dialog.js';
 import { STROKE_FEEDBACK, matchStroke } from './kanji-stroke-match.js';
 import { formatHanViet, hanVietOf, loadHanViet } from './kanji-hanviet.js';
+import { clearSheet, decodeStroke, encodeStroke, loadSheet, saveSheet } from './kanji-sheet-store.js';
 
 /** Squares per kanji: 1 model + traced + blank. */
 export const SHEET_LAYOUT = Object.freeze({
@@ -79,7 +80,7 @@ export function cellRole(index, layout = SHEET_LAYOUT) {
 }
 
 /** Open the sheet for a list of characters. */
-export function openKanjiSheet({ characters = [], title = '', trigger = null } = {}) {
+export function openKanjiSheet({ characters = [], title = '', lessonId = '', trigger = null } = {}) {
   if (typeof document === 'undefined') return null;
   activeSheet?.close();
 
@@ -140,7 +141,7 @@ export function openKanjiSheet({ characters = [], title = '', trigger = null } =
           const role = cellRole(index);
           return role === 'model'
             ? `<div class="kanji-sheet-cell is-model" lang="ja" aria-hidden="true">${escapeHtml(character)}</div>`
-            : `<canvas class="kanji-sheet-cell" data-role="${role}" data-char="${escapeHtml(character)}" width="${CELL_PIXELS}" height="${CELL_PIXELS}" aria-label="Ô viết ${escapeHtml(character)} số ${index}"></canvas>`;
+            : `<canvas class="kanji-sheet-cell" data-role="${role}" data-char="${escapeHtml(character)}" data-index="${index}" width="${CELL_PIXELS}" height="${CELL_PIXELS}" aria-label="Ô viết ${escapeHtml(character)} số ${index}"></canvas>`;
         }).join('')}
       </div>
     </section>`).join('');
@@ -149,10 +150,52 @@ export function openKanjiSheet({ characters = [], title = '', trigger = null } =
 
   const cellState = (canvas) => {
     if (!cells.has(canvas)) {
-      cells.set(canvas, { character: canvas.dataset.char, role: canvas.dataset.role, strokes: [], accepted: 0 });
+      cells.set(canvas, {
+        character: canvas.dataset.char,
+        role: canvas.dataset.role,
+        index: Number(canvas.dataset.index),
+        strokes: [],
+        accepted: 0,
+      });
     }
     return cells.get(canvas);
   };
+
+  /** Everything drawn so far, in the compact shape the store persists. */
+  function collectRows() {
+    const rows = {};
+    for (const [canvas, state] of cells) {
+      if (!state.strokes.length) continue;
+      const row = rows[state.character] || (rows[state.character] = {});
+      row[state.index] = {
+        s: state.strokes.map((stroke) => encodeStroke(stroke, canvas.width)),
+        a: state.accepted,
+      };
+    }
+    return rows;
+  }
+
+  // Written after every finished stroke rather than on close: the learner may
+  // simply navigate away, and a sheet that only survives a tidy exit is a
+  // sheet that mostly does not survive.
+  const persist = () => { if (lessonId) saveSheet(lessonId, collectRows()); };
+
+  /** Put a saved sheet back on the canvases. */
+  function restore() {
+    if (!lessonId) return 0;
+    const saved = loadSheet(lessonId);
+    if (!saved?.rows) return 0;
+    let restored = 0;
+    for (const canvas of overlay.querySelectorAll('canvas.kanji-sheet-cell')) {
+      const state = cellState(canvas);
+      const entry = saved.rows?.[state.character]?.[state.index];
+      if (!entry || !Array.isArray(entry.s)) continue;
+      state.strokes = entry.s.map((flat) => decodeStroke(flat, canvas.width));
+      state.accepted = Math.max(0, Math.min(Number(entry.a) || 0, state.strokes.length));
+      restored += state.strokes.length;
+    }
+    return restored;
+  }
 
   function pointOf(event, canvas) {
     const rect = canvas.getBoundingClientRect();
@@ -247,6 +290,7 @@ export function openKanjiSheet({ characters = [], title = '', trigger = null } =
     if (!checking) {
       state.strokes.push(points);
       paintCell(canvas);
+      persist();
       return;
     }
 
@@ -257,6 +301,7 @@ export function openKanjiSheet({ characters = [], title = '', trigger = null } =
       state.accepted += 1;
       const done = state.accepted >= guide.length;
       setStatus(done ? `${state.character}: xong ${guide.length} nét.` : `${state.character}: nét ${state.accepted + 1}/${guide.length}`, done ? 'ok' : '');
+      persist();
     } else {
       setStatus(`${state.character}: ${STROKE_FEEDBACK[verdict.reason] || STROKE_FEEDBACK['wrong-place']}`, 'error');
       canvas.classList.remove('is-rejected');
@@ -267,17 +312,23 @@ export function openKanjiSheet({ characters = [], title = '', trigger = null } =
   }
 
   rowsHost.addEventListener('pointerdown', onPointerDown);
+  // preventDefault on pointerdown is not enough on its own: a drag that began
+  // on a square still raises selectstart, which highlights the whole row and
+  // brings up the copy menu mid-stroke.
+  rowsHost.addEventListener('selectstart', (event) => event.preventDefault());
+  rowsHost.addEventListener('dragstart', (event) => event.preventDefault());
   document.addEventListener('pointermove', onPointerMove, { passive: false });
   document.addEventListener('pointerup', onPointerUp);
   document.addEventListener('pointercancel', onPointerUp);
 
-  function clearSheet() {
+  function wipeSheet() {
     for (const [canvas, state] of cells) {
       state.strokes = [];
       state.accepted = 0;
       paintCell(canvas);
     }
-    setStatus('');
+    if (lessonId) clearSheet(lessonId);
+    setStatus('Đã xóa cả tờ.');
   }
 
   function close() {
@@ -293,7 +344,7 @@ export function openKanjiSheet({ characters = [], title = '', trigger = null } =
 
   overlay.addEventListener('click', (event) => {
     const action = event.target.closest('[data-sheet-action]')?.dataset.sheetAction;
-    if (action === 'clear') clearSheet();
+    if (action === 'clear') wipeSheet();
     else if (action === 'close' || event.target === overlay) close();
   });
 
@@ -303,6 +354,12 @@ export function openKanjiSheet({ characters = [], title = '', trigger = null } =
     onEscape: close,
   });
   activeSheet = { element: overlay, close };
+
+  // Ink first: it comes from localStorage, so it can be on screen immediately
+  // rather than waiting on the half-megabyte stroke file.
+  const restored = restore();
+  for (const canvas of overlay.querySelectorAll('canvas.kanji-sheet-cell')) paintCell(canvas);
+  if (restored) setStatus('Đã mở lại tờ đang viết dở.');
 
   // Stroke outlines and readings arrive together; until they do the squares are
   // plain paper, which is still usable.

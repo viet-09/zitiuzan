@@ -21,6 +21,7 @@ export const USER_SCOPED_STORAGE_KEYS = Object.freeze([
   'n2_bookmarks_v1',
   'n2_exam_history_cache_v1',
   'n2_pet_memories_v1',
+  'n2_kanji_sheet_v1',
 ]);
 
 export function shouldRunLegacyMigration(markerValue) {

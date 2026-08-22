@@ -22,9 +22,9 @@ import { completeLessonOnce, toggleLessonCompletion } from './completion.js';
 import { learningState } from './learning-state.js';
 import { buildBookViewerModel, renderBookViewerStrip } from './book-viewer.js';
 import { activateModalDialog } from './modal-dialog.js';
-import { openKanjiWritingPad } from './kanji-writing.js?v=28';
-import { openKanjiSheet } from './kanji-sheet.js?v=28';
-import { announceLessonCompleted } from './pet.js?v=28';
+import { openKanjiWritingPad } from './kanji-writing.js?v=29';
+import { openKanjiSheet } from './kanji-sheet.js?v=29';
+import { announceLessonCompleted } from './pet.js?v=29';
 import { fetchLessonReview, MIN_REVIEW_QUESTIONS } from './lesson-review.js';
 import { formatHanViet, hanVietOf, loadHanViet } from './kanji-hanviet.js';
 
@@ -808,7 +808,7 @@ export function renderLesson(root, id) {
     else if (action === 'jump-to') jumpToSection(button.closest('.lesson-page'), button.dataset.target);
     else if (action === 'practice-sheet') {
       const chars = (getBookContent(id)?.kanji || []).map((item) => item?.char || '');
-      openKanjiSheet({ characters: chars, title: findLesson(id)?.lesson?.title || '', trigger: button });
+      openKanjiSheet({ characters: chars, title: findLesson(id)?.lesson?.title || '', lessonId: id, trigger: button });
     }
     else if (action === 'refresh-revision') {
       void hydrateRevision(root, findLesson(id), id, getBookContent(id), { refresh: true });

@@ -272,6 +272,10 @@ export function openKanjiWritingPad({ character = '', trigger = null } = {}) {
   };
   canvas.addEventListener('pointerup', finishStroke);
   canvas.addEventListener('pointercancel', finishStroke);
+  // Same as the sheet: a pen drag is a text drag to the browser unless told
+  // otherwise, and the selection highlight lands on top of the writing.
+  sheet.addEventListener('selectstart', (event) => event.preventDefault());
+  sheet.addEventListener('dragstart', (event) => event.preventDefault());
 
   overlay.addEventListener('click', (event) => {
     const action = event.target.closest('[data-writing-action]')?.dataset.writingAction;
