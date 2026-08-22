@@ -82,3 +82,26 @@ test('build scripts read the chain rather than naming a model', () => {
     assert.doesNotMatch(source, /(MODEL|MODELS) = (\[)?'gemini/, file);
   }
 });
+
+test('the reply is read from every part, not just the first', async () => {
+  const { textFromResponse } = await import('../supabase/functions/_shared/gemini-models.js');
+
+  // Thinking models emit reasoning as its own part, so the answer can sit
+  // behind a part that carries no text at all — reading parts[0] returned an
+  // empty string and the chat looked like it had simply not replied.
+  assert.equal(textFromResponse({
+    candidates: [{ content: { parts: [{ thought: true }, { text: 'Xin chào' }] } }],
+  }), 'Xin chào');
+  assert.equal(textFromResponse({
+    candidates: [{ content: { parts: [{ text: 'một ' }, { text: 'hai' }] } }],
+  }), 'một hai');
+  assert.equal(textFromResponse({ candidates: [{ content: { parts: [] } }] }), '');
+  assert.equal(textFromResponse(null), '');
+});
+
+test('a hanging model becomes a fallback instead of a spinner', () => {
+  const proxy = read('supabase/functions/gemini-proxy/index.ts');
+  assert.match(proxy, /signal: AbortSignal\.timeout\(REQUEST_TIMEOUT_MS\)/);
+  // 504 is in the fallback set, so a timeout advances the chain.
+  assert.match(proxy, /timedOut \? 504 : 502/);
+});

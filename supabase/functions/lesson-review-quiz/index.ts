@@ -19,6 +19,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.0';
 import { hasGeminiKeys, withGeminiModelFallback } from '../_shared/gemini-key-pool.ts';
 import { MIN_QUESTIONS, sanitiseQuestions, targetQuestionCount } from '../_shared/lesson-review-rules.js';
+import { textFromResponse } from '../_shared/gemini-models.js';
 
 declare const Deno: {
   env: { get(name: string): string | undefined };
@@ -180,8 +181,7 @@ Deno.serve(async (req) => {
       if (!res.ok) {
         return { ok: false, status: res.status, errorText: (await res.text().catch(() => '')).slice(0, 200) };
       }
-      const body = await res.json();
-      const text = body?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+      const text = textFromResponse(await res.json());
       const parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
       const questions = sanitiseQuestions(parsed?.questions, existing);
       // Fewer than the floor means the model mostly repeated the book; storing

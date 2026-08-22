@@ -23,7 +23,7 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.0';
 import { hasGeminiKeys, withGeminiModelFallback } from '../_shared/gemini-key-pool.ts';
-import { TEXT_MODEL_CHAIN } from '../_shared/gemini-models.js';
+import { REQUEST_TIMEOUT_MS, TEXT_MODEL_CHAIN, textFromResponse } from '../_shared/gemini-models.js';
 
 declare const Deno: {
   env: { get(name: string): string | undefined };
@@ -183,17 +183,22 @@ Deno.serve(async (req) => {
           contents,
           generationConfig,
         }),
+        // The thinking models are slow by design — one measured 18s on a tutor
+        // prompt — but a model that hangs is indistinguishable from a broken
+        // chat. The cap turns a hang into a fallback instead of a spinner.
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       });
       if (!geminiRes.ok) {
         const errText = await geminiRes.text().catch(() => '');
         return { ok: false, status: geminiRes.status, errorText: errText.slice(0, 200) };
       }
-      const geminiJson = await geminiRes.json();
-      const text = geminiJson?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+      const text = textFromResponse(await geminiRes.json());
       if (!text) return { ok: false, status: 502, errorText: 'empty response' };
       return { ok: true, value: text };
     } catch (err) {
-      return { ok: false, status: 502, errorText: String(err) };
+      // A timeout is a 504 so the chain treats it as "try the next model".
+      const timedOut = (err as { name?: string })?.name === 'TimeoutError';
+      return { ok: false, status: timedOut ? 504 : 502, errorText: String(err).slice(0, 200) };
     }
   });
 

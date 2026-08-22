@@ -20,6 +20,7 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.0';
 import { hasGeminiKeys, withGeminiModelFallback } from '../_shared/gemini-key-pool.ts';
+import { textFromResponse } from '../_shared/gemini-models.js';
 
 declare const Deno: {
   env: { get(name: string): string | undefined };
@@ -104,7 +105,7 @@ async function callGemini(systemInstruction: string, prompt: string, schema: Rec
       return { ok: false, status: res.status, errorText: detail.slice(0, 300) };
     }
     const json = await res.json();
-    const text = json?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+    const text = textFromResponse(json);
     if (!text) return { ok: false, status: 502, errorText: 'Gemini returned no content' };
     try {
       return { ok: true, value: JSON.parse(text) };

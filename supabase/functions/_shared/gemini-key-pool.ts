@@ -14,6 +14,7 @@
 //   supabase secrets set GEMINI_API_KEYS="key1,key2,key3" --project-ref <ref>
 
 import { MODEL_FALLBACK_STATUSES, modelChain } from './gemini-models.js';
+import { createCooldownLedger } from './gemini-cooldown.js';
 
 declare const Deno: { env: { get(name: string): string | undefined } };
 
@@ -27,12 +28,11 @@ function loadKeyPool(): string[] {
 
 const KEY_POOL = loadKeyPool();
 
-// Cooldown/sticky-index state is per-isolate (module-level), reset on cold
-// start — at worst a recently-exhausted key gets retried once after a
-// redeploy/restart. Daily quotas reset once/day, so an hour-long cooldown
-// just avoids repeatedly wasting a request on a key already known-bad.
-const COOLDOWN_MS = 60 * 60_000;
-const cooldownUntil = new Map<string, number>();
+// Cooldowns are per (model, key) and their length depends on why the call
+// failed — see gemini-cooldown.js, and the bug that made that necessary.
+// State is per-isolate and lost on cold start; at worst one request is wasted
+// on a pair already known bad.
+const cooldowns = createCooldownLedger();
 let stickyIndex = 0;
 
 // Statuses worth trying the next key for: invalid/revoked key (401/403),
@@ -59,6 +59,7 @@ export function hasGeminiKeys(): boolean {
  */
 export async function withGeminiKeyFailover<T>(
   attempt: (key: string) => Promise<GeminiTry<T>>,
+  scope = 'default',
 ): Promise<GeminiTry<T>> {
   if (KEY_POOL.length === 0) {
     return { ok: false, status: 500, errorText: 'Server misconfigured: no Gemini API key configured' };
@@ -66,21 +67,25 @@ export async function withGeminiKeyFailover<T>(
 
   const now = Date.now();
   const order = KEY_POOL.map((_, i) => (stickyIndex + i) % KEY_POOL.length);
-  let last: GeminiTry<T> = { ok: false, status: 500, errorText: 'No Gemini API key available' };
+  // 503 when every key is benched, not 500: this is "temporarily unavailable",
+  // and the model chain above needs to read it as a reason to try the next
+  // model rather than as a configuration error.
+  let last: GeminiTry<T> = { ok: false, status: 503, errorText: `No Gemini key available for ${scope}` };
 
   for (const idx of order) {
     const key = KEY_POOL[idx];
-    if ((cooldownUntil.get(key) ?? 0) > now) continue;
+    if (cooldowns.blocked(scope, key, now)) continue;
 
     const result = await attempt(key);
     if (result.ok) {
+      cooldowns.clear(scope, key);
       stickyIndex = idx;
       return result;
     }
     last = result;
     if (!RETRYABLE_STATUSES.has(result.status)) return result;
-    cooldownUntil.set(key, now + COOLDOWN_MS);
-    console.error(`Gemini key #${idx} failed (status ${result.status}) — trying next key in pool`);
+    const wait = cooldowns.penalise(scope, key, result.status, now);
+    console.error(`Gemini key #${idx} failed on ${scope} (status ${result.status}) — benched ${wait}ms, trying next key`);
   }
 
   return last;
@@ -107,7 +112,9 @@ export async function withGeminiModelFallback<T>(
   let last: GeminiTry<T> = { ok: false, status: 500, errorText: 'No Gemini model available' };
 
   for (const model of chain) {
-    const result = await withGeminiKeyFailover((key) => attempt(model, key));
+    // The scope is what keeps one model's outage from benching every key for
+    // the models below it, which is what used to break this whole loop.
+    const result = await withGeminiKeyFailover((key) => attempt(model, key), model);
     if (result.ok) return result;
     last = result;
     if (!MODEL_RETRY.has(result.status)) return result;

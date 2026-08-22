@@ -46,3 +46,23 @@ export function modelChain(preferred) {
  * model, so it stops the walk instead of burning the whole chain.
  */
 export const MODEL_FALLBACK_STATUSES = Object.freeze([404, 429, 500, 502, 503, 504]);
+
+/** How long one generate call may take before the chain gives up on it. */
+export const REQUEST_TIMEOUT_MS = 45_000;
+
+/**
+ * The reply text out of a generateContent response.
+ *
+ * Reading `parts[0].text` is not safe on the newer models: they think before
+ * answering and emit the reasoning as its own part, so the first part can
+ * carry no text at all while the answer sits behind it. Joining every part
+ * keeps the reply whole whichever shape comes back.
+ *
+ * @param {unknown} body parsed JSON from generateContent
+ * @returns {string}
+ */
+export function textFromResponse(body) {
+  const parts = body?.candidates?.[0]?.content?.parts;
+  if (!Array.isArray(parts)) return '';
+  return parts.map((part) => (typeof part?.text === 'string' ? part.text : '')).join('').trim();
+}
