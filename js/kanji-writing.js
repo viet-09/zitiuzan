@@ -140,23 +140,50 @@ export function openKanjiWritingPad({ character = '', trigger = null } = {}) {
     context.clearRect(0, 0, canvas.width, canvas.height);
   }
 
-  /** The next expected stroke, faint, with a dot at the point to start from. */
-  function drawGuide() {
-    if (!guided() || strokes.length >= guideStrokes.length) return;
-    const points = guideStrokes[strokes.length].map((point) => ({
-      x: point.x * canvas.width,
-      y: point.y * canvas.height,
-    }));
-    if (points.length < 2) return;
+  const canvasPoints = (stroke) => stroke.map((point) => ({
+    x: point.x * canvas.width,
+    y: point.y * canvas.height,
+  }));
 
-    context.save();
-    context.strokeStyle = 'rgba(196, 64, 48, .34)';
-    context.lineWidth = 9;
-    context.setLineDash([14, 10]);
+  function tracePath(points) {
     context.beginPath();
     context.moveTo(points[0].x, points[0].y);
     for (const point of points.slice(1)) context.lineTo(point.x, point.y);
     context.stroke();
+  }
+
+  /**
+   * The whole character, faint, drawn from the very strokes that are being
+   * checked.
+   *
+   * The tracing outline used to be a font glyph centred in the sheet, which
+   * could never line up with KanjiVG's 109-unit box: a font has its own em
+   * square and side bearings, and the two were sized independently. Drawing
+   * both from one source makes a mismatch impossible rather than tuned away.
+   */
+  function drawGhost() {
+    if (!guided()) return;
+    context.save();
+    context.strokeStyle = 'rgba(20, 18, 16, .13)';
+    context.lineWidth = 11;
+    for (const stroke of guideStrokes) {
+      const points = canvasPoints(stroke);
+      if (points.length >= 2) tracePath(points);
+    }
+    context.restore();
+  }
+
+  /** The next expected stroke, faint, with a dot at the point to start from. */
+  function drawGuide() {
+    if (!guided() || strokes.length >= guideStrokes.length) return;
+    const points = canvasPoints(guideStrokes[strokes.length]);
+    if (points.length < 2) return;
+
+    context.save();
+    context.strokeStyle = 'rgba(196, 64, 48, .55)';
+    context.lineWidth = 9;
+    context.setLineDash([14, 10]);
+    tracePath(points);
 
     context.setLineDash([]);
     context.fillStyle = 'rgba(196, 64, 48, .7)';
@@ -168,6 +195,7 @@ export function openKanjiWritingPad({ character = '', trigger = null } = {}) {
 
   function redraw() {
     clearCanvas();
+    drawGhost();
     drawGuide();
     strokes.forEach((stroke) => {
       if (stroke.length === 1) drawSegment(context, stroke[0], stroke[0]);
@@ -276,6 +304,9 @@ export function openKanjiWritingPad({ character = '', trigger = null } = {}) {
       .filter((points) => points.length >= 2);
     if (!guideStrokes.length) return;
     hintEl.textContent = 'Viết theo đúng thứ tự nét. Nét sai chỗ hoặc sai chiều sẽ không được nhận.';
+    // The font glyph would sit at its own size and position next to the real
+    // outline, so it steps aside once the outline is available.
+    sheet.dataset.guided = 'true';
     redraw();
     setStatus(progressMessage());
   });

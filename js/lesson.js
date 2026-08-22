@@ -22,8 +22,9 @@ import { completeLessonOnce, toggleLessonCompletion } from './completion.js';
 import { learningState } from './learning-state.js';
 import { buildBookViewerModel, renderBookViewerStrip } from './book-viewer.js';
 import { activateModalDialog } from './modal-dialog.js';
-import { openKanjiWritingPad } from './kanji-writing.js?v=24';
-import { announceLessonCompleted } from './pet.js?v=24';
+import { openKanjiWritingPad } from './kanji-writing.js?v=26';
+import { announceLessonCompleted } from './pet.js?v=26';
+import { fetchLessonReview, MIN_REVIEW_QUESTIONS } from './lesson-review.js';
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (char) => ({
@@ -409,15 +410,39 @@ function pageHtml(found, lessonId, content) {
       <nav class="lesson-local-nav" aria-label="Mục lục bài học">
         <button type="button" data-action="jump-to" data-target="lesson-content">Nội dung</button>
         <button type="button" data-action="jump-to" data-target="lesson-practice" data-lesson-practice-link>Luyện tập</button>
+        <button type="button" data-action="jump-to" data-target="lesson-revision" data-lesson-revision-link hidden>Ôn lại</button>
         <button type="button" data-action="ask-tutor">Gia sư</button>
         <span class="lesson-local-progress"><strong data-lesson-progress-text>0/0 câu</strong><progress max="1" value="0" data-lesson-progress aria-label="Tiến độ câu luyện tập"></progress></span>
       </nav>
       <div class="lesson-body" id="lesson-content">${renderBookContent(category?.id, content, lessonId)}</div>
+      <section class="quiz-block lesson-revision" id="lesson-revision" data-lesson-revision aria-labelledby="lesson-revision-heading">
+        <h3 class="subheading" id="lesson-revision-heading">Ôn lại</h3>
+        <p class="lesson-revision-status" data-revision-status role="status" aria-live="polite">Đang soạn câu ôn thêm cho bài này…</p>
+      </section>
       <div class="lesson-footer-actions">
         <button type="button" class="tutor-lesson-btn" data-action="ask-tutor">🎓 Hỏi gia sư AI</button>
         <button type="button" class="back-btn back-btn-bottom" data-action="back">← Quay lại tổng quan</button>
       </div>
     </article>`;
+}
+
+/**
+ * One AI-written revision question, in the same shape handleQuiz already knows
+ * how to grade. The review key is prefixed `:r` so these never collide with
+ * the book's `:q` keys in the spaced-repetition log.
+ */
+function renderRevisionItem(question, lessonId, index) {
+  const options = Array.isArray(question?.options) ? question.options : [];
+  const correct = Number.isInteger(question?.answerIndex) ? question.answerIndex : -1;
+  const note = String(question?.note || '').trim();
+  return `
+    <div class="quiz-question" data-revision data-correct-idx="${correct}" data-review-key="${escapeHtml(`${lessonId}:r${index}`)}"${note ? ` data-revision-note="${escapeHtml(note)}"` : ''}>
+      <div class="quiz-q-text" lang="ja">${renderFurigana(question?.prompt || '')}</div>
+      <div class="quiz-options">
+        ${options.map((option, optionIndex) => `<button type="button" class="quiz-option" data-action="quiz-option" data-idx="${optionIndex}" lang="ja">${renderFurigana(option)}</button>`).join('')}
+      </div>
+      <div class="quiz-explain" role="status" hidden></div>
+    </div>`;
 }
 
 function handleQuiz(button, lessonId, categoryId) {
@@ -441,9 +466,13 @@ function handleQuiz(button, lessonId, categoryId) {
   if (status) {
     status.hidden = false;
     const correctTarget = targets[correct];
-    status.textContent = correct >= 0 && correctTarget
+    const answerLine = correct >= 0 && correctTarget
       ? `Đáp án: ${correctTarget.textContent.trim()}`
       : 'Đáp án của câu này chưa được xác minh.';
+    // Revision questions carry the reason the answer is right; the book's own
+    // questions have no such note and just show the answer.
+    const note = container.dataset.revisionNote;
+    status.textContent = note ? `${answerLine} — ${note}` : answerLine;
   }
   const reviewKey = container.dataset.reviewKey || `${lessonId}:quiz`;
   const wasCorrect = selected === correct;
@@ -458,7 +487,7 @@ function handleQuiz(button, lessonId, categoryId) {
       options: targets.map((target) => target.textContent?.trim() || ''),
       correctIndex: correct,
       selectedAnswer: targets[selected]?.textContent?.trim() || '',
-      source: 'lesson',
+      source: container.dataset.revision !== undefined ? 'lesson-revision' : 'lesson',
       correct: wasCorrect,
       now: new Date(),
     });
@@ -485,8 +514,11 @@ function handleQuiz(button, lessonId, categoryId) {
  */
 async function maybeAutoComplete(scope, lessonId, categoryId) {
   if (!scope || !lessonId) return;
-  const questions = scope.querySelectorAll('.quiz-question');
-  const answered = scope.querySelectorAll('.quiz-question.is-answered');
+  // Only the book's practice decides completion. The "Ôn lại" set is extra
+  // drilling on top, so requiring it would make finishing a lesson harder the
+  // moment the AI wrote more questions.
+  const questions = bookQuestions(scope);
+  const answered = questions.filter((question) => question.classList.contains('is-answered'));
   if (!questions.length || answered.length < questions.length) return;
 
   const { changed } = await completeLessonOnce({ lessonId, categoryId });
@@ -506,9 +538,14 @@ async function maybeAutoComplete(scope, lessonId, categoryId) {
   if (status) status.textContent = `${questions.length}/${questions.length} câu · đã hoàn thành`;
 }
 
+/** The book's own practice questions — never the AI revision set. */
+function bookQuestions(scope) {
+  return [...(scope?.querySelectorAll('#lesson-content .quiz-question') || [])];
+}
+
 function updateLessonProgress(scope) {
   if (!scope) return;
-  const questions = [...scope.querySelectorAll('.quiz-question')];
+  const questions = bookQuestions(scope);
   const answered = questions.filter((question) => question.classList.contains('is-answered')).length;
   const output = scope.querySelector('[data-lesson-progress-text]');
   const progress = scope.querySelector('[data-lesson-progress]');
@@ -518,7 +555,7 @@ function updateLessonProgress(scope) {
     progress.value = answered;
     progress.setAttribute('aria-label', `Đã làm ${answered} trên ${questions.length} câu luyện tập`);
   }
-  const block = scope.querySelector('.quiz-block');
+  const block = scope.querySelector('#lesson-content .quiz-block');
   const link = scope.querySelector('[data-lesson-practice-link]');
   if (block) block.id = 'lesson-practice';
   if (link) {
@@ -601,9 +638,47 @@ export function renderLesson(root, id) {
       root.innerHTML = '<div class="lesson-page lesson-not-found"><p role="alert">Không tìm thấy bài học.</p><button type="button" class="back-btn" data-action="back">← Quay lại</button></div>';
       return;
     }
-    root.innerHTML = pageHtml(found, id, getBookContent(id));
+    const bookContent = getBookContent(id);
+    root.innerHTML = pageHtml(found, id, bookContent);
     updateLessonProgress(root.querySelector('.lesson-page'));
     hydrateLessonAudio(root);
+    void hydrateRevision(root, found, id, bookContent);
+  };
+
+  /**
+   * Fill the "Ôn lại" block. The questions come from a table every learner
+   * shares, so this is almost always one cheap read; only the first visit to a
+   * lesson anywhere pays for generation.
+   */
+  const hydrateRevision = async (root, found, id, content) => {
+    const section = root.querySelector('[data-lesson-revision]');
+    const status = section?.querySelector('[data-revision-status]');
+    if (!section || !status) return;
+
+    const { questions, error } = await fetchLessonReview({
+      lessonId: id,
+      lesson: found?.lesson,
+      content,
+      practice: content?.practice,
+    });
+    // paint() replaces the page wholesale, so a detached section is the signal
+    // that this result belongs to a render nobody is looking at any more.
+    if (!section.isConnected) return;
+
+    if (!questions.length) {
+      status.textContent = error === 'offline'
+        ? 'Phần ôn lại cần kết nối mạng.'
+        : 'Chưa soạn được phần ôn lại cho bài này. Mở lại bài sau nhé.';
+      return;
+    }
+
+    status.remove();
+    section.insertAdjacentHTML('beforeend', `
+      <p class="lesson-revision-lead">${questions.length} câu luyện thêm, soạn riêng từ nội dung bài này — không trùng với phần 練習 ở trên.</p>
+      <div class="quiz-section">${questions.map((question, index) => renderRevisionItem(question, id, index)).join('')}</div>`);
+
+    const link = root.querySelector('[data-lesson-revision-link]');
+    if (link) link.hidden = false;
   };
 
   // Shared popup lifecycle for both tap-a-word (definition) and tap-a-sentence

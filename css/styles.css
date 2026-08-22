@@ -2657,6 +2657,16 @@ body.furigana-off rt {
     .exam-advance-top { padding: 6px 10px; min-height: 30px; font-size: 9px; }
 }
 
+/* --- "Ôn lại": AI practice written from the lesson's own material -------- */
+.lesson-revision { margin-top: 28px; }
+.lesson-revision-status,
+.lesson-revision-lead {
+    margin-bottom: 14px;
+    color: var(--text-muted);
+    font: 500 .84rem/1.5 var(--font-sans);
+}
+.lesson-revision[hidden] { display: none; }
+
 /* --- Question classification badges ------------------------------------ */
 .quiz-q-header {
     display: flex;
@@ -3507,27 +3517,9 @@ body.modal-open { overflow: hidden; }
 .pet-art__hearts::after { position: absolute; content: '♥'; font: 900 20px/1 Georgia, serif; text-shadow: 0 2px 2px rgba(72, 30, 36, .18); }
 .pet-art__hearts::after { right: 0; bottom: 0; color: #ef8492; font-size: 13px; }
 .pet-art__spark { left: 2px; top: 46px; width: 25px; height: 25px; background: #f4bd3f; clip-path: polygon(50% 0, 61% 36%, 100% 50%, 61% 62%, 50% 100%, 38% 62%, 0 50%, 38% 36%); filter: drop-shadow(0 1px 1px rgba(57, 45, 39, .35)); }
-.pet-art__evolution-mark {
-    position: absolute;
-    z-index: 3;
-    right: 10px;
-    bottom: 19px;
-    width: 24px;
-    height: 24px;
-    display: grid;
-    place-items: center;
-    border: 1px solid rgba(57, 45, 39, .5);
-    border-radius: 50%;
-    background: #f8e5ad;
-    color: #743c31;
-    box-shadow: 0 2px 3px rgba(57, 45, 39, .16);
-    font: 900 12px/1 var(--font-sans);
-}
 .pet--tier-sleeping .pet-art { opacity: .78; }
 .pet--tier-excited .pet-art,
 .pet--tier-legendary .pet-art { animation-duration: 3.2s; }
-.pet--evolution-hatchling .pet-art__evolution-mark { opacity: 0; }
-.pet--evolution-companion .pet-art__evolution-mark { opacity: .72; }
 
 .pet-widget__hit-zones {
     position: absolute;
@@ -4123,6 +4115,10 @@ body.modal-open { overflow: hidden; }
     pointer-events: none;
     user-select: none;
 }
+/* Guided mode traces the KanjiVG outline on the canvas itself, which is the
+   same geometry the stroke check uses; the font glyph cannot be aligned to it
+   and would only sit behind it at a different size. */
+.kanji-writing-sheet[data-guided='true'] .kanji-writing-guide { display: none; }
 .kanji-writing-canvas {
     position: absolute;
     inset: 0;

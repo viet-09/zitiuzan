@@ -33,6 +33,5 @@ export function renderPetArt(petType, accessoryId = 'none') {
     ${accessoryMarkup(accessoryId)}
     <span class="pet-art__effect pet-art__hearts" aria-hidden="true"></span>
     <span class="pet-art__effect pet-art__spark" aria-hidden="true"></span>
-    <span class="pet-art__evolution-mark" aria-hidden="true">✓</span>
   </span>`;
 }

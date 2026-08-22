@@ -3,7 +3,7 @@
 // settings object so changing the character never overwrites unrelated settings.
 
 import { getSettings, setSettings } from './store.js';
-import { renderPetArt } from './pet-art.js?v=24';
+import { renderPetArt } from './pet-art.js?v=26';
 
 export const PET_UPDATED_EVENT = 'n2:pet-updated';
 export const PET_COMPLETION_EVENT = 'n2:lesson-complete';
@@ -290,6 +290,11 @@ export function mountPet(target, options = {}) {
 
   function render() {
     if (destroyed) return;
+    // Both timers point at nodes this render is about to throw away.
+    if (statusTimer) window.clearTimeout(statusTimer);
+    if (reactionTimer) window.clearTimeout(reactionTimer);
+    statusTimer = null;
+    reactionTimer = null;
     const loadToken = ++companionLoadToken;
     petCompanionController?.destroy();
     petCompanionController = null;
@@ -320,7 +325,7 @@ export function mountPet(target, options = {}) {
       </div>`;
     mount.classList.toggle('is-panel-open', panelOpen);
     const companionHost = mount.querySelector('[data-pet-companion]');
-    import('./pet-companion.js?v=24').then(({ mountPetCompanion }) => {
+    import('./pet-companion.js?v=26').then(({ mountPetCompanion }) => {
       if (destroyed || loadToken !== companionLoadToken || !companionHost?.isConnected) return;
       petCompanionController = mountPetCompanion(companionHost, {
         mount,
@@ -351,16 +356,24 @@ export function mountPet(target, options = {}) {
     petCompanionController?.setPanelOpen(panelOpen);
   }
 
+  /** Hide whatever speech bubble is mounted right now. */
+  function hideBubble() {
+    if (statusTimer) window.clearTimeout(statusTimer);
+    statusTimer = null;
+    // Re-queried rather than captured: render() replaces the widget's markup,
+    // so a node captured when the bubble was shown may already be detached —
+    // clearing the class on that orphan left the live bubble on screen for
+    // good, which is why the completion message never went away.
+    mount.querySelector('.pet-widget__bubble')?.classList.remove('is-visible');
+  }
+
   function showBubble(text) {
     const bubble = mount.querySelector('.pet-widget__bubble');
     if (!bubble) return;
+    if (statusTimer) window.clearTimeout(statusTimer);
     bubble.textContent = text;
     bubble.classList.add('is-visible');
-    if (statusTimer) window.clearTimeout(statusTimer);
-    statusTimer = window.setTimeout(() => {
-      bubble.classList.remove('is-visible');
-      statusTimer = null;
-    }, 2600);
+    statusTimer = window.setTimeout(hideBubble, 2600);
   }
 
   function react(kind = 'play') {
@@ -380,7 +393,8 @@ export function mountPet(target, options = {}) {
       if (petCompanionController) petCompanionController.react(kind);
       else pendingCompanionReaction = kind;
       reactionTimer = window.setTimeout(() => {
-        widget.dataset.reaction = '';
+        // Same reason as hideBubble: read the live widget, not a captured one.
+        mount.querySelector('.pet-widget')?.setAttribute('data-reaction', '');
         reactionTimer = null;
       }, kind === 'complete' || kind === 'tier-up' ? 1500 : 1000);
     }

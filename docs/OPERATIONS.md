@@ -32,6 +32,16 @@ node scripts/link-and-deploy.mjs
 
 Migration phát hành nằm trong `supabase/migrations/`. Browser chỉ có quyền đọc trực tiếp tiến độ; thay đổi hoàn thành bài và thời gian học đi qua RPC đã xác thực.
 
+## Mục "Ôn lại" trong bài học
+
+Câu ôn thêm do AI soạn từ nội dung từng bài, nằm dưới phần 練習. Sinh bởi Edge Function `lesson-review-quiz` và lưu ở bảng **`lesson_review_quiz` — dùng chung cho mọi học viên**, không cache theo user: câu hỏi thuộc về bài học, mà quota Gemini free chỉ vài chục lượt/ngày nên cache theo user sẽ nhân số lần gọi lên bằng số người dùng.
+
+Client chỉ được `select`; chỉ Edge Function ghi (service role), nên không ai chèn bậy được nội dung mà cả lớp cùng học.
+
+Luật lọc/chống trùng nằm ở `supabase/functions/_shared/lesson-review-rules.js` — file JS thuần, Deno bundle cho function và Node import trong `tests/lesson-review.test.mjs`, nên test chạy đúng logic server chạy.
+
+Muốn soạn lại một bài: xoá dòng tương ứng trong `lesson_review_quiz`, lần mở bài kế tiếp sẽ sinh lại.
+
 ## Dữ liệu nét chữ kanji
 
 `data/kanji-strokes.json` chứa đường nét theo đúng thứ tự viết cho 683 kanji của giáo trình, dùng cho bảng luyện viết (`js/kanji-writing.js` + `js/kanji-stroke-match.js`). File được tải lười khi mở bảng luyện viết, không nằm trong app shell.
