@@ -16,6 +16,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { TEXT_MODEL_CHAIN } from '../supabase/functions/_shared/gemini-models.js';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const BOOK_DIR = join(ROOT, 'data', 'book');
@@ -29,7 +30,7 @@ if (!GEMINI_API_KEY) {
   process.exit(1);
 }
 
-const MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
+const MODEL = process.env.GEMINI_MODEL || TEXT_MODEL_CHAIN[0];
 const GEN_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 const UPLOAD_BASE = 'https://generativelanguage.googleapis.com/upload/v1beta/files';
 

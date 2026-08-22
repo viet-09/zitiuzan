@@ -42,6 +42,20 @@ Luật lọc/chống trùng nằm ở `supabase/functions/_shared/lesson-review-
 
 Muốn soạn lại một bài: xoá dòng tương ứng trong `lesson_review_quiz`, lần mở bài kế tiếp sẽ sinh lại.
 
+## Thứ tự model Gemini
+
+Chuỗi dự phòng nằm ở **`supabase/functions/_shared/gemini-models.js`** — đây là nơi duy nhất ghi thứ tự:
+
+```
+gemini-3.7-flash → gemini-3.6-flash → gemini-3.5-flash → gemini-3.5-flash-lite
+```
+
+Mỗi model có hạn mức free riêng theo ngày, nên hết lượt model này thì tự tụt xuống model kế tiếp (`withGeminiModelFallback` trong `_shared/gemini-key-pool.ts`, lồng bên ngoài vòng thử từng API key). Chỉ tụt khi gặp 429 / 404 / 5xx — gặp 400 thì dừng, vì request sai định dạng sẽ hỏng ở mọi model.
+
+Secret `GEMINI_MODEL` (nếu đặt) chỉ **đẩy một model lên đầu chuỗi**, không cắt mất các model dự phòng phía sau. Model học viên chọn trong Cài đặt cũng vậy.
+
+Đổi thứ tự: sửa `TEXT_MODEL_CHAIN`, cập nhật `MODEL_SUGGESTIONS` trong `js/gemini.js` và `DEFAULT_SETTINGS.model` trong `js/config.js` (trình duyệt không import được từ `supabase/functions/`), rồi chạy `npm test` — `tests/gemini-models.test.mjs` bắt lệch. Sau đó deploy lại Edge Functions.
+
 ## Âm Hán Việt
 
 `data/kanji-hanviet.json` — âm Hán Việt của 665/683 kanji trong giáo trình, hiện dưới mỗi thẻ kanji và trong tờ luyện viết.

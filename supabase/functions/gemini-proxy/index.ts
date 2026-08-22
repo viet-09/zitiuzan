@@ -22,7 +22,8 @@
 //   supabase functions deploy gemini-proxy --project-ref <ref>
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.0';
-import { hasGeminiKeys, withGeminiKeyFailover } from '../_shared/gemini-key-pool.ts';
+import { hasGeminiKeys, withGeminiModelFallback } from '../_shared/gemini-key-pool.ts';
+import { TEXT_MODEL_CHAIN } from '../_shared/gemini-models.js';
 
 declare const Deno: {
   env: { get(name: string): string | undefined };
@@ -31,14 +32,15 @@ declare const Deno: {
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
-const DEFAULT_MODEL = Deno.env.get('GEMINI_MODEL') ?? 'gemini-3.5-flash-lite';
+// Empty unless an operator pins one; the shared chain supplies the order.
+const DEFAULT_MODEL = Deno.env.get('GEMINI_MODEL') ?? '';
 
 // The client (Settings modal) may request a faster/slower model, but only
 // from this allowlist — never forward an arbitrary client-supplied string
 // into the upstream URL. Kept in sync with js/gemini.js's MODEL_SUGGESTIONS;
 // gemini-2.0-flash (fully deprecated) and gemini-2.5-flash (not available to
 // this project's API keys) were removed after both broke live AI calls.
-const ALLOWED_MODELS = new Set(['gemini-3.5-flash-lite', 'gemini-3.5-flash']);
+const ALLOWED_MODELS = new Set(TEXT_MODEL_CHAIN);
 
 const MAX_TEXT_CHARS = 4000;
 const MAX_HISTORY_TURNS = 40;
@@ -143,6 +145,8 @@ Deno.serve(async (req) => {
   const history = clampHistory(raw.history);
   const userText = clampText(raw.user, MAX_TEXT_CHARS);
   const schema = raw.schema && typeof raw.schema === 'object' ? raw.schema : null;
+  // A learner's chosen model is only a preference for the front of the chain —
+  // the fallbacks behind it still apply once it runs out of quota.
   const model = typeof raw.model === 'string' && ALLOWED_MODELS.has(raw.model) ? raw.model : DEFAULT_MODEL;
 
   const contents: Content[] = historyToContents(history);
@@ -168,8 +172,8 @@ Deno.serve(async (req) => {
     generationConfig.responseSchema = schema;
   }
 
-  const result = await withGeminiKeyFailover<string>(async (key) => {
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${key}`;
+  const result = await withGeminiModelFallback<string>(model, async (attemptModel, key) => {
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(attemptModel)}:generateContent?key=${key}`;
     try {
       const geminiRes = await fetch(geminiUrl, {
         method: 'POST',

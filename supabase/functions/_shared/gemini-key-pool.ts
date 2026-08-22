@@ -13,6 +13,8 @@
 //
 //   supabase secrets set GEMINI_API_KEYS="key1,key2,key3" --project-ref <ref>
 
+import { MODEL_FALLBACK_STATUSES, modelChain } from './gemini-models.js';
+
 declare const Deno: { env: { get(name: string): string | undefined } };
 
 function loadKeyPool(): string[] {
@@ -81,5 +83,35 @@ export async function withGeminiKeyFailover<T>(
     console.error(`Gemini key #${idx} failed (status ${result.status}) — trying next key in pool`);
   }
 
+  return last;
+}
+
+const MODEL_RETRY = new Set(MODEL_FALLBACK_STATUSES);
+
+/**
+ * Walk the model chain, and inside each model the whole key pool.
+ *
+ * Key failover alone was not enough: every key shares one project's per-model
+ * daily allowance, so once a model is spent no key can serve it and the
+ * feature went dark for the rest of the day. Dropping to the next model is
+ * what keeps it working, because each model has its own allowance.
+ *
+ * @param preferred a model to try first, e.g. the GEMINI_MODEL secret
+ * @param attempt performs the call for one (model, key) pair
+ */
+export async function withGeminiModelFallback<T>(
+  preferred: string,
+  attempt: (model: string, key: string) => Promise<GeminiTry<T>>,
+): Promise<GeminiTry<T>> {
+  const chain = modelChain(preferred);
+  let last: GeminiTry<T> = { ok: false, status: 500, errorText: 'No Gemini model available' };
+
+  for (const model of chain) {
+    const result = await withGeminiKeyFailover((key) => attempt(model, key));
+    if (result.ok) return result;
+    last = result;
+    if (!MODEL_RETRY.has(result.status)) return result;
+    console.error(`Gemini model ${model} unavailable (status ${result.status}) — trying the next model`);
+  }
   return last;
 }

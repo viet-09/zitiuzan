@@ -17,7 +17,7 @@
 //          (auto-injected), GEMINI_API_KEYS — see _shared/gemini-key-pool.ts.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.0';
-import { hasGeminiKeys, withGeminiKeyFailover } from '../_shared/gemini-key-pool.ts';
+import { hasGeminiKeys, withGeminiModelFallback } from '../_shared/gemini-key-pool.ts';
 import { MIN_QUESTIONS, sanitiseQuestions, targetQuestionCount } from '../_shared/lesson-review-rules.js';
 
 declare const Deno: {
@@ -28,7 +28,8 @@ declare const Deno: {
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
-const GEMINI_MODEL = Deno.env.get('GEMINI_MODEL') ?? 'gemini-3.5-flash';
+// Empty unless an operator pins one; the shared chain supplies the rest.
+const GEMINI_MODEL = Deno.env.get('GEMINI_MODEL') ?? '';
 
 const COOLDOWN_MS = 20_000;
 const lastCallByUser = new Map<string, number>();
@@ -159,8 +160,10 @@ Deno.serve(async (req) => {
   const want = targetQuestionCount(fromBook.length);
   const prompt = buildPrompt(content, existing, want);
 
-  const attempt = await withGeminiKeyFailover<ReturnType<typeof sanitiseQuestions>>(async (key) => {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent?key=${key}`;
+  let usedModel = '';
+  const attempt = await withGeminiModelFallback<ReturnType<typeof sanitiseQuestions>>(GEMINI_MODEL, async (model, key) => {
+    usedModel = model;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${key}`;
     try {
       const res = await fetch(url, {
         method: 'POST',
@@ -199,7 +202,7 @@ Deno.serve(async (req) => {
 
   const { error: writeErr } = await service
     .from('lesson_review_quiz')
-    .upsert({ lesson_id: lessonId, questions: attempt.value, model: GEMINI_MODEL });
+    .upsert({ lesson_id: lessonId, questions: attempt.value, model: usedModel });
   // A failed write only costs the next reader one more generation.
   if (writeErr) console.error('lesson-review-quiz cache write failed:', writeErr.message);
 

@@ -128,9 +128,14 @@ export async function askAudio({ system, history = [], audioBase64, mimeType, pr
 const MODAL_ID = 'gemini-settings-overlay';
 let activeSettingsDialog = null;
 
+// Mirrors the server's fallback chain, newest first. Kept in step with
+// supabase/functions/_shared/gemini-models.js by tests/gemini-models.test.mjs —
+// the browser cannot import from the functions directory.
 const MODEL_SUGGESTIONS = [
-  'gemini-3.5-flash-lite',
+  'gemini-3.7-flash',
+  'gemini-3.6-flash',
   'gemini-3.5-flash',
+  'gemini-3.5-flash-lite',
 ];
 const LIVE_MODEL_SUGGESTIONS = [
   'gemini-3.1-flash-live-preview',
@@ -191,7 +196,7 @@ export function openSettings() {
 
   const help = document.createElement('p');
   help.className = 'settings-help';
-  help.textContent = 'Trợ lý AI (gia sư, luyện nói, giải nghĩa hán tự) chạy qua máy chủ nên bạn cần đăng nhập để dùng. Ở đây bạn chỉ chọn model — không cần nhập API key.';
+  help.textContent = 'Trợ lý AI (gia sư, luyện nói, giải nghĩa hán tự) chạy qua máy chủ nên bạn cần đăng nhập để dùng. Ở đây bạn chỉ chọn model ưu tiên — hết lượt trong ngày, máy chủ tự chuyển xuống model kế tiếp.';
 
   const modelLabel = document.createElement('label');
   modelLabel.setAttribute('for', 'gemini-settings-model');
@@ -203,7 +208,7 @@ export function openSettings() {
   modelInput.setAttribute('list', 'gemini-settings-model-options');
   modelInput.autocomplete = 'off';
   modelInput.spellcheck = false;
-  modelInput.placeholder = 'gemini-3.5-flash-lite';
+  modelInput.placeholder = MODEL_SUGGESTIONS[0];
   modelInput.value = current.model || '';
 
   const datalist = document.createElement('datalist');

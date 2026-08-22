@@ -16,7 +16,9 @@ export const STORAGE = {
 };
 
 export const DEFAULT_SETTINGS = {
-  model: 'gemini-3.5-flash-lite',
+  // Head of the shared fallback chain — see supabase/functions/_shared/
+  // gemini-models.js, which tests keep this in step with.
+  model: 'gemini-3.7-flash',
   liveModel: 'gemini-3.1-flash-live-preview',
   furigana: true,
   examTargetDate: '',

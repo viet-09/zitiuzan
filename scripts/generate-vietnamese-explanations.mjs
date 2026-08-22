@@ -25,6 +25,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadGeminiKeyPool, createGeminiKeyRotator, GeminiKeyError } from './lib/gemini-key-pool.mjs';
+import { TEXT_MODEL_CHAIN } from '../supabase/functions/_shared/gemini-models.js';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const BOOK_DIR = join(ROOT, 'data', 'book');
@@ -41,7 +42,7 @@ console.log(`Using a pool of ${KEY_POOL.length} Gemini API key(s).`);
 // per DAY despite the misleading "retry in Ns" hint in 429 responses) was
 // fully exhausted by earlier work today. gemini-3.5-flash-lite is a separate
 // model with its own quota bucket and was still available.
-const MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
+const MODEL = process.env.GEMINI_MODEL || TEXT_MODEL_CHAIN[0];
 const GEN_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 
 const args = process.argv.slice(2);

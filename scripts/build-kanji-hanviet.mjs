@@ -108,10 +108,11 @@ const PROMPTS = [
   ].join('\n'),
 ];
 
-// The free tier allows only a couple of dozen flash calls a day, and this
-// build spends a dozen. flash-lite has its own allowance, so a 429 falls
-// through to it rather than losing the whole run.
-const MODELS = ['gemini-3.5-flash', 'gemini-3.5-flash-lite'];
+// Each model has its own small daily allowance and this build spends a dozen
+// calls, so a 429 walks down the shared chain rather than losing the run.
+import { TEXT_MODEL_CHAIN } from '../supabase/functions/_shared/gemini-models.js';
+
+const MODELS = [...TEXT_MODEL_CHAIN];
 let modelIndex = 0;
 
 /** Ask Gemini for one batch, returning `{ character: reading }`. */

@@ -19,7 +19,7 @@
 //          GEMINI_API_KEY secret if unset).
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.0';
-import { hasGeminiKeys, withGeminiKeyFailover } from '../_shared/gemini-key-pool.ts';
+import { hasGeminiKeys, withGeminiModelFallback } from '../_shared/gemini-key-pool.ts';
 
 declare const Deno: {
   env: { get(name: string): string | undefined };
@@ -29,7 +29,8 @@ declare const Deno: {
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
-const GEMINI_MODEL = Deno.env.get('GEMINI_MODEL') ?? 'gemini-3.5-flash';
+// Empty unless an operator pins one; the shared chain supplies the rest.
+const GEMINI_MODEL = Deno.env.get('GEMINI_MODEL') ?? '';
 
 const COOLDOWN_MS = 15_000;
 const lastCallByUser = new Map<string, number>();
@@ -87,8 +88,8 @@ function questionId(q: { section: string; part: string; number: number }): strin
 }
 
 async function callGemini(systemInstruction: string, prompt: string, schema: Record<string, unknown>) {
-  const attempt = await withGeminiKeyFailover<unknown>(async (key) => {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent?key=${key}`;
+  const attempt = await withGeminiModelFallback<unknown>(GEMINI_MODEL, async (model, key) => {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${key}`;
     const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
