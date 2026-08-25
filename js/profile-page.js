@@ -5,8 +5,8 @@
 
 import { currentUser, signInWithGoogle, signOut, ready as supabaseReady } from './supabase.js';
 import { getProfile, renderAvatar, openProfileDialog, saveProfile } from './profile.js';
-import { PET_TYPES, getPetEvolution, getPetMemories, getPetPreferences, getPetSkins, setPetPreferences, renderPet } from './pet.js?v=30';
-import { mountPetMotion } from './pet-motion.js?v=30';
+import { PET_TYPES, getPetEvolution, getPetMemories, getPetPreferences, getPetSkins, setPetPreferences, renderPet } from './pet.js?v=33';
+import { mountPetMotion } from './pet-motion.js?v=33';
 import { clearUserScopedStorage } from './account-storage.js';
 import { learningState } from './learning-state.js';
 
@@ -153,7 +153,7 @@ async function paint(el) {
     if (caption) caption.textContent = {
       walk: 'Dáng di chuyển riêng của ngoại trang.',
       signature: 'Điệu múa / emote đặc trưng của ngoại trang.',
-      recall: 'Chuỗi B về riêng gồm 4 nhịp.',
+      recall: 'Chuỗi B về riêng gồm 4 hồi và 64 khung chuyển động.',
     }[action];
   });
 

@@ -6,12 +6,13 @@ import {
   PET_RESTING_STATES,
   choosePetWaypoint,
   chooseNextPetState,
+  choosePetReactionState,
   clampPetPosition,
   getContextualPetAdvice,
   getPetBounds,
   getPetStatePath,
-} from './pet-companion-state.js?v=30';
-import { getClipDuration, isPetClipLooping, mountPetMotion } from './pet-motion.js?v=30';
+} from './pet-companion-state.js?v=33';
+import { getClipDuration, isPetClipLooping, mountPetMotion } from './pet-motion.js?v=33';
 
 const POSITION_STORAGE_KEY = 'n2_pet_position_v1';
 const BOTTOM_INSET = 74;
@@ -52,6 +53,7 @@ export function mountPetCompanion(host, options = {}) {
   const now = typeof options.now === 'function' ? options.now : () => Date.now();
   const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
   let reducedMotion = motionQuery.matches;
+  let lastLongEffectAt = -Infinity;
   const skinId = host.dataset.petSkin || 'classic';
   let coach = options.coach || {};
   let state = 'idle';
@@ -278,13 +280,10 @@ export function mountPetCompanion(host, options = {}) {
   return {
     react(kind) {
       noteInteraction();
-      transitionTo({
-        pat: 'look',
-        tease: 'play',
-        highfive: 'signature',
-        complete: 'signature',
-        'tier-up': 'recall',
-      }[kind] || 'look');
+      const reactionAt = now();
+      const target = choosePetReactionState(kind, { now: reactionAt, lastLongEffectAt });
+      if (target === 'recall') lastLongEffectAt = reactionAt;
+      transitionTo(target);
     },
     updateCoach(nextCoach = {}) {
       coach = nextCoach;

@@ -4,9 +4,11 @@ import assert from 'node:assert/strict';
 import {
   PET_ACTIVITY_WEIGHTS,
   PET_COMPANION_STATES,
+  PET_LONG_EFFECT_COOLDOWN,
   PET_STATE_TRANSITIONS,
   PET_TRAVEL,
   chooseNextPetState,
+  choosePetReactionState,
   choosePetWaypoint,
   clampPetPosition,
   getContextualPetAdvice,
@@ -70,6 +72,19 @@ test('a lively pet picks activities by weight and never repeats one back to back
   assert.equal(chooseNextPetState('idle', { idleMs: 0, random: () => 0.99 }), 'play');
   assert.equal(chooseNextPetState('walk', { idleMs: 0, random: () => 0.6 }), 'idle');
   assert.equal(chooseNextPetState('look', { idleMs: 0, random: () => 0.4 }), 'idle');
+});
+
+test('long showcase effects never enter ambient rotation and have a five-minute event cooldown', () => {
+  for (const weights of Object.values(PET_ACTIVITY_WEIGHTS)) {
+    assert.equal('recall' in weights, false);
+    assert.equal('signature' in weights, false);
+  }
+  const now = 1_000_000;
+  assert.equal(PET_LONG_EFFECT_COOLDOWN, 300_000);
+  assert.equal(choosePetReactionState('tier-up', { now, lastLongEffectAt: -Infinity }), 'recall');
+  assert.equal(choosePetReactionState('tier-up', { now, lastLongEffectAt: now - 299_999 }), 'signature');
+  assert.equal(choosePetReactionState('tier-up', { now, lastLongEffectAt: now - 300_000 }), 'recall');
+  assert.equal(choosePetReactionState('complete', { now, lastLongEffectAt: now }), 'signature');
 });
 
 test('advice draws on a wide pool led by the learner current weakness', () => {

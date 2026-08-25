@@ -8,6 +8,7 @@
     "test:e2e": "playwright test",
     "build:vendor": "node scripts/build-vendor.mjs",
     "build:pets": "node scripts/build-pet-atlas.mjs",
+    "build:skin-atlases": "node scripts/normalize-skin-atlas.mjs",
     "build:kanji-strokes": "node scripts/build-kanji-strokes.mjs",
     "build:kanji-hanviet": "node scripts/build-kanji-hanviet.mjs",
     "validate:data": "node scripts/validate-book-data.mjs",

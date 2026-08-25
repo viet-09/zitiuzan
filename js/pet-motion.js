@@ -51,7 +51,7 @@ function clip({ steps, loop = true, next = null, ...rest }) {
     loop,
     next,
     motion: motion(rest.motion),
-    steps: Object.freeze(steps.map(([frame, hold]) => Object.freeze({ frame, hold }))),
+    steps: Object.freeze(steps.map(([frame, hold, sheet = null]) => Object.freeze({ frame, hold, sheet }))),
   });
 }
 
@@ -165,12 +165,40 @@ function skinSteps(frames, holds) {
   return frames.map((frame, index) => [frame, holds[index]]);
 }
 
+const PREMIUM_RECALL_HOLDS = Object.freeze([
+  Object.freeze([320, 100, 90, 90, 85, 85, 80, 80, 80, 80, 80, 80, 80, 85, 95, 180]),
+  Object.freeze([140, 85, 80, 80, 75, 75, 70, 70, 70, 75, 75, 80, 80, 85, 95, 180]),
+  Object.freeze([180, 90, 85, 85, 80, 80, 75, 75, 75, 80, 80, 85, 85, 90, 105, 220]),
+  Object.freeze([180, 90, 85, 85, 80, 80, 75, 75, 75, 80, 80, 85, 90, 120, 180, 600]),
+]);
+
+const PREMIUM_RECALL_TEMPO = Object.freeze({
+  'peacemaker-high-noon': 0.98,
+  'prestige-heartsteel': 0.94,
+  'high-noon': 0.99,
+  dawnbringer: 1,
+  elementalist: 0.96,
+  'prestige-spirit-blossom': 0.97,
+  'dark-cosmic': 0.95,
+  cosmic: 0.93,
+});
+
+function premiumRecallSteps(skinId) {
+  const tempo = PREMIUM_RECALL_TEMPO[skinId] || 1;
+  return PREMIUM_RECALL_HOLDS.flatMap((holds, actIndex) => holds.map((hold, frame) => [
+    frame,
+    Math.max(65, Math.round((hold * tempo) / 5) * 5),
+    `${skinId}-recall-act-${actIndex + 1}`,
+  ]));
+}
+
 function buildPremiumClips(skinId) {
   const rhythm = SKIN_RHYTHMS[skinId] || SKIN_RHYTHMS.cosmic;
   const idleFrames = [SF.idleA, SF.idleB, SF.idleC, SF.idleD];
   const travelFrames = [SF.travelA, SF.travelB, SF.travelC, SF.travelD];
   const signatureFrames = [SF.signatureA, SF.signatureB, SF.signatureC, SF.signatureD];
-  const recallFrames = [SF.recallA, SF.recallB, SF.recallC, SF.recallD];
+  const recallSteps = premiumRecallSteps(skinId);
+  const recallMotion = { bob: 1.2, bobHz: 0.32, tilt: 0.6, tiltHz: 0.22, breathe: 0.01, breatheHz: 0.28 };
   return Object.freeze({
     idle: clip({ steps: skinSteps(idleFrames, rhythm.idle), motion: { bob: 1.2, bobHz: 0.3, breathe: 0.016, breatheHz: 0.3 } }),
     look: clip({ steps: skinSteps([SF.idleA, SF.idleB, SF.idleC, SF.idleA], [260, 360, 760, 300]), loop: false, next: 'idle', motion: { bob: 1, bobHz: 0.5, tilt: 1, tiltHz: 0.5 } }),
@@ -178,7 +206,7 @@ function buildPremiumClips(skinId) {
     play: clip({ steps: skinSteps(signatureFrames, rhythm.signature), loop: false, next: 'idle', motion: { bob: 4.8, bobHz: 1.8, tilt: 2.8, tiltHz: 0.9 } }),
     cheer: clip({ steps: skinSteps(signatureFrames, rhythm.signature), loop: false, next: 'idle', motion: { bob: 5.8, bobHz: 2, tilt: 3.2, tiltHz: 1 } }),
     signature: clip({ steps: skinSteps(signatureFrames, rhythm.signature), loop: false, next: 'idle', motion: { bob: 5.8, bobHz: 2, tilt: 3.2, tiltHz: 1 } }),
-    recall: clip({ steps: skinSteps(recallFrames, rhythm.recall), loop: false, next: 'idle', motion: { bob: 3.6, bobHz: 1.15, tilt: 2.2, tiltHz: 0.58, breathe: 0.018, breatheHz: 0.58 } }),
+    recall: clip({ steps: recallSteps, loop: false, next: 'idle', motion: recallMotion }),
     drowsy: clip({ steps: skinSteps([SF.idleA, SF.idleB], [1100, 1600]), motion: { bob: 0.7, bobHz: 0.18, breathe: 0.022, breatheHz: 0.18 } }),
     settle: clip({ steps: [[SF.idleD, 1000]], loop: false, next: 'sleep', motion: { breathe: 0.02, breatheHz: 0.24 } }),
     sleep: clip({ steps: skinSteps([SF.idleD, SF.idleA], [1700, 1700]), motion: { breathe: 0.026, breatheHz: 0.15 } }),
@@ -224,21 +252,22 @@ export function getClipDuration(state, skinId = 'classic') {
   return getPetClip(state, skinId).steps.reduce((total, step) => total + step.hold, 0);
 }
 
-/**
- * Frame shown `elapsed` ms into a clip. Looping clips wrap; one-shot clips hold
- * their last pose so a finished action never flickers back to its first frame.
- */
-export function getClipFrame(state, elapsed = 0, skinId = 'classic') {
+/** Timeline step shown `elapsed` ms into a clip, including its optional atlas. */
+export function getClipStep(state, elapsed = 0, skinId = 'classic') {
   const { steps, loop } = getPetClip(state, skinId);
   const duration = steps.reduce((total, step) => total + step.hold, 0);
   const time = Math.max(0, Number(elapsed) || 0);
-  if (!loop && time >= duration) return steps[steps.length - 1].frame;
+  if (!loop && time >= duration) return steps[steps.length - 1];
   let cursor = loop ? time % duration : time;
   for (const step of steps) {
-    if (cursor < step.hold) return step.frame;
+    if (cursor < step.hold) return step;
     cursor -= step.hold;
   }
-  return steps[steps.length - 1].frame;
+  return steps[steps.length - 1];
+}
+
+export function getClipFrame(state, elapsed = 0, skinId = 'classic') {
+  return getClipStep(state, elapsed, skinId).frame;
 }
 
 /** Sub-frame rig offsets: lift, rock and breath at `elapsed` ms into a clip. */
@@ -271,15 +300,18 @@ export function mountPetMotion(host, options = {}) {
   let state = PET_MOTION_STATES.includes(options.initialState) ? options.initialState : 'idle';
   let startedAt = 0;
   let frameRequest = 0;
-  let paintedFrame = -1;
+  let paintedFrame = '';
   let announcedEnd = false;
   let destroyed = false;
 
-  function paintFrame(frame) {
-    if (frame === paintedFrame) return;
-    paintedFrame = frame;
+  function paintFrame(frame, sheet = null) {
+    const paintKey = `${sheet || ''}:${frame}`;
+    if (paintKey === paintedFrame) return;
+    paintedFrame = paintKey;
     const position = getPetFramePosition(frame);
     host.dataset.petFrame = String(frame);
+    if (sheet) host.dataset.petSheet = sheet;
+    else delete host.dataset.petSheet;
     host.style.setProperty('--pet-frame-x', position.x);
     host.style.setProperty('--pet-frame-y', position.y);
   }
@@ -297,7 +329,8 @@ export function mountPetMotion(host, options = {}) {
     if (destroyed) return;
     if (!startedAt) startedAt = timestamp;
     const elapsed = timestamp - startedAt;
-    paintFrame(getClipFrame(state, elapsed, skinId));
+    const step = getClipStep(state, elapsed, skinId);
+    paintFrame(step.frame, step.sheet);
     paintOffsets(getClipOffsets(state, elapsed, skinId));
     const clipState = state;
     if (!getPetClip(state, skinId).loop && !announcedEnd && elapsed >= getClipDuration(state, skinId)) {
@@ -325,10 +358,11 @@ export function mountPetMotion(host, options = {}) {
     state = target;
     startedAt = 0;
     announcedEnd = false;
-    paintedFrame = -1;
+    paintedFrame = '';
     host.dataset.petClip = state;
     stop();
-    paintFrame(getClipFrame(state, 0, skinId));
+    const step = getClipStep(state, 0, skinId);
+    paintFrame(step.frame, step.sheet);
     paintOffsets(getClipOffsets(state, 0, skinId));
     start();
   }

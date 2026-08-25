@@ -4082,10 +4082,42 @@ body.modal-open { overflow: hidden; }
 .pet--skin-prestige-heartsteel .pixel-pet__sprite { background-image: url('../assets/pets/skins/fox-prestige-heartsteel.png'); }
 .pet--skin-high-noon .pixel-pet__sprite { background-image: url('../assets/pets/skins/fox-high-noon.png'); }
 .pet--skin-dawnbringer .pixel-pet__sprite { background-image: url('../assets/pets/skins/fox-dawnbringer.png'); }
+[data-pet-sheet='dawnbringer-recall-act-1'] .pet--skin-dawnbringer .pixel-pet__sprite { background-image: url('../assets/pets/skins/fox-dawnbringer-recall-act-1.png'); }
+[data-pet-sheet='dawnbringer-recall-act-2'] .pet--skin-dawnbringer .pixel-pet__sprite { background-image: url('../assets/pets/skins/fox-dawnbringer-recall-act-2.png'); }
+[data-pet-sheet='dawnbringer-recall-act-3'] .pet--skin-dawnbringer .pixel-pet__sprite { background-image: url('../assets/pets/skins/fox-dawnbringer-recall-act-3.png'); }
+[data-pet-sheet='dawnbringer-recall-act-4'] .pet--skin-dawnbringer .pixel-pet__sprite { background-image: url('../assets/pets/skins/fox-dawnbringer-recall-act-4.png'); }
 .pet--skin-elementalist .pixel-pet__sprite { background-image: url('../assets/pets/skins/rabbit-elementalist.png'); }
 .pet--skin-prestige-spirit-blossom .pixel-pet__sprite { background-image: url('../assets/pets/skins/rabbit-prestige-spirit-blossom.png'); }
 .pet--skin-dark-cosmic .pixel-pet__sprite { background-image: url('../assets/pets/skins/rabbit-dark-cosmic.png'); }
 .pet--skin-cosmic .pixel-pet__sprite { background-image: url('../assets/pets/skins/rabbit-cosmic.png'); }
+[data-pet-sheet='peacemaker-high-noon-recall-act-1'] .pet--skin-peacemaker-high-noon .pixel-pet__sprite { background-image: url('../assets/pets/skins/fox-peacemaker-high-noon-recall-act-1.png'); }
+[data-pet-sheet='peacemaker-high-noon-recall-act-2'] .pet--skin-peacemaker-high-noon .pixel-pet__sprite { background-image: url('../assets/pets/skins/fox-peacemaker-high-noon-recall-act-2.png'); }
+[data-pet-sheet='peacemaker-high-noon-recall-act-3'] .pet--skin-peacemaker-high-noon .pixel-pet__sprite { background-image: url('../assets/pets/skins/fox-peacemaker-high-noon-recall-act-3.png'); }
+[data-pet-sheet='peacemaker-high-noon-recall-act-4'] .pet--skin-peacemaker-high-noon .pixel-pet__sprite { background-image: url('../assets/pets/skins/fox-peacemaker-high-noon-recall-act-4.png'); }
+[data-pet-sheet='prestige-heartsteel-recall-act-1'] .pet--skin-prestige-heartsteel .pixel-pet__sprite { background-image: url('../assets/pets/skins/fox-prestige-heartsteel-recall-act-1.png'); }
+[data-pet-sheet='prestige-heartsteel-recall-act-2'] .pet--skin-prestige-heartsteel .pixel-pet__sprite { background-image: url('../assets/pets/skins/fox-prestige-heartsteel-recall-act-2.png'); }
+[data-pet-sheet='prestige-heartsteel-recall-act-3'] .pet--skin-prestige-heartsteel .pixel-pet__sprite { background-image: url('../assets/pets/skins/fox-prestige-heartsteel-recall-act-3.png'); }
+[data-pet-sheet='prestige-heartsteel-recall-act-4'] .pet--skin-prestige-heartsteel .pixel-pet__sprite { background-image: url('../assets/pets/skins/fox-prestige-heartsteel-recall-act-4.png'); }
+[data-pet-sheet='high-noon-recall-act-1'] .pet--skin-high-noon .pixel-pet__sprite { background-image: url('../assets/pets/skins/fox-high-noon-recall-act-1.png'); }
+[data-pet-sheet='high-noon-recall-act-2'] .pet--skin-high-noon .pixel-pet__sprite { background-image: url('../assets/pets/skins/fox-high-noon-recall-act-2.png'); }
+[data-pet-sheet='high-noon-recall-act-3'] .pet--skin-high-noon .pixel-pet__sprite { background-image: url('../assets/pets/skins/fox-high-noon-recall-act-3.png'); }
+[data-pet-sheet='high-noon-recall-act-4'] .pet--skin-high-noon .pixel-pet__sprite { background-image: url('../assets/pets/skins/fox-high-noon-recall-act-4.png'); }
+[data-pet-sheet='elementalist-recall-act-1'] .pet--skin-elementalist .pixel-pet__sprite { background-image: url('../assets/pets/skins/rabbit-elementalist-recall-act-1.png'); }
+[data-pet-sheet='elementalist-recall-act-2'] .pet--skin-elementalist .pixel-pet__sprite { background-image: url('../assets/pets/skins/rabbit-elementalist-recall-act-2.png'); }
+[data-pet-sheet='elementalist-recall-act-3'] .pet--skin-elementalist .pixel-pet__sprite { background-image: url('../assets/pets/skins/rabbit-elementalist-recall-act-3.png'); }
+[data-pet-sheet='elementalist-recall-act-4'] .pet--skin-elementalist .pixel-pet__sprite { background-image: url('../assets/pets/skins/rabbit-elementalist-recall-act-4.png'); }
+[data-pet-sheet='prestige-spirit-blossom-recall-act-1'] .pet--skin-prestige-spirit-blossom .pixel-pet__sprite { background-image: url('../assets/pets/skins/rabbit-prestige-spirit-blossom-recall-act-1.png'); }
+[data-pet-sheet='prestige-spirit-blossom-recall-act-2'] .pet--skin-prestige-spirit-blossom .pixel-pet__sprite { background-image: url('../assets/pets/skins/rabbit-prestige-spirit-blossom-recall-act-2.png'); }
+[data-pet-sheet='prestige-spirit-blossom-recall-act-3'] .pet--skin-prestige-spirit-blossom .pixel-pet__sprite { background-image: url('../assets/pets/skins/rabbit-prestige-spirit-blossom-recall-act-3.png'); }
+[data-pet-sheet='prestige-spirit-blossom-recall-act-4'] .pet--skin-prestige-spirit-blossom .pixel-pet__sprite { background-image: url('../assets/pets/skins/rabbit-prestige-spirit-blossom-recall-act-4.png'); }
+[data-pet-sheet='dark-cosmic-recall-act-1'] .pet--skin-dark-cosmic .pixel-pet__sprite { background-image: url('../assets/pets/skins/rabbit-dark-cosmic-recall-act-1.png'); }
+[data-pet-sheet='dark-cosmic-recall-act-2'] .pet--skin-dark-cosmic .pixel-pet__sprite { background-image: url('../assets/pets/skins/rabbit-dark-cosmic-recall-act-2.png'); }
+[data-pet-sheet='dark-cosmic-recall-act-3'] .pet--skin-dark-cosmic .pixel-pet__sprite { background-image: url('../assets/pets/skins/rabbit-dark-cosmic-recall-act-3.png'); }
+[data-pet-sheet='dark-cosmic-recall-act-4'] .pet--skin-dark-cosmic .pixel-pet__sprite { background-image: url('../assets/pets/skins/rabbit-dark-cosmic-recall-act-4.png'); }
+[data-pet-sheet='cosmic-recall-act-1'] .pet--skin-cosmic .pixel-pet__sprite { background-image: url('../assets/pets/skins/rabbit-cosmic-recall-act-1.png'); }
+[data-pet-sheet='cosmic-recall-act-2'] .pet--skin-cosmic .pixel-pet__sprite { background-image: url('../assets/pets/skins/rabbit-cosmic-recall-act-2.png'); }
+[data-pet-sheet='cosmic-recall-act-3'] .pet--skin-cosmic .pixel-pet__sprite { background-image: url('../assets/pets/skins/rabbit-cosmic-recall-act-3.png'); }
+[data-pet-sheet='cosmic-recall-act-4'] .pet--skin-cosmic .pixel-pet__sprite { background-image: url('../assets/pets/skins/rabbit-cosmic-recall-act-4.png'); }
 .pixel-pet-host[data-facing='left'] .pixel-pet__sprite { --pet-facing: -1; }
 
 .pet-figure::after {

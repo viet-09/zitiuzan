@@ -349,6 +349,40 @@ test('pixel desktop companion roams, reacts, drags and keeps its learning quest'
   await expect(profilePreview).toHaveAttribute('data-pet-clip', 'recall');
   await expect.poll(async () => Number(await profilePreview.getAttribute('data-pet-frame'))).toBeGreaterThanOrEqual(12);
   await page.getByRole('combobox', { name: 'Loài' }).selectOption('fox');
+  await page.getByRole('radio', { name: /Dawnbringer/ }).check();
+  await page.getByRole('button', { name: 'B về' }).click();
+  await expect(profilePreview).toHaveAttribute('data-pet-sheet', 'dawnbringer-recall-act-1');
+  await expect(profilePreview.locator('.pixel-pet__sprite')).toHaveCSS('background-image', /fox-dawnbringer-recall-act-1\.png/);
+  const recallFrames = new Set();
+  const recallSheets = new Set();
+  for (let sample = 0; sample < 34; sample += 1) {
+    const frame = await profilePreview.getAttribute('data-pet-frame');
+    const sheet = await profilePreview.getAttribute('data-pet-sheet');
+    recallFrames.add(`${sheet}:${frame}`);
+    recallSheets.add(sheet);
+    await page.waitForTimeout(100);
+  }
+  expect(recallFrames.size).toBeGreaterThanOrEqual(22);
+  expect(recallSheets.size).toBeGreaterThanOrEqual(2);
+
+  const recallSkins = [
+    ['fox', 'peacemaker-high-noon', 'fox-peacemaker-high-noon'],
+    ['fox', 'prestige-heartsteel', 'fox-prestige-heartsteel'],
+    ['fox', 'high-noon', 'fox-high-noon'],
+    ['rabbit', 'elementalist', 'rabbit-elementalist'],
+    ['rabbit', 'prestige-spirit-blossom', 'rabbit-prestige-spirit-blossom'],
+    ['rabbit', 'dark-cosmic', 'rabbit-dark-cosmic'],
+    ['rabbit', 'cosmic', 'rabbit-cosmic'],
+  ];
+  for (const [type, skinId, asset] of recallSkins) {
+    await page.getByRole('combobox', { name: 'Loài' }).selectOption(type);
+    await page.locator(`input[name="pet-skin"][value="${skinId}"]`).check();
+    await page.getByRole('button', { name: 'B về' }).click();
+    await expect(profilePreview).toHaveAttribute('data-pet-sheet', `${skinId}-recall-act-1`);
+    await expect(profilePreview.locator('.pixel-pet__sprite')).toHaveCSS(
+      'background-image', new RegExp(`${asset}-recall-act-1\\.png`),
+    );
+  }
 });
 
 test('the tutor conversation fills one viewport instead of scrolling the page', async ({ page }) => {

@@ -9,6 +9,7 @@ import {
   PET_SKIN_MOTION_CLIPS,
   getClipDuration,
   getClipFrame,
+  getClipStep,
   getClipOffsets,
   getPetFramePosition,
   isPetClipLooping,
@@ -93,13 +94,29 @@ test('premium skins reserve whole rows for travel, signature emote and recall', 
   for (const [skinId, clips] of Object.entries(PET_SKIN_MOTION_CLIPS)) {
     assert.deepEqual(clips.walk.steps.map((step) => step.frame), [F.travelA, F.travelB, F.travelC, F.travelD], `${skinId} travel row`);
     assert.deepEqual(clips.signature.steps.map((step) => step.frame), [F.signatureA, F.signatureB, F.signatureC, F.signatureD], `${skinId} signature row`);
-    assert.deepEqual(clips.recall.steps.map((step) => step.frame), [F.recallA, F.recallB, F.recallC, F.recallD], `${skinId} recall row`);
+    const expectedRecall = Array.from({ length: 4 }, () => Array.from({ length: 16 }, (_, frame) => frame)).flat();
+    assert.deepEqual(clips.recall.steps.map((step) => step.frame), expectedRecall, `${skinId} recall frames`);
+    assert.deepEqual([...new Set(clips.recall.steps.map((step) => step.sheet))], [1, 2, 3, 4]
+      .map((act) => `${skinId}-recall-act-${act}`));
+    const duration = getClipDuration('recall', skinId);
+    assert.ok(duration >= 6000 && duration <= 7000, `${skinId} recall should breathe for roughly six seconds`);
+    assert.ok(clips.recall.steps.filter((step) => step.hold <= 100).length >= 52,
+      `${skinId} must keep enough distinct drawings per second to stay smooth`);
     assert.equal(clips.signature.loop, false);
     assert.equal(clips.recall.loop, false);
   }
   const recallRhythms = Object.values(PET_SKIN_MOTION_CLIPS)
     .map((clips) => clips.recall.steps.map((step) => step.hold).join(','));
   assert.equal(new Set(recallRhythms).size, 8, 'every premium recall has its own timing');
+  const dawnbringerRecall = PET_SKIN_MOTION_CLIPS.dawnbringer.recall.steps;
+  assert.ok(dawnbringerRecall.at(-1).hold >= 500,
+    'the final balanced sigil gives the eyes somewhere calm to rest');
+
+  let elapsed = 0;
+  for (const expected of dawnbringerRecall) {
+    assert.equal(getClipStep('recall', elapsed, 'dawnbringer'), expected);
+    elapsed += expected.hold;
+  }
 });
 
 test('the rig adds sub-frame lift and breath so short clips still read as motion', () => {

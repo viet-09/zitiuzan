@@ -25,6 +25,23 @@ export const PET_ACTIVITY_WEIGHTS = Object.freeze({
   deep: Object.freeze({ doze: 100 }),
 });
 
+// Showcase recalls are deliberately absent from ambient weights. Even event
+// triggers share a long cooldown, so spectacle stays a reward instead of
+// becoming visual noise while someone is trying to study.
+export const PET_LONG_EFFECT_COOLDOWN = 5 * 60_000;
+
+export function choosePetReactionState(kind, { now = Date.now(), lastLongEffectAt = -Infinity } = {}) {
+  const target = {
+    pat: 'look',
+    tease: 'play',
+    highfive: 'signature',
+    complete: 'signature',
+    'tier-up': 'recall',
+  }[kind] || 'look';
+  if (target === 'recall' && now - lastLongEffectAt < PET_LONG_EFFECT_COOLDOWN) return 'signature';
+  return target;
+}
+
 // Reachable neighbours, used to walk the pet through the poses in between two
 // states instead of cutting straight from a curled sleep to a pounce.
 export const PET_STATE_TRANSITIONS = Object.freeze({
