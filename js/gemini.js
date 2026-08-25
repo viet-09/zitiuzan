@@ -44,11 +44,10 @@ async function callGeminiProxy(body, feature) {
     throw new Error('Chưa đăng nhập. Vui lòng đăng nhập để dùng trợ lý AI.');
   }
 
-  const { model } = getSettings();
   let data;
   let error;
   try {
-    ({ data, error } = await sb.functions.invoke('gemini-proxy', { body: { ...body, model, feature } }));
+    ({ data, error } = await sb.functions.invoke('gemini-proxy', { body: { ...body, feature } }));
   } catch (networkErr) {
     throw new Error(`Không thể kết nối tới máy chủ AI: ${networkErr && networkErr.message ? networkErr.message : networkErr}`);
   }
@@ -121,22 +120,17 @@ export async function askAudio({ system, history = [], audioBase64, mimeType, pr
 }
 
 // ---------------------------------------------------------------------------
-// Settings modal — model choice only. No API key field: the key lives only
-// in `supabase secrets` on the server (see supabase/functions/gemini-proxy).
+// Settings modal — live voice model choice only. Chat and voice-turn text
+// always run on the fast model server-side (see gemini-proxy's CHAT_MODEL);
+// only the live-conversation model is still a real choice, since both
+// options there are already speed-tuned for real-time audio. No API key
+// field: the key lives only in `supabase secrets` on the server (see
+// supabase/functions/gemini-proxy).
 // ---------------------------------------------------------------------------
 
 const MODAL_ID = 'gemini-settings-overlay';
 let activeSettingsDialog = null;
 
-// Mirrors the server's fallback chain, newest first. Kept in step with
-// supabase/functions/_shared/gemini-models.js by tests/gemini-models.test.mjs —
-// the browser cannot import from the functions directory.
-const MODEL_SUGGESTIONS = [
-  'gemini-3.7-flash',
-  'gemini-3.6-flash',
-  'gemini-3.5-flash',
-  'gemini-3.5-flash-lite',
-];
 const LIVE_MODEL_SUGGESTIONS = [
   'gemini-3.1-flash-live-preview',
   'gemini-2.5-flash-native-audio-latest',
@@ -153,9 +147,8 @@ function closeExistingSettingsModal() {
 
 /**
  * Build and show a modal (reusing the `.modal-overlay`/`.modal-card` look)
- * to edit the Gemini `model`/`liveModel` settings. Saves via
- * `store.setSettings` and closes on backdrop click, Escape, or the close
- * button.
+ * to edit the Gemini `liveModel` setting. Saves via `store.setSettings` and
+ * closes on backdrop click, Escape, or the close button.
  */
 export function openSettings() {
   closeExistingSettingsModal();
@@ -196,28 +189,7 @@ export function openSettings() {
 
   const help = document.createElement('p');
   help.className = 'settings-help';
-  help.textContent = 'Trợ lý AI (gia sư, luyện nói, giải nghĩa hán tự) chạy qua máy chủ nên bạn cần đăng nhập để dùng. Ở đây bạn chỉ chọn model ưu tiên — hết lượt trong ngày, máy chủ tự chuyển xuống model kế tiếp.';
-
-  const modelLabel = document.createElement('label');
-  modelLabel.setAttribute('for', 'gemini-settings-model');
-  modelLabel.textContent = 'Model';
-
-  const modelInput = document.createElement('input');
-  modelInput.type = 'text';
-  modelInput.id = 'gemini-settings-model';
-  modelInput.setAttribute('list', 'gemini-settings-model-options');
-  modelInput.autocomplete = 'off';
-  modelInput.spellcheck = false;
-  modelInput.placeholder = MODEL_SUGGESTIONS[0];
-  modelInput.value = current.model || '';
-
-  const datalist = document.createElement('datalist');
-  datalist.id = 'gemini-settings-model-options';
-  for (const m of MODEL_SUGGESTIONS) {
-    const opt = document.createElement('option');
-    opt.value = m;
-    datalist.appendChild(opt);
-  }
+  help.textContent = 'Trợ lý AI (gia sư, luyện nói, giải nghĩa hán tự) chạy qua máy chủ nên bạn cần đăng nhập để dùng. Chat và luyện nói luôn dùng model nhanh nhất để trả lời tức thì; hết lượt trong ngày, máy chủ tự chuyển sang model khác. Ở đây bạn chỉ chọn model cho hội thoại trực tiếp (Live).';
 
   const liveLabel = document.createElement('label');
   liveLabel.setAttribute('for', 'gemini-settings-live-model');
@@ -241,9 +213,6 @@ export function openSettings() {
   });
 
   body.appendChild(help);
-  body.appendChild(modelLabel);
-  body.appendChild(modelInput);
-  body.appendChild(datalist);
   body.appendChild(liveLabel);
   body.appendChild(liveInput);
   body.appendChild(liveDatalist);
@@ -286,14 +255,13 @@ export function openSettings() {
   closeBtn.addEventListener('click', close);
 
   saveBtn.addEventListener('click', () => {
-    const nextModel = modelInput.value.trim() || current.model;
     const nextLiveModel = liveInput.value.trim() || current.liveModel;
-    setSettings({ model: nextModel, liveModel: nextLiveModel });
+    setSettings({ liveModel: nextLiveModel });
     status.textContent = 'Đã lưu!';
     status.classList.add('ok');
     setTimeout(close, 600);
   });
 
-  modalDialog = activateModalDialog(overlay, { trigger, initialFocus: modelInput, onEscape: close });
+  modalDialog = activateModalDialog(overlay, { trigger, initialFocus: liveInput, onEscape: close });
   activeSettingsDialog = { close };
 }

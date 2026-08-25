@@ -50,11 +50,13 @@ Chuỗi dự phòng nằm ở **`supabase/functions/_shared/gemini-models.js`** 
 gemini-3.7-flash → gemini-3.6-flash → gemini-3.5-flash → gemini-3.5-flash-lite
 ```
 
-Mỗi model có hạn mức free riêng theo ngày, nên hết lượt model này thì tự tụt xuống model kế tiếp (`withGeminiModelFallback` trong `_shared/gemini-key-pool.ts`, lồng bên ngoài vòng thử từng API key). Chỉ tụt khi gặp 429 / 404 / 5xx — gặp 400 thì dừng, vì request sai định dạng sẽ hỏng ở mọi model.
+Mỗi model có hạn mức free riêng theo ngày, nên hết lượt model này thì tự tụt xuống model kế tiếp (`withGeminiModelFallback` trong `_shared/gemini-key-pool.ts`, lồng bên ngoài vòng thử từng API key). Chỉ tụt khi gặp 429 / 404 / 5xx — gặp 400 thì dừng, vì request sai định dạng sẽ hỏng ở mọi model. Cooldown khi một cặp (model, key) lỗi được ghi theo từng cặp riêng (`_shared/gemini-cooldown.js`) — trước đây ghi theo key chung nên một model bị 503 sẽ khoá luôn mọi key cho toàn bộ các model phía sau, tắt hẳn cả chuỗi dự phòng.
 
-Secret `GEMINI_MODEL` (nếu đặt) chỉ **đẩy một model lên đầu chuỗi**, không cắt mất các model dự phòng phía sau. Model học viên chọn trong Cài đặt cũng vậy.
+Secret `GEMINI_MODEL` (nếu đặt) chỉ **đẩy một model lên đầu chuỗi**, không cắt mất các model dự phòng phía sau. Áp dụng cho `exam-review-explain` và `lesson-review-quiz` — hai hàm "phân tích / tạo bài tập", không phải hội thoại trực tiếp nên đủ thời gian chờ model thông minh hơn.
 
-Đổi thứ tự: sửa `TEXT_MODEL_CHAIN`, cập nhật `MODEL_SUGGESTIONS` trong `js/gemini.js` và `DEFAULT_SETTINGS.model` trong `js/config.js` (trình duyệt không import được từ `supabase/functions/`), rồi chạy `npm test` — `tests/gemini-models.test.mjs` bắt lệch. Sau đó deploy lại Edge Functions.
+`gemini-proxy` (chat + luyện nói) thì khác: đây là hội thoại trực tiếp học viên đang chờ, nên **luôn cố định** ở `gemini-3.5-flash-lite` (hằng số `CHAT_MODEL` trong `gemini-proxy/index.ts`) — model học viên chọn không còn ảnh hưởng tới model chat nữa, vì model suy luận (3.6/3.7-flash) có thể mất tới ~18s hoặc trả 503, khiến chat trông như bị treo. Chuỗi dự phòng phía sau `CHAT_MODEL` vẫn còn, chỉ dùng khi cả lite cũng hết lượt. Cài đặt trong app giờ chỉ còn chọn model cho hội thoại trực tiếp (Live API).
+
+Đổi thứ tự chuỗi dùng cho phân tích/tạo bài tập: sửa `TEXT_MODEL_CHAIN` trong `_shared/gemini-models.js`, rồi chạy `npm test` — `tests/gemini-models.test.mjs` bắt lệch. Sau đó deploy lại Edge Functions.
 
 ## Âm Hán Việt
 

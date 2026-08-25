@@ -16,9 +16,9 @@ export const STORAGE = {
 };
 
 export const DEFAULT_SETTINGS = {
-  // Head of the shared fallback chain — see supabase/functions/_shared/
-  // gemini-models.js, which tests keep this in step with.
-  model: 'gemini-3.7-flash',
+  // Chat/voice text turns pin their own fast model server-side (see
+  // gemini-proxy's CHAT_MODEL) — there is no client-chosen text model
+  // anymore. Only the live-conversation model is still a learner choice.
   liveModel: 'gemini-3.1-flash-live-preview',
   furigana: true,
   examTargetDate: '',

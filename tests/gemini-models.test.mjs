@@ -58,16 +58,33 @@ test('every Gemini caller walks the chain instead of pinning one model', () => {
   }
 });
 
-test('the browser copy of the chain matches the server', () => {
-  // The client cannot import from supabase/functions, so the lists are
-  // duplicated; this is what stops them drifting apart.
+test('chat and voice pin the fast model instead of taking a client choice', () => {
+  // Selecting a slow/unavailable model used to hang the whole chat (see
+  // gemini-cooldown.js's header). Chat and voice now always start at the
+  // lite model server-side, and the client has nothing that could override
+  // that back in — the Settings modal only edits the live-conversation model.
+  const proxy = read('supabase/functions/gemini-proxy/index.ts');
+  assert.match(proxy, /CHAT_MODEL = 'gemini-3.5-flash-lite'/);
+  assert.match(proxy, /withGeminiModelFallback<string>\(CHAT_MODEL,/);
+  assert.doesNotMatch(proxy, /raw\.model/, 'the client must not be able to pick the chat model');
+
   const gemini = read('js/gemini.js');
-  const listed = [...gemini.matchAll(/^\s+'(gemini-[\w.-]+)',$/gm)].map((m) => m[1]);
-  const suggestions = listed.slice(0, TEXT_MODEL_CHAIN.length);
-  assert.deepEqual(suggestions, EXPECTED);
+  assert.doesNotMatch(gemini, /getSettings\(\)\.model\b/);
+  assert.doesNotMatch(gemini, /(?<!LIVE_)MODEL_SUGGESTIONS\s*=/, 'no client-facing text-model list should remain');
 
   const config = read('js/config.js');
-  assert.match(config, new RegExp(`model: '${DEFAULT_TEXT_MODEL}'`));
+  assert.doesNotMatch(config, /\bmodel:\s*'gemini/, 'config should not default a client-chosen chat model');
+});
+
+test('the analysis/exercise-generation functions still start at the top of the chain', () => {
+  // "Ôn lại" question generation and exam-answer explanations are not a live
+  // conversation the learner is staring at, so they can afford the smarter,
+  // slower models the chat proxy now skips past.
+  for (const file of ['supabase/functions/exam-review-explain/index.ts', 'supabase/functions/lesson-review-quiz/index.ts']) {
+    const source = read(file);
+    assert.doesNotMatch(source, /'gemini-3\.5-flash-lite'/, `${file} should not pin the lite model`);
+  }
+  assert.equal(DEFAULT_TEXT_MODEL, EXPECTED[0]);
 });
 
 test('build scripts read the chain rather than naming a model', () => {
