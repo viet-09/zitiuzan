@@ -33,6 +33,13 @@ public static class PetSpriteBackgroundExtractor
         return min >= 215 && max - min <= 26;
     }
 
+    private static bool IsDarkNeutral(byte red, byte green, byte blue)
+    {
+        int min = Math.Min(red, Math.Min(green, blue));
+        int max = Math.Max(red, Math.Max(green, blue));
+        return max <= 12 && max - min <= 8;
+    }
+
     public static void Extract(string source, string destination)
     {
         using (var original = new Bitmap(source))
@@ -43,6 +50,8 @@ public static class PetSpriteBackgroundExtractor
                 graphics.DrawImageUnscaled(original, 0, 0);
             }
 
+            Color corner = output.GetPixel(0, 0);
+            bool darkBackground = IsDarkNeutral(corner.R, corner.G, corner.B);
             var rect = new Rectangle(0, 0, output.Width, output.Height);
             var data = output.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
             int stride = data.Stride;
@@ -64,7 +73,10 @@ public static class PetSpriteBackgroundExtractor
                 byte blue = pixels[offset];
                 byte green = pixels[offset + 1];
                 byte red = pixels[offset + 2];
-                if (!IsPaleNeutral(red, green, blue)) return;
+                bool isBackground = darkBackground
+                    ? IsDarkNeutral(red, green, blue)
+                    : IsPaleNeutral(red, green, blue);
+                if (!isBackground) return;
                 visited[position] = true;
                 queue[tail++] = position;
             };

@@ -13,7 +13,7 @@ import {
 } from './store.js';
 import { renderFurigana } from './furigana.js';
 import { navigate } from './router.js';
-import { announceLessonCompleted, PET_CONTEXT_EVENT } from './pet.js?v=29';
+import { announceLessonCompleted, PET_CONTEXT_EVENT } from './pet.js?v=30';
 import { toggleLessonCompletion } from './completion.js';
 import {
   buildDailyPlan,
@@ -539,4 +539,3 @@ function bindEvents(data) {
     }
   });
 }
-

@@ -5,9 +5,12 @@
 
 import { currentUser, signInWithGoogle, signOut, ready as supabaseReady } from './supabase.js';
 import { getProfile, renderAvatar, openProfileDialog, saveProfile } from './profile.js';
-import { PET_ACCESSORIES, PET_TYPES, getPetEvolution, getPetMemories, getPetPreferences, setPetPreferences, renderPet } from './pet.js?v=29';
+import { PET_TYPES, getPetEvolution, getPetMemories, getPetPreferences, getPetSkins, setPetPreferences, renderPet } from './pet.js?v=30';
+import { mountPetMotion } from './pet-motion.js?v=30';
 import { clearUserScopedStorage } from './account-storage.js';
 import { learningState } from './learning-state.js';
+
+let profilePreviewMotion = null;
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (ch) => ({
@@ -21,12 +24,13 @@ function optionsMarkup(items, selected) {
   )).join('');
 }
 
-function accessoryOptionsMarkup(items, selected, mastered) {
-  return items.map((item) => {
-    const locked = mastered < item.minMastered;
-    const suffix = locked ? ` — mở khi làm chủ ${item.minMastered} lỗi` : '';
-    return `<option value="${escapeHtml(item.id)}"${item.id === selected ? ' selected' : ''}${locked ? ' disabled' : ''}>${escapeHtml(item.label + suffix)}</option>`;
-  }).join('');
+function skinOptionsMarkup(petType, selected) {
+  return getPetSkins(petType).map((skin) => `
+    <label class="pet-skin-option" data-skin-tier="${escapeHtml(skin.tier.toLowerCase())}">
+      <input type="radio" name="pet-skin" value="${escapeHtml(skin.id)}" data-pet-setting="petSkin"${skin.id === selected ? ' checked' : ''}>
+      <span class="pet-skin-option__art" aria-hidden="true">${renderPet({ petType, petSkin: skin.id, decorative: true })}</span>
+      <span class="pet-skin-option__copy"><strong>${escapeHtml(skin.label)}</strong><small>${escapeHtml(skin.tier)}</small></span>
+    </label>`).join('');
 }
 
 export function renderProfilePage(root) {
@@ -37,12 +41,19 @@ export function renderProfilePage(root) {
     </section>
   `;
   paint(root.querySelector('#profile-page'));
-  return { preserveScroll: false };
+  return {
+    preserveScroll: false,
+    cleanup() {
+      profilePreviewMotion?.destroy();
+      profilePreviewMotion = null;
+    },
+  };
 }
 
 async function paint(el) {
   if (!el) return;
   await supabaseReady();
+  if (!el.isConnected) return;
   const user = await currentUser();
   const profile = getProfile();
   const displayName = profile.name || user?.user_metadata?.full_name || 'Học viên';
@@ -65,14 +76,24 @@ async function paint(el) {
       <h3 id="pet-customizer-heading" class="subheading">Bạn đồng hành</h3>
       <p class="profile-modal__help">Bạn nhỏ gợi ý đúng một việc nên làm tiếp theo và tiến hóa khi bạn sửa được lỗi thật.</p>
       <div class="pet-customizer__layout">
-        <div class="pet-customizer__preview" data-pet-preview>${renderPet({ ...petPrefs, evolutionId: evolution.id, decorative: true })}</div>
+        <div class="pet-customizer__showcase">
+          <div class="pet-customizer__preview" data-pet-preview data-pet-skin="${escapeHtml(petPrefs.petSkin)}"><span class="pixel-pet-host" data-pet-preview-art>${renderPet({ ...petPrefs, evolutionId: evolution.id, decorative: true })}</span></div>
+          <div class="pet-preview-actions" aria-label="Xem trước hành động skin">
+            <button type="button" data-pet-preview-action="walk">Dạo bước</button>
+            <button type="button" data-pet-preview-action="signature">Múa / emote</button>
+            <button type="button" data-pet-preview-action="recall">B về</button>
+          </div>
+          <p class="pet-preview-caption" data-pet-preview-caption>Đang đứng yên · chọn một hành động để xem.</p>
+        </div>
         <div class="pet-customizer__fields">
-          <label for="pet-customizer-type">Loài
+          <label class="pet-customizer__species" for="pet-customizer-type">Loài
             <select id="pet-customizer-type" data-pet-setting="petType">${optionsMarkup(PET_TYPES, petPrefs.petType)}</select>
           </label>
-          <label for="pet-customizer-accessory">Phụ kiện
-            <select id="pet-customizer-accessory" data-pet-setting="petAccessory">${accessoryOptionsMarkup(PET_ACCESSORIES, petPrefs.petAccessory, evolution.mastered)}</select>
-          </label>
+          <fieldset class="pet-skin-picker">
+            <legend>Ngoại trang</legend>
+            <p>4 skin cao cấp lấy cảm hứng từ Yone hoặc Lux, gồm cả dáng và hiệu ứng riêng.</p>
+            <div class="pet-skin-picker__grid" data-pet-skin-options>${skinOptionsMarkup(petPrefs.petType, petPrefs.petSkin)}</div>
+          </fieldset>
           <p class="pet-mastery"><strong>${escapeHtml(evolution.label)}</strong> · ${evolution.mastered} lỗi đã làm chủ · ${evolution.balancedSkills}/5 kỹ năng cân bằng</p>
         </div>
       </div>
@@ -82,6 +103,14 @@ async function paint(el) {
       </details>
     </section>
   `;
+
+  profilePreviewMotion?.destroy();
+  const preview = el.querySelector('[data-pet-preview]');
+  profilePreviewMotion = mountPetMotion(preview, {
+    initialState: 'idle',
+    skinId: petPrefs.petSkin,
+    onClipEnd: () => profilePreviewMotion?.play('idle'),
+  });
 
   el.querySelector('[data-action="edit-profile"]')?.addEventListener('click', (event) => {
     openProfileDialog({
@@ -116,6 +145,18 @@ async function paint(el) {
     }
   });
 
+  el.querySelector('.pet-customizer')?.addEventListener('click', (event) => {
+    const action = event.target.closest('[data-pet-preview-action]')?.dataset.petPreviewAction;
+    if (!action) return;
+    profilePreviewMotion?.play(action);
+    const caption = el.querySelector('[data-pet-preview-caption]');
+    if (caption) caption.textContent = {
+      walk: 'Dáng di chuyển riêng của ngoại trang.',
+      signature: 'Điệu múa / emote đặc trưng của ngoại trang.',
+      recall: 'Chuỗi B về riêng gồm 4 nhịp.',
+    }[action];
+  });
+
   el.querySelector('.pet-customizer')?.addEventListener('change', (event) => {
     const select = event.target.closest('[data-pet-setting]');
     if (!select) return;
@@ -127,8 +168,17 @@ async function paint(el) {
         const pageAvatar = el.querySelector('.profile-page__avatar');
         if (pageAvatar) pageAvatar.innerHTML = renderAvatar(getProfile());
       }
+      const skinOptions = el.querySelector('[data-pet-skin-options]');
+      if (skinOptions) skinOptions.innerHTML = skinOptionsMarkup(next.petType, next.petSkin);
     }
     const preview = el.querySelector('[data-pet-preview]');
-    if (preview) preview.innerHTML = renderPet({ ...next, evolutionId: evolution.id, decorative: true });
+    if (preview) {
+      preview.dataset.petSkin = next.petSkin;
+      const previewArt = preview.querySelector('[data-pet-preview-art]');
+      if (previewArt) previewArt.innerHTML = renderPet({ ...next, evolutionId: evolution.id, decorative: true });
+    }
+    profilePreviewMotion?.setSkin(next.petSkin);
+    const caption = el.querySelector('[data-pet-preview-caption]');
+    if (caption) caption.textContent = 'Đang đứng yên · chọn một hành động để xem.';
   });
 }

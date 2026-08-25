@@ -22,13 +22,14 @@ const AREA = Object.freeze({ bottomInset: 74, topInset: 56 });
 
 test('desktop companion exposes the full calm-to-asleep state flow', () => {
   assert.deepEqual(PET_COMPANION_STATES, [
-    'wake', 'idle', 'look', 'walk', 'play', 'cheer', 'drowsy', 'settle', 'sleep', 'doze',
+    'wake', 'idle', 'look', 'walk', 'play', 'cheer', 'signature', 'recall', 'drowsy', 'settle', 'sleep', 'doze',
   ]);
   assert.deepEqual(PET_STATE_TRANSITIONS.drowsy, ['idle', 'settle']);
   assert.deepEqual(PET_STATE_TRANSITIONS.settle, ['sleep']);
   // Waking up is a route, not a jump: the pet gets up before it does anything.
   assert.deepEqual(getPetStatePath('doze', 'cheer'), ['doze', 'wake', 'idle', 'cheer']);
   assert.deepEqual(getPetStatePath('sleep', 'look'), ['sleep', 'wake', 'idle', 'look']);
+  assert.deepEqual(getPetStatePath('idle', 'recall'), ['idle', 'recall']);
 });
 
 test('energy runs down with time left alone and resets to lively on contact', () => {

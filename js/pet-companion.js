@@ -10,8 +10,8 @@ import {
   getContextualPetAdvice,
   getPetBounds,
   getPetStatePath,
-} from './pet-companion-state.js?v=29';
-import { getClipDuration, isPetClipLooping, mountPetMotion } from './pet-motion.js?v=29';
+} from './pet-companion-state.js?v=30';
+import { getClipDuration, isPetClipLooping, mountPetMotion } from './pet-motion.js?v=30';
 
 const POSITION_STORAGE_KEY = 'n2_pet_position_v1';
 const BOTTOM_INSET = 74;
@@ -52,6 +52,7 @@ export function mountPetCompanion(host, options = {}) {
   const now = typeof options.now === 'function' ? options.now : () => Date.now();
   const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
   let reducedMotion = motionQuery.matches;
+  const skinId = host.dataset.petSkin || 'classic';
   let coach = options.coach || {};
   let state = 'idle';
   let stateTimer = 0;
@@ -158,7 +159,7 @@ export function mountPetCompanion(host, options = {}) {
     applyPosition(0);
     // A one-shot clip normally reports its own ending; the timer is the safety
     // net for when frames are throttled, so the pet can never freeze mid-action.
-    scheduleNext(LOOP_DURATION[state] || getClipDuration(state) + 400);
+    scheduleNext(LOOP_DURATION[state] || getClipDuration(state, skinId) + 400);
   }
 
   /** Step the behaviour forward: finish a queued pose chain, else pick anew. */
@@ -171,7 +172,7 @@ export function mountPetCompanion(host, options = {}) {
       pendingRestart = false;
       enterState(step, { announce: isFinalStep && pendingAnnounce, restart });
       if (isFinalStep) pendingAnnounce = false;
-      else if (isPetClipLooping(step)) scheduleNext(LINK_DURATION);
+      else if (isPetClipLooping(step, skinId)) scheduleNext(LINK_DURATION);
       return;
     }
     const next = preferred && PET_COMPANION_STATES.includes(preferred)
@@ -192,6 +193,7 @@ export function mountPetCompanion(host, options = {}) {
 
   const spriteMotion = mountPetMotion(host, {
     initialState: state,
+    skinId,
     onClipEnd: (finished, next) => {
       // A one-shot clip stopped animating; hand back to the scheduler instead
       // of letting the pet freeze on its last pose.
@@ -279,9 +281,9 @@ export function mountPetCompanion(host, options = {}) {
       transitionTo({
         pat: 'look',
         tease: 'play',
-        highfive: 'cheer',
-        complete: 'cheer',
-        'tier-up': 'cheer',
+        highfive: 'signature',
+        complete: 'signature',
+        'tier-up': 'recall',
       }[kind] || 'look');
     },
     updateCoach(nextCoach = {}) {

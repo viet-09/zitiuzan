@@ -3,7 +3,7 @@
 // settings object so changing the character never overwrites unrelated settings.
 
 import { getSettings, setSettings } from './store.js';
-import { renderPetArt } from './pet-art.js?v=29';
+import { renderPetArt } from './pet-art.js?v=30';
 
 export const PET_UPDATED_EVENT = 'n2:pet-updated';
 export const PET_COMPLETION_EVENT = 'n2:lesson-complete';
@@ -15,14 +15,19 @@ export const PET_TYPES = Object.freeze([
   Object.freeze({ id: 'rabbit', label: 'Thỏ', sound: 'Chít!' }),
 ]);
 
-export const PET_ACCESSORIES = Object.freeze([
-  Object.freeze({ id: 'none', label: 'Không phụ kiện', minMastered: 0 }),
-  Object.freeze({ id: 'pencil', label: 'Bút chì chăm học', minMastered: 1 }),
-  Object.freeze({ id: 'seal', label: 'Dấu son tiến bộ', minMastered: 5 }),
-  Object.freeze({ id: 'lamp', label: 'Đèn học bền bỉ', minMastered: 15 }),
+export const PET_SKINS = Object.freeze([
+  Object.freeze({ id: 'classic', petType: 'all', label: 'Nguyên bản', tier: 'Cổ điển' }),
+  Object.freeze({ id: 'peacemaker-high-noon', petType: 'fox', label: 'Peacemaker High Noon', tier: 'Mythic' }),
+  Object.freeze({ id: 'prestige-heartsteel', petType: 'fox', label: 'Prestige HEARTSTEEL', tier: 'Mythic' }),
+  Object.freeze({ id: 'high-noon', petType: 'fox', label: 'High Noon', tier: 'Legendary' }),
+  Object.freeze({ id: 'dawnbringer', petType: 'fox', label: 'Dawnbringer', tier: 'Legendary' }),
+  Object.freeze({ id: 'elementalist', petType: 'rabbit', label: 'Elementalist', tier: 'Ultimate' }),
+  Object.freeze({ id: 'prestige-spirit-blossom', petType: 'rabbit', label: 'Prestige Spirit Blossom', tier: 'Mythic' }),
+  Object.freeze({ id: 'dark-cosmic', petType: 'rabbit', label: 'Dark Cosmic', tier: 'Legendary' }),
+  Object.freeze({ id: 'cosmic', petType: 'rabbit', label: 'Cosmic', tier: 'Legendary' }),
 ]);
 
-const DEFAULT_PET = Object.freeze({ petType: 'fox', petAccessory: 'none' });
+const DEFAULT_PET = Object.freeze({ petType: 'fox', petSkin: 'classic' });
 let petSequence = 0;
 
 function escapeHtml(value) {
@@ -39,6 +44,15 @@ function lookup(items, id) {
   return items.find((item) => item.id === id) || items[0];
 }
 
+export function getPetSkins(petType) {
+  const type = lookup(PET_TYPES, petType).id;
+  return PET_SKINS.filter((skin) => skin.petType === 'all' || skin.petType === type);
+}
+
+function lookupSkin(petType, skinId) {
+  return getPetSkins(petType).find((skin) => skin.id === skinId) || PET_SKINS[0];
+}
+
 function safeStreak(value) {
   const streak = Number(value);
   return Number.isFinite(streak) ? Math.max(0, Math.floor(streak)) : 0;
@@ -48,17 +62,15 @@ export function getPetPreferences(settings = getSettings()) {
   const source = settings && typeof settings === 'object' ? settings : {};
   return {
     petType: lookup(PET_TYPES, source.petType || DEFAULT_PET.petType).id,
-    petAccessory: lookup(PET_ACCESSORIES, source.petAccessory || DEFAULT_PET.petAccessory).id,
+    petSkin: lookupSkin(source.petType || DEFAULT_PET.petType, source.petSkin || DEFAULT_PET.petSkin).id,
   };
 }
 
 export function setPetPreferences(patch) {
   const current = getPetPreferences();
   const source = patch && typeof patch === 'object' ? patch : {};
-  const next = {
-    petType: lookup(PET_TYPES, source.petType || current.petType).id,
-    petAccessory: lookup(PET_ACCESSORIES, source.petAccessory || current.petAccessory).id,
-  };
+  const petType = lookup(PET_TYPES, source.petType || current.petType).id;
+  const next = { petType, petSkin: lookupSkin(petType, source.petSkin || current.petSkin).id };
   setSettings(next);
 
   if (typeof window !== 'undefined' && typeof CustomEvent === 'function') {
@@ -215,20 +227,18 @@ export function getPetTier(streakValue) {
  * fixed allow-lists before reaching markup.
  */
 export function renderPet(options = {}) {
-  const preferences = {
-    petType: lookup(PET_TYPES, options.type || options.petType || DEFAULT_PET.petType).id,
-    petAccessory: lookup(PET_ACCESSORIES, options.petAccessory || DEFAULT_PET.petAccessory).id,
-  };
+  const petType = lookup(PET_TYPES, options.type || options.petType || DEFAULT_PET.petType).id;
+  const preferences = { petType, petSkin: lookupSkin(petType, options.petSkin || DEFAULT_PET.petSkin).id };
   const streak = safeStreak(options.streak);
   const tier = getPetTier(streak);
   const type = lookup(PET_TYPES, preferences.petType);
-  const accessory = lookup(PET_ACCESSORIES, preferences.petAccessory);
+  const skin = lookupSkin(type.id, preferences.petSkin);
   const evolutionId = ['hatchling', 'companion', 'mentor'].includes(options.evolutionId) ? options.evolutionId : 'hatchling';
   const decorative = options.decorative === true;
-  const label = `${type.label} ${tier.label.toLocaleLowerCase('vi-VN')}`;
+  const label = `${type.label} ${skin.label}, ${tier.label.toLocaleLowerCase('vi-VN')}`;
   const accessibility = decorative ? 'aria-hidden="true"' : `role="img" aria-label="${escapeHtml(label)}"`;
 
-  return `<span class="pet-figure pet--${type.id} pet--tier-${tier.id} pet--evolution-${evolutionId}" ${accessibility}>${renderPetArt(type.id, accessory.id)}</span>`;
+  return `<span class="pet-figure pet--${type.id} pet--skin-${skin.id} pet--tier-${tier.id} pet--evolution-${evolutionId}" ${accessibility}>${renderPetArt(type.id, skin.id)}</span>`;
 }
 
 function resolveTarget(target) {
@@ -311,7 +321,7 @@ export function mountPet(target, options = {}) {
         </section>
         <div class="pet-widget__companion">
           <span class="pet-widget__stage">
-            <span class="pixel-pet-host" data-pet-companion data-renderer="pixel-sprite" data-pet-state="idle" data-motion="active" data-pet-type="${escapeHtml(type.id)}" aria-hidden="true">
+            <span class="pixel-pet-host" data-pet-companion data-renderer="pixel-sprite" data-pet-state="idle" data-motion="active" data-pet-type="${escapeHtml(type.id)}" data-pet-skin="${escapeHtml(preferences.petSkin)}" aria-hidden="true">
               ${renderPet({ ...preferences, streak, evolutionId: coach.evolution.id, decorative: true })}
             </span>
           </span>
@@ -325,7 +335,7 @@ export function mountPet(target, options = {}) {
       </div>`;
     mount.classList.toggle('is-panel-open', panelOpen);
     const companionHost = mount.querySelector('[data-pet-companion]');
-    import('./pet-companion.js?v=29').then(({ mountPetCompanion }) => {
+    import('./pet-companion.js?v=30').then(({ mountPetCompanion }) => {
       if (destroyed || loadToken !== companionLoadToken || !companionHost?.isConnected) return;
       petCompanionController = mountPetCompanion(companionHost, {
         mount,
@@ -484,7 +494,7 @@ export function mountPet(target, options = {}) {
       if (next.petType) {
         preferences = { ...preferences, petType: lookup(PET_TYPES, next.petType).id };
       }
-      if (next.petAccessory) preferences = { ...preferences, petAccessory: lookup(PET_ACCESSORIES, next.petAccessory).id };
+      if (next.petSkin) preferences = { ...preferences, petSkin: lookupSkin(preferences.petType, next.petSkin).id };
       if (next.coach) coach = buildPetCoachState(next.coach);
       render();
     },

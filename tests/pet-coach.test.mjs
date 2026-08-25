@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 import {
   PET_MEMORY_STORAGE_KEY,
+  PET_SKINS,
   announceLessonCompleted,
   buildPetCoachState,
   getPetEvolution,
@@ -48,22 +49,32 @@ test('pet coach chooses a due review quest before a new lesson', () => {
 test('pet preferences, unlocked visuals and memory journal remain local and bounded', () => {
   const storage = createFakeStorage();
   globalThis.localStorage = storage;
-  assert.deepEqual(getPetPreferences(), { petType: 'fox', petAccessory: 'none' });
-  assert.deepEqual(setPetPreferences({ petType: 'rabbit', petAccessory: 'pencil' }), {
-    petType: 'rabbit', petAccessory: 'pencil',
+  assert.deepEqual(getPetPreferences(), { petType: 'fox', petSkin: 'classic' });
+  assert.deepEqual(setPetPreferences({ petType: 'rabbit', petSkin: 'elementalist' }), {
+    petType: 'rabbit', petSkin: 'elementalist',
   });
-  const markup = renderPet({ petType: 'rabbit', petAccessory: 'pencil', streak: 7, evolutionId: 'mentor' });
-  assert.match(markup, /class="pet-art pet-art--rabbit pixel-pet pixel-pet--rabbit"/u);
+  const markup = renderPet({ petType: 'rabbit', petSkin: 'elementalist', streak: 7, evolutionId: 'mentor' });
+  assert.match(markup, /pet-art--rabbit/u);
+  assert.match(markup, /pet-art--skin-elementalist/u);
+  assert.match(markup, /pet--skin-elementalist/u);
   assert.match(markup, /class="pixel-pet__sprite"/u);
   assert.doesNotMatch(markup, /class="pixel-pet__svg"/u);
-  assert.match(markup, /pet-accessory--pencil/u);
+  assert.doesNotMatch(markup, /pet-accessory/u);
   assert.doesNotMatch(markup, /🐰|🦊/u);
 
-  const fox = renderPet({ petType: 'fox', petAccessory: 'none', streak: 0 });
-  assert.match(fox, /class="pet-art pet-art--fox pixel-pet pixel-pet--fox"/u);
+  const fox = renderPet({ petType: 'fox', petSkin: 'high-noon', streak: 0 });
+  assert.match(fox, /pet-art--fox/u);
+  assert.match(fox, /pet-art--skin-high-noon/u);
   assert.match(fox, /class="pixel-pet__sprite"/u);
   assert.doesNotMatch(fox, /<svg/u);
   assert.doesNotMatch(fox, /🐰|🦊/u);
+
+  assert.equal(PET_SKINS.filter((skin) => skin.petType === 'fox').length, 4);
+  assert.equal(PET_SKINS.filter((skin) => skin.petType === 'rabbit').length, 4);
+  assert.deepEqual(setPetPreferences({ petType: 'fox' }), { petType: 'fox', petSkin: 'classic' });
+  assert.deepEqual(setPetPreferences({ petType: 'fox', petSkin: 'dark-cosmic' }), {
+    petType: 'fox', petSkin: 'classic',
+  });
   assert.equal(getPetTier(0).id, 'sleeping');
   assert.equal(getPetTier(2).id, 'waking');
   assert.equal(getPetTier(5).id, 'happy');

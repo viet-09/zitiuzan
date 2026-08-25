@@ -17,6 +17,16 @@ import {
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const petAsset = (name) => path.join(root, 'assets', 'pets', name);
 const PETS = ['fox', 'rabbit'];
+const SKINS = [
+  'fox-peacemaker-high-noon.png',
+  'fox-prestige-heartsteel.png',
+  'fox-high-noon.png',
+  'fox-dawnbringer.png',
+  'rabbit-elementalist.png',
+  'rabbit-prestige-spirit-blossom.png',
+  'rabbit-dark-cosmic.png',
+  'rabbit-cosmic.png',
+];
 const ALPHA = 40;
 
 test('motion sprite sheets provide transparent multi-frame artwork for both pets', () => {
@@ -26,6 +36,22 @@ test('motion sprite sheets provide transparent multi-frame artwork for both pets
     assert.ok(asset.readUInt32BE(16) >= 1000, `${pet} needs room for five pose columns`);
     assert.ok(asset.readUInt32BE(20) >= 1000, `${pet} needs room for four pose rows`);
     assert.equal(asset[25], 6, `${pet} must preserve alpha transparency`);
+  }
+});
+
+test('every premium skin ships as a transparent 4x4 raster atlas', () => {
+  for (const skin of SKINS) {
+    const file = petAsset(path.join('skins', skin));
+    const asset = fs.readFileSync(file);
+    assert.deepEqual([...asset.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
+    assert.equal(asset[25], 6, `${skin} must preserve alpha transparency`);
+    const atlas = decodePNG(file);
+    assert.ok(atlas.width >= 1000 && atlas.height >= 1000, `${skin} is too small`);
+    let transparent = 0;
+    for (let offset = 3; offset < atlas.data.length; offset += 4) {
+      if (atlas.data[offset] <= ALPHA) transparent += 1;
+    }
+    assert.ok(transparent >= atlas.width * atlas.height * 0.4, `${skin} background is not transparent`);
   }
 });
 

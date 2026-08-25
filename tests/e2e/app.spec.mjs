@@ -295,7 +295,7 @@ test('pixel desktop companion roams, reacts, drags and keeps its learning quest'
     y: directInteractionSize.height * 0.7,
   } });
   await expect(petWidget).toHaveAttribute('data-reaction', 'highfive');
-  await expect(petCompanion).toHaveAttribute('data-pet-state', 'cheer');
+  await expect(petCompanion).toHaveAttribute('data-pet-state', 'signature');
 
   const transformBeforeDrag = await page.locator('#pet-widget-mount .streak-pet-mount').evaluate((node) => getComputedStyle(node).transform);
   const dragTarget = directInteraction;
@@ -312,7 +312,7 @@ test('pixel desktop companion roams, reacts, drags and keeps its learning quest'
     detail: { id: 'motion-check', done: true, streak: 0 },
   })));
   await expect(petWidget).toHaveAttribute('data-reaction', 'complete');
-  await expect(petCompanion).toHaveAttribute('data-pet-state', 'cheer');
+  await expect(petCompanion).toHaveAttribute('data-pet-state', 'signature');
 
   await page.getByRole('button', { name: 'Mở nhiệm vụ học của Cáo' }).click();
   const panel = page.getByRole('region', { name: 'Nhiệm vụ của bạn đồng hành' });
@@ -340,6 +340,14 @@ test('pixel desktop companion roams, reacts, drags and keeps its learning quest'
   await expect(rabbitCompanion).toHaveAttribute('data-renderer', 'pixel-sprite');
   await expect(rabbitCompanion.locator('.pixel-pet--rabbit')).toBeVisible();
   await expect(page.locator('#btn-account .profile-avatar--rabbit')).toBeVisible();
+  await expect(page.getByRole('radio')).toHaveCount(5);
+  await page.getByRole('radio', { name: /Elementalist/ }).check();
+  const profilePreview = page.locator('[data-pet-preview]');
+  await expect(profilePreview).toHaveAttribute('data-pet-skin', 'elementalist');
+  await expect(profilePreview.locator('.pixel-pet__sprite')).toHaveCSS('background-image', /rabbit-elementalist\.png/);
+  await page.getByRole('button', { name: 'B về' }).click();
+  await expect(profilePreview).toHaveAttribute('data-pet-clip', 'recall');
+  await expect.poll(async () => Number(await profilePreview.getAttribute('data-pet-frame'))).toBeGreaterThanOrEqual(12);
   await page.getByRole('combobox', { name: 'Loài' }).selectOption('fox');
 });
 

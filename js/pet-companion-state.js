@@ -2,7 +2,7 @@
 // winds down when it is left alone, and where it is allowed to wander.
 
 export const PET_COMPANION_STATES = Object.freeze([
-  'wake', 'idle', 'look', 'walk', 'play', 'cheer', 'drowsy', 'settle', 'sleep', 'doze',
+  'wake', 'idle', 'look', 'walk', 'play', 'cheer', 'signature', 'recall', 'drowsy', 'settle', 'sleep', 'doze',
 ]);
 
 // How long since the last touch. The pet does not fall asleep at random — it
@@ -29,11 +29,13 @@ export const PET_ACTIVITY_WEIGHTS = Object.freeze({
 // states instead of cutting straight from a curled sleep to a pounce.
 export const PET_STATE_TRANSITIONS = Object.freeze({
   wake: Object.freeze(['idle']),
-  idle: Object.freeze(['look', 'walk', 'play', 'cheer', 'drowsy']),
+  idle: Object.freeze(['look', 'walk', 'play', 'cheer', 'signature', 'recall', 'drowsy']),
   look: Object.freeze(['idle']),
   walk: Object.freeze(['idle']),
   play: Object.freeze(['idle']),
   cheer: Object.freeze(['idle']),
+  signature: Object.freeze(['idle']),
+  recall: Object.freeze(['idle']),
   drowsy: Object.freeze(['idle', 'settle']),
   settle: Object.freeze(['sleep']),
   sleep: Object.freeze(['doze', 'wake']),

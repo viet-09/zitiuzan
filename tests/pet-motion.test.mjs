@@ -5,6 +5,8 @@ import {
   PET_ATLAS_GRID,
   PET_FRAMES,
   PET_MOTION_CLIPS,
+  PET_SKIN_FRAMES,
+  PET_SKIN_MOTION_CLIPS,
   getClipDuration,
   getClipFrame,
   getClipOffsets,
@@ -41,6 +43,8 @@ test('no clip borrows a frame from another action', () => {
     walk: [F.walkPass, F.walkStrideA, F.walkStrideB],
     play: [F.walkPass, F.pounce],
     cheer: [F.cheer],
+    signature: [F.cheer],
+    recall: [F.cheer, F.stretch, F.sleepA, F.dozeB],
     drowsy: [F.idle, F.blink],
     settle: [F.flop],
     sleep: [F.sleepA, F.sleepB],
@@ -72,7 +76,7 @@ test('looping clips repeat while one-shot clips hold their closing pose', () => 
   assert.ok(isPetClipLooping('idle'));
   assert.ok(isPetClipLooping('walk'));
   assert.ok(isPetClipLooping('sleep'));
-  for (const state of ['look', 'play', 'cheer', 'settle', 'wake']) {
+  for (const state of ['look', 'play', 'cheer', 'signature', 'recall', 'settle', 'wake']) {
     assert.equal(isPetClipLooping(state), false, `${state} must end`);
     assert.ok(PET_MOTION_CLIPS[state].next, `${state} must name a follow-up state`);
   }
@@ -81,6 +85,21 @@ test('looping clips repeat while one-shot clips hold their closing pose', () => 
   assert.equal(getClipFrame('idle', 0), getClipFrame('idle', idleDuration));
   const lastWakeFrame = PET_MOTION_CLIPS.wake.steps.at(-1).frame;
   assert.equal(getClipFrame('wake', getClipDuration('wake') + 9000), lastWakeFrame);
+});
+
+test('premium skins reserve whole rows for travel, signature emote and recall', () => {
+  const F = PET_SKIN_FRAMES;
+  assert.equal(Object.keys(PET_SKIN_MOTION_CLIPS).length, 8);
+  for (const [skinId, clips] of Object.entries(PET_SKIN_MOTION_CLIPS)) {
+    assert.deepEqual(clips.walk.steps.map((step) => step.frame), [F.travelA, F.travelB, F.travelC, F.travelD], `${skinId} travel row`);
+    assert.deepEqual(clips.signature.steps.map((step) => step.frame), [F.signatureA, F.signatureB, F.signatureC, F.signatureD], `${skinId} signature row`);
+    assert.deepEqual(clips.recall.steps.map((step) => step.frame), [F.recallA, F.recallB, F.recallC, F.recallD], `${skinId} recall row`);
+    assert.equal(clips.signature.loop, false);
+    assert.equal(clips.recall.loop, false);
+  }
+  const recallRhythms = Object.values(PET_SKIN_MOTION_CLIPS)
+    .map((clips) => clips.recall.steps.map((step) => step.hold).join(','));
+  assert.equal(new Set(recallRhythms).size, 8, 'every premium recall has its own timing');
 });
 
 test('the rig adds sub-frame lift and breath so short clips still read as motion', () => {

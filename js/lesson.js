@@ -22,9 +22,9 @@ import { completeLessonOnce, toggleLessonCompletion } from './completion.js';
 import { learningState } from './learning-state.js';
 import { buildBookViewerModel, renderBookViewerStrip } from './book-viewer.js';
 import { activateModalDialog } from './modal-dialog.js';
-import { openKanjiWritingPad } from './kanji-writing.js?v=29';
-import { openKanjiSheet } from './kanji-sheet.js?v=29';
-import { announceLessonCompleted } from './pet.js?v=29';
+import { openKanjiWritingPad } from './kanji-writing.js?v=30';
+import { openKanjiSheet } from './kanji-sheet.js?v=30';
+import { announceLessonCompleted } from './pet.js?v=30';
 import { fetchLessonReview, MIN_REVIEW_QUESTIONS } from './lesson-review.js';
 import { formatHanViet, hanVietOf, loadHanViet } from './kanji-hanviet.js';
 
