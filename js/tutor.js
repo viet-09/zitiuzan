@@ -12,7 +12,6 @@ import {
   getTutorMemory,
   setTutorMemory,
 } from './store.js';
-import { getProfile } from './profile.js';
 import { renderFurigana } from './furigana.js';
 import { askText, openSettings } from './gemini.js';
 import { learningState } from './learning-state.js';
@@ -36,10 +35,11 @@ let mountToken = 0;
 function systemPrompt() {
   let prompt = TUTOR_SYSTEM_PROMPT;
 
-  const name = (getProfile()?.name || '').trim();
-  if (name) {
-    prompt += `\n\nTên người học: ${name}. Hãy chào hỏi và xưng hô với người học bằng tên này một cách tự nhiên, thân thiện — không cần lặp lại ở mọi câu.`;
-  }
+  // The learner's display name is deliberately NOT sent to the model. It is
+  // seeded from the Google account's full name without asking, so including
+  // it would hand a legal name to a third-party LLM the learner never agreed
+  // to share it with. The tutor works fine without it — the prompt already
+  // addresses the learner as "người học".
 
   const memory = getTutorMemory().trim();
   if (memory) {

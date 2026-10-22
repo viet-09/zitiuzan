@@ -1,6 +1,10 @@
 export const PROFILE_LIMITS = Object.freeze({
   nameLength: 40,
-  dataUrlBytes: 750_000,
+  // Must stay <= AVATAR_DATA_MAX (js/sync.js) and the user_profiles
+  // avatar_data_len CHECK constraint (200000 characters). A larger local
+  // ceiling let the client accept an avatar the database rejects, which
+  // aborted the whole legacy migration for that account.
+  dataUrlBytes: 200_000,
 });
 
 export const PROFILE_PRESETS = Object.freeze([
