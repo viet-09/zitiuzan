@@ -17,6 +17,13 @@ export function openSignInGate(options = {}) {
 
   const sequence = ++dialogSequence;
   const titleId = `signin-gate-title-${sequence}`;
+  const isIphoneSafari = /iPhone|iPad|iPod/.test(navigator.userAgent) &&
+    /Safari/.test(navigator.userAgent) && !/CriOS|FxiOS|EdgiOS/.test(navigator.userAgent);
+  const isInstalled = window.matchMedia?.('(display-mode: standalone)').matches ||
+    navigator.standalone === true;
+  const installHint = isIphoneSafari && !isInstalled
+    ? '<p class="profile-modal__help auth-modal__install-hint">Muốn dùng như app trên iPhone? Trong Safari, bấm Chia sẻ → Thêm vào Màn hình chính.</p>'
+    : '';
 
   const overlay = document.createElement('div');
   overlay.className = 'modal-overlay auth-modal active';
@@ -28,6 +35,7 @@ export function openSignInGate(options = {}) {
       <div class="modal-body">
         <p class="profile-modal__help">Đăng nhập Google để học, đồng bộ tiến độ và tham gia bảng xếp hạng.</p>
         <button type="button" class="auth-pill auth-modal__google" data-gate-action="google">Đăng nhập bằng Google</button>
+        ${installHint}
         <p class="profile-status" data-gate-status role="status" aria-live="polite"></p>
       </div>
     </section>`;

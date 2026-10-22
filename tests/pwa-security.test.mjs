@@ -21,6 +21,36 @@ test('the app is installable and registers a service worker', () => {
   assert.match(worker, /data\/lessons\.json/);
 });
 
+test('iPhone home screen integration has real PNG icons, standalone metadata and safe-area spacing', () => {
+  const index = read('index.html');
+  const manifest = JSON.parse(read('manifest.webmanifest'));
+  const sw = read('sw.js');
+  const css = read('css/styles.css');
+  const viewport = read('js/viewport-fit.js');
+
+  assert.match(index, /viewport-fit=cover/);
+  assert.match(index, /name="apple-mobile-web-app-capable" content="yes"/);
+  assert.match(index, /name="apple-mobile-web-app-title" content="N2"/);
+  assert.match(index, /rel="apple-touch-icon" sizes="180x180" href="icons\/apple-touch-icon\.png"/);
+  assert.equal(manifest.short_name, 'N2');
+  assert.equal(manifest.display, 'standalone');
+  assert.equal(manifest.id, './');
+  for (const [file, size] of [
+    ['app-icon-192.png', 192], ['app-icon-512.png', 512], ['apple-touch-icon.png', 180],
+  ]) {
+    const png = fs.readFileSync(path.join(root, 'icons', file));
+    assert.equal(png.subarray(0, 8).toString('hex'), '89504e470d0a1a0a', `${file} is not a PNG`);
+    assert.equal(png.readUInt32BE(16), size, `${file} width`);
+    assert.equal(png.readUInt32BE(20), size, `${file} height`);
+    assert.match(sw, new RegExp(`icons/${file.replaceAll('.', '\\.')}`), `${file} missing from app shell`);
+  }
+  assert.ok(manifest.icons.some((icon) => icon.src === 'icons/app-icon-192.png'));
+  assert.ok(manifest.icons.some((icon) => icon.src === 'icons/app-icon-512.png'));
+  assert.match(css, /padding-top: env\(safe-area-inset-top/);
+  assert.match(viewport, /getBoundingClientRect\(\)\.height/);
+  assert.match(read('js/auth.js'), /Thêm vào Màn hình chính/);
+});
+
 test('pet motion assets are versioned consistently to bypass a stale service-worker cache', () => {
   const index = read('index.html');
   const worker = read('sw.js');

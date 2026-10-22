@@ -12,6 +12,11 @@ import { ROUTE_CHANGED_EVENT } from './router.js';
 const MIN_HEIGHT = 280;
 
 function readBottomNavHeight(root) {
+  // On installed iPhones the fixed navigation includes the Home Indicator
+  // safe-area padding, which is taller than the CSS token alone.
+  const nav = document.querySelector('.bottom-nav');
+  const measured = nav?.getBoundingClientRect().height;
+  if (Number.isFinite(measured) && measured > 0) return measured;
   const raw = getComputedStyle(root).getPropertyValue('--bottom-nav-height');
   const value = Number.parseFloat(raw);
   return Number.isFinite(value) ? value : 76;

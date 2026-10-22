@@ -69,6 +69,7 @@ body {
     line-height: 1.65;
     -webkit-font-smoothing: antialiased;
     padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0));
+    padding-top: env(safe-area-inset-top, 0px);
     min-height: 100vh;
     overflow-x: hidden;
 }
@@ -2363,7 +2364,7 @@ body.furigana-off rt {
    account icon; opens the dedicated #/profile page. */
 .account-avatar-btn {
     position: fixed;
-    top: 14px;
+    top: calc(14px + env(safe-area-inset-top, 0px));
     right: 14px;
     z-index: 60;
     width: 38px;
@@ -2492,6 +2493,7 @@ body.furigana-off rt {
 /* Sign-in gate (Google or skip) — reuses .modal-*, .profile-status */
 .auth-modal__card { max-width: 420px; }
 .auth-modal__google { display: flex; width: 100%; justify-content: center; margin: 4px 0 4px; }
+.auth-modal__install-hint { margin-top: 12px; font-size: 13px; line-height: 1.5; }
 .auth-modal__link-btn {
     min-height: 44px;
     padding: 4px 0;
@@ -2656,7 +2658,7 @@ body.furigana-off rt {
     .category-block { min-width: 0; }
     .lessons-grid { grid-template-columns: minmax(0, 1fr); }
     .exam-tracker { padding: 8px; margin-bottom: 10px; }
-    .account-avatar-btn { top: 8px; right: 8px; width: 30px; height: 30px; }
+    .account-avatar-btn { top: calc(8px + env(safe-area-inset-top, 0px)); right: 8px; width: 30px; height: 30px; }
     .exam-timer-bar { padding: 8px 10px; gap: 8px; }
     .exam-timer-phase { font-size: 11px; }
     .exam-timer-clock { font-size: 16px; }

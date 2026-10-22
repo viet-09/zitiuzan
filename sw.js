@@ -1,18 +1,21 @@
-const CACHE_NAME = 'n2-journal-v42';
+const CACHE_NAME = 'n2-journal-v43';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './icons/app-icon.svg',
-  './css/styles.css?v=42',
-  './js/app.js?v=42',
-  './js/pet.js?v=42',
-  './js/pet-art.js?v=42',
-  './js/pet-companion.js?v=42',
-  './js/pet-companion-state.js?v=42',
-  './js/pet-motion.js?v=42',
-  './js/kanji-writing.js?v=42',
-  './js/viewport-fit.js?v=42',
+  './icons/app-icon-192.png',
+  './icons/app-icon-512.png',
+  './icons/apple-touch-icon.png',
+  './css/styles.css?v=43',
+  './js/app.js?v=43',
+  './js/pet.js?v=43',
+  './js/pet-art.js?v=43',
+  './js/pet-companion.js?v=43',
+  './js/pet-companion-state.js?v=43',
+  './js/pet-motion.js?v=43',
+  './js/kanji-writing.js?v=43',
+  './js/viewport-fit.js?v=43',
   './js/profile-avatar.js',
   './assets/pets/fox-motion-atlas.png',
   './assets/pets/rabbit-motion-atlas.png',
@@ -55,6 +58,12 @@ self.addEventListener('fetch', (event) => {
       if (response.ok) caches.open(CACHE_NAME).then((cache) => cache.put(request, response.clone()));
       return response;
     });
-    return cached || fresh;
+    // Cached content works offline. Ignore background revalidation failures
+    // rather than producing unhandled promise rejections when the phone is offline.
+    if (cached) {
+      event.waitUntil(fresh.catch(() => {}));
+      return cached;
+    }
+    return fresh;
   }));
 });
