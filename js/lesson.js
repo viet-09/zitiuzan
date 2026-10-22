@@ -22,11 +22,12 @@ import { completeLessonOnce, toggleLessonCompletion } from './completion.js';
 import { learningState } from './learning-state.js';
 import { buildBookViewerModel, renderBookViewerStrip } from './book-viewer.js';
 import { activateModalDialog } from './modal-dialog.js';
-import { openKanjiWritingPad } from './kanji-writing.js?v=38';
-import { openKanjiSheet } from './kanji-sheet.js?v=38';
-import { announceLessonCompleted } from './pet.js?v=38';
+import { openKanjiWritingPad } from './kanji-writing.js?v=39';
+import { openKanjiSheet } from './kanji-sheet.js?v=39';
+import { announceLessonCompleted } from './pet.js?v=39';
 import { fetchLessonReview, MIN_REVIEW_QUESTIONS } from './lesson-review.js';
 import { formatHanViet, hanVietOf, loadHanViet } from './kanji-hanviet.js';
+import { ensureLessonContent } from './book-content.js?v=39';
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (char) => ({
@@ -374,8 +375,8 @@ function renderListening(lessonId, content) {
 function renderBookContent(categoryId, content, lessonId = '') {
   if (!content || typeof content !== 'object') return `
     <div class="lesson-empty-state" role="status">
-      <p>Nội dung sách của bài này chưa được trích xuất và xác minh.</p>
-      <p class="text-muted">Ứng dụng không tự sáng tác nội dung thay cho sách.</p>
+      <div class="spinner" aria-hidden="true"></div>
+      <p>Đang tải nội dung bài học…</p>
     </div>`;
   if (categoryId === 'kanji') return renderKanji(lessonId, content);
   if (categoryId === 'vocabulary') return renderVocabulary(lessonId, content);
@@ -652,7 +653,9 @@ export function renderLesson(root, id) {
     updateLessonProgress(root.querySelector('.lesson-page'));
     hydrateLessonAudio(root);
     void hydrateHanViet(root);
-    void hydrateRevision(root, found, id, bookContent);
+    // The revision questions are generated from the lesson body, so there is
+    // nothing to send until the category has landed.
+    if (bookContent) void hydrateRevision(root, found, id, bookContent);
   };
 
   /**
@@ -921,7 +924,26 @@ export function renderLesson(root, id) {
   };
 
   root.addEventListener('click', onClick);
+
+  // The book payload is fetched per category on demand (see js/book-content.js),
+  // so the first paint may not have this lesson's body yet. lessons.json carries
+  // the title, which is enough to render the frame, and the full body swaps in
+  // when the category lands — so the page is interactive immediately instead of
+  // waiting on a 2.3 MB download.
+  const epoch = getCurrentRoute().epoch;
   paint();
+  void ensureLessonContent(id).then((status) => {
+    if (!isRouteActive('lesson', id, epoch)) return;
+    if (getBookContent(id)) {
+      paint();
+      return;
+    }
+    if (status === 'failed') {
+      root.querySelector('.lesson-empty-state')?.replaceChildren(
+        Object.assign(document.createElement('p'), { textContent: 'Không tải được nội dung bài học. Kiểm tra kết nối rồi thử lại.' })
+      );
+    }
+  });
 
   return {
     cleanup() {

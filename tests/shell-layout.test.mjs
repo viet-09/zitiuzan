@@ -114,12 +114,31 @@ test('a signed-in tab regaining focus does not resync and repaint the whole rout
   // every single time, which is what made pages blink at random.
   assert.match(app, /let syncedUserId = null;/);
   assert.match(app, /if \(syncedUserId === authedUser\.id\) return;/);
-  assert.match(app, /syncedUserId = null;[\s\S]{0,120}openSignInGate\(\);/);
+  assert.match(app, /syncedUserId = null;[\s\S]{0,160}openSignInGate\(\);/);
+  assert.doesNotMatch(app, /BOOK_CONTENT_ROUTES/);
+});
 
-  // The book payload lands seconds after first paint; only the two routes
-  // built from it may be repainted when it does.
-  assert.match(app, /const BOOK_CONTENT_ROUTES = new Set\(\['dashboard', 'lesson'\]\);/);
-  assert.match(app, /BOOK_CONTENT_ROUTES\.has\(getCurrentRoute\(\)\.name\)\) navigate/);
+test('boot does not fetch the multi-megabyte book payload', () => {
+  const app = read('js/app.js');
+
+  // The 2.3 MB of lesson bodies used to be fetched before first paint. It is
+  // now pulled one category at a time by js/book-content.js, on demand.
+  assert.doesNotMatch(app, /mergeBookContent/,
+    'app.js must not load the whole book payload at boot');
+  assert.doesNotMatch(app, /loadEnrichment/,
+    'app.js must not load every enrichment file at boot');
+  assert.doesNotMatch(app, /fetch\('data\/book\//,
+    'app.js must not fetch book files directly any more');
+
+  const book = read('js/book-content.js');
+  assert.match(book, /export async function ensureLessonContent/);
+  assert.match(book, /export async function ensureAllBookContent/);
+  assert.match(book, /data\/book\/\$\{encodeURIComponent\(entry\.file\)\}/,
+    'book-content must fetch one category file at a time');
+  assert.match(book, /if \(loaded\.get\(category\)\) return Promise\.resolve\(\);/,
+    'a resident category must not be refetched');
+  assert.match(book, /if \(inflight\.has\(category\)\) return inflight\.get\(category\);/,
+    'concurrent loads of one category must share a single request');
 });
 
 test('the leaderboard repaints from its last standings instead of a loading flash', () => {

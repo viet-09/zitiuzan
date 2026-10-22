@@ -13,7 +13,7 @@ import {
 } from './store.js';
 import { renderFurigana } from './furigana.js';
 import { navigate } from './router.js';
-import { announceLessonCompleted, PET_CONTEXT_EVENT } from './pet.js?v=38';
+import { announceLessonCompleted, PET_CONTEXT_EVENT } from './pet.js?v=39';
 import { toggleLessonCompletion } from './completion.js';
 import {
   buildDailyPlan,
@@ -29,6 +29,7 @@ import { initialExpandedWeeks } from './dashboard-state.js';
 import { examHistoryStore } from './exam-history.js';
 import { currentUser } from './supabase.js';
 import { pushProfile } from './sync.js';
+import { ensureAllBookContent } from './book-content.js?v=39';
 
 const dashboardState = {
   activeCategory: 'all',
@@ -222,7 +223,13 @@ function renderLearningHub(data) {
 }
 
 function bindLearningHub(data, hub) {
-  const searchIndex = buildSearchIndex(data, getBookContent);
+  // Title-only index first: the lesson bodies are fetched per category on
+  // demand (js/book-content.js), and waiting for all 2.3 MB before the search
+  // field works would defeat the point of not loading it at boot. Typing
+  // matches titles immediately; opening the field upgrades the index to full
+  // body text in the background.
+  let searchIndex = buildSearchIndex(data, getBookContent);
+  let fullIndexPending = false;
   const results = hub.querySelector('[data-learning-results]');
   hub.addEventListener('click', (event) => {
     const route = event.target.closest('[data-learning-route]')?.dataset.learningRoute;
@@ -243,7 +250,18 @@ function bindLearningHub(data, hub) {
     captureDashboardState();
     navigate(`#/lesson/${encodeURIComponent(open.dataset.learningOpen)}`);
   });
-  hub.querySelector('[data-learning-search]')?.addEventListener('input', (event) => {
+  const searchInput = hub.querySelector('[data-learning-search]');
+  searchInput?.addEventListener('focus', () => {
+    if (fullIndexPending) return;
+    fullIndexPending = true;
+    void ensureAllBookContent().then(() => {
+      searchIndex = buildSearchIndex(data, getBookContent);
+      // Re-run whatever the learner has typed while the bodies arrived.
+      const query = searchInput.value.trim();
+      if (query) searchInput.dispatchEvent(new Event('input'));
+    });
+  });
+  searchInput?.addEventListener('input', (event) => {
     const query = event.target.value.trim();
     if (!query) {
       results.innerHTML = '';

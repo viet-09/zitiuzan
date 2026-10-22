@@ -1,9 +1,9 @@
 // js/app.js — application bootstrap
 // Loads lesson data, wires the header/nav controls, and starts the hash router.
 
-import { setLessons, resetBookContent, mergeBookContent, setTutorContext, setQuestionClassification, setLessonImages, setVietnameseExplanations, getStreak } from './store.js';
-import { mountPet } from './pet.js?v=38';
-import { getCurrentRoute, initRouter, navigate } from './router.js';
+import { setLessons, setTutorContext, getStreak } from './store.js';
+import { mountPet } from './pet.js?v=39';
+import { initRouter, navigate } from './router.js';
 import { initFuriganaToggle } from './furigana.js';
 import { openSettings } from './gemini.js';
 import { renderDashboard } from './dashboard.js';
@@ -26,7 +26,7 @@ import { openSignInGate } from './auth.js';
 import { onAuthChange, ready as supabaseReady, currentUser } from './supabase.js';
 import { flushCompletionQueue, flushReviewQueue, maybeMigrateLocalData, maybeSeedProfileFromGoogle, pullFromCloud, pushProfile, syncReviewRemote } from './sync.js';
 import { REVIEW_RECORDED_EVENT } from './learning-state.js';
-import { mountAppViewportFit } from './viewport-fit.js?v=38';
+import { mountAppViewportFit } from './viewport-fit.js?v=39';
 
 function registerServiceWorker() {
     if (!('serviceWorker' in navigator) || location.protocol === 'file:') return;
@@ -120,67 +120,12 @@ async function loadLessons() {
     }
 }
 
-async function loadBookContent() {
-    resetBookContent();
-    try {
-        const manifestResponse = await fetch('data/book/manifest.json');
-        if (!manifestResponse.ok) throw new Error(`HTTP ${manifestResponse.status}`);
-        const manifest = await manifestResponse.json();
-        const categories = manifest.categories && typeof manifest.categories === 'object' ? manifest.categories : {};
-        const files = Array.isArray(manifest.files)
-            ? manifest.files
-            : Object.values(categories).map((entry) => entry && entry.file).filter(Boolean);
-        const payloads = await Promise.all(files.map(async (file) => {
-            const response = await fetch(`data/book/${encodeURIComponent(file)}`);
-            if (!response.ok) throw new Error(`${file}: HTTP ${response.status}`);
-            return response.json();
-        }));
-        payloads.forEach(mergeBookContent);
-        // Load optional enrichment files (classification + images) per category.
-        await loadEnrichment(categories);
-    } catch (err) {
-        // The checked-in W1 proof remains a useful development fallback while a
-        // manifest is being regenerated, but production uses manifest.json only.
-        try {
-            const response = await fetch('data/book/kanji-w1.json');
-            if (response.ok) mergeBookContent(await response.json());
-        } catch (fallbackErr) {
-            console.warn('Không thể nạp dữ liệu sách:', err);
-        }
-    }
-}
-
-async function loadEnrichment(categories) {
-    await Promise.all(Object.entries(categories).map(async ([category, entry]) => {
-        if (!entry || typeof entry !== 'object') return;
-        const files = Array.isArray(entry.enrichmentFiles) ? entry.enrichmentFiles : [];
-        for (const suffix of files) {
-            try {
-                const response = await fetch(`data/book/${encodeURIComponent(category)}.${encodeURIComponent(suffix)}`);
-                if (!response.ok) continue;
-                const data = await response.json();
-                if (suffix === 'classification.json' && data && typeof data === 'object') {
-                    for (const [lessonId, body] of Object.entries(data)) {
-                        if (body && Array.isArray(body.questions)) setQuestionClassification(lessonId, body.questions);
-                    }
-                } else if (suffix === 'images.json' && data && typeof data === 'object') {
-                    for (const [lessonId, list] of Object.entries(data)) {
-                        if (Array.isArray(list)) setLessonImages(lessonId, list);
-                    }
-                } else if (suffix === 'vietnamese.json' && data && typeof data === 'object') {
-                    for (const [lessonId, list] of Object.entries(data)) {
-                        if (Array.isArray(list)) setVietnameseExplanations(lessonId, list);
-                    }
-                }
-            } catch (_err) {
-                // enrichment is optional; skip silently
-            }
-        }
-    }));
-}
-
-// Routes whose markup is built from the lazily loaded book payload.
-const BOOK_CONTENT_ROUTES = new Set(['dashboard', 'lesson']);
+// The ~2.3 MB book payload (lesson bodies + classification + images +
+// Vietnamese explanations) is NOT loaded at boot. js/book-content.js fetches
+// one category at a time, on demand: a lesson visit pulls that lesson's
+// category, and the curriculum search pulls everything the first time the
+// learner focuses the field. Boot only needs lessons.json (55 KB) for the
+// lesson list and titles.
 
 async function bootstrap() {
     registerServiceWorker();
@@ -290,13 +235,6 @@ async function bootstrap() {
         },
         rootEl
     );
-
-    void loadBookContent().then(() => {
-        // Only these two routes read lesson bodies out of the book payload.
-        // Repainting anything else once it lands throws away the page the user
-        // is already reading — and re-runs its network calls — for no gain.
-        if (BOOK_CONTENT_ROUTES.has(getCurrentRoute().name)) navigate(location.hash || '#/');
-    });
 }
 
 document.addEventListener('DOMContentLoaded', bootstrap);
