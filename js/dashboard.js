@@ -13,7 +13,7 @@ import {
 } from './store.js';
 import { renderFurigana } from './furigana.js';
 import { navigate } from './router.js';
-import { announceLessonCompleted, PET_CONTEXT_EVENT } from './pet.js?v=39';
+import { announceLessonCompleted, PET_CONTEXT_EVENT } from './pet.js?v=40';
 import { toggleLessonCompletion } from './completion.js';
 import {
   buildDailyPlan,
@@ -29,7 +29,7 @@ import { initialExpandedWeeks } from './dashboard-state.js';
 import { examHistoryStore } from './exam-history.js';
 import { currentUser } from './supabase.js';
 import { pushProfile } from './sync.js';
-import { ensureAllBookContent } from './book-content.js?v=39';
+import { ensureAllBookContent } from './book-content.js?v=40';
 
 const dashboardState = {
   activeCategory: 'all',

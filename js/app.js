@@ -2,7 +2,7 @@
 // Loads lesson data, wires the header/nav controls, and starts the hash router.
 
 import { setLessons, setTutorContext, getStreak } from './store.js';
-import { mountPet } from './pet.js?v=39';
+import { mountPet } from './pet.js?v=40';
 import { initRouter, navigate } from './router.js';
 import { initFuriganaToggle } from './furigana.js';
 import { openSettings } from './gemini.js';
@@ -23,10 +23,11 @@ import {
     PROFILE_UPDATED_EVENT,
 } from './profile.js';
 import { openSignInGate } from './auth.js';
+import { clearUserScopedStorage } from './account-storage.js';
 import { onAuthChange, ready as supabaseReady, currentUser } from './supabase.js';
 import { flushCompletionQueue, flushReviewQueue, maybeMigrateLocalData, maybeSeedProfileFromGoogle, pullFromCloud, pushProfile, syncReviewRemote } from './sync.js';
 import { REVIEW_RECORDED_EVENT } from './learning-state.js';
-import { mountAppViewportFit } from './viewport-fit.js?v=39';
+import { mountAppViewportFit } from './viewport-fit.js?v=40';
 
 function registerServiceWorker() {
     if (!('serviceWorker' in navigator) || location.protocol === 'file:') return;
@@ -165,6 +166,14 @@ async function bootstrap() {
         let syncedUserId = null;
         onAuthChange(async (authedUser) => {
             if (!authedUser) {
+                // The session ended without the learner clicking Sign Out —
+                // an expired token, a revoked session, a sign-out in another
+                // tab. Whatever was on screen belonged to the account that just
+                // went away, so it is cleared here. Leaving it would let the
+                // next person to sign in on this device read the previous
+                // learner's AI history and voice transcripts, and would push
+                // the previous learner's local reviews into the new account.
+                clearUserScopedStorage();
                 syncedUserId = null;
                 openSignInGate();
                 // A signed-out tab must not offer the previous account's
@@ -173,6 +182,11 @@ async function bootstrap() {
                 return;
             }
             if (syncedUserId === authedUser.id) return;
+            // A different account than the one this tab was showing. The
+            // previous account's local data must not follow them over.
+            if (syncedUserId && syncedUserId !== authedUser.id) {
+                clearUserScopedStorage();
+            }
             syncedUserId = authedUser.id;
             setExamSessionOwner(authedUser.id);
             markProfilePromptSeen();
