@@ -22,6 +22,16 @@ function readJson(path) {
   return JSON.parse(readFileSync(path, 'utf8'));
 }
 
+/** Same as readJson, but returns null when the file does not exist yet
+ *  (first run) instead of throwing. */
+function readJsonIfExists(path) {
+  try {
+    return readJson(path);
+  } catch {
+    return null;
+  }
+}
+
 function writeJson(path, value) {
   writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`, 'utf8');
 }
@@ -51,10 +61,21 @@ for (const definition of DEFINITIONS) {
   canonicalByCategory.set(definition.id, canonical);
   writeJson(join(BOOK_DIR, `${definition.id}.json`), canonical);
 
+  // Preserve enrichmentFiles from the existing manifest if present. If
+  // finalize overwrites manifestCategories without copying enrichmentFiles,
+  // loadBookContent in app.js stops loading classification, images, and
+  // Vietnamese glosses.
+  const existingManifest = readJsonIfExists(join(BOOK_DIR, 'manifest.json'));
+  const existingEntry = existingManifest?.categories?.[definition.id];
+  const enrichmentFiles = Array.isArray(existingEntry?.enrichmentFiles)
+    ? existingEntry.enrichmentFiles
+    : ['classification.json', 'images.json', 'vietnamese.json'];
+
   manifestCategories[definition.id] = {
     file: `${definition.id}.json`,
     prefix: definition.prefix,
     lessonIds: expectedIds,
+    enrichmentFiles,
     complete: true,
   };
 

@@ -2,17 +2,17 @@
   "l1d1": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "listening-imamashii",
         "descriptionVi": "Nghe va dien am tiet co am ngat 'tsu' vao cho trong"
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "listening-imamashii",
         "descriptionVi": "Chon tu dung voi nhung gi nghe duoc co chu y cach viet"
       },
       {
-        "index": 3,
+        "index": 2,
         "type": "listening-imamashii",
         "descriptionVi": "Nghe va viet lai tu da nghe bang hiragana va dang goc vao ngoac"
       }
@@ -70,52 +70,52 @@
   "l1d3": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "listening-point",
         "descriptionVi": "Hỏi về thời gian cho đến khi ăn được"
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "listening-point",
         "descriptionVi": "Hỏi tình hình của chồng người nghe"
       },
       {
-        "index": 3,
+        "index": 2,
         "type": "listening-point",
         "descriptionVi": "Hỏi về việc có thể gặp nhau vào ngày mai hay không"
       },
       {
-        "index": 4,
+        "index": 3,
         "type": "listening-point",
         "descriptionVi": "Hỏi về việc có lời nhắn hay không"
       },
       {
-        "index": 5,
+        "index": 4,
         "type": "listening-point",
         "descriptionVi": "Cuộc gọi điện thoại từ Tanaka"
       },
       {
-        "index": 6,
+        "index": 5,
         "type": "listening-point",
         "descriptionVi": "Người nữ đã xin lỗi người nam"
       },
       {
-        "index": 7,
+        "index": 6,
         "type": "listening-point",
         "descriptionVi": "Người nữ yêu cầu người nam giải thích"
       },
       {
-        "index": 8,
+        "index": 7,
         "type": "listening-point",
         "descriptionVi": "Thầy Tanaka nhớ người nữ"
       },
       {
-        "index": 9,
+        "index": 8,
         "type": "listening-point",
         "descriptionVi": "Người nam định báo cáo về cuộc điều tra"
       },
       {
-        "index": 10,
+        "index": 9,
         "type": "listening-point",
         "descriptionVi": "Cả người nam và người nữ đều đã xem bộ phim mang tên 'Hakuou'"
       }
@@ -124,57 +124,57 @@
   "l1d4": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "listening-imamashii",
         "descriptionVi": "Lựa chọn ý nghĩa đúng của biểu thức '～わけだ'"
+      },
+      {
+        "index": 1,
+        "type": "listening-imamashii",
+        "descriptionVi": "Lựa chọn ý nghĩa đúng của biểu thức '～わけじゃない'"
       },
       {
         "index": 2,
         "type": "listening-imamashii",
-        "descriptionVi": "Lựa chọn ý nghĩa đúng của biểu thức '～わけじゃない'"
+        "descriptionVi": "Lựa chọn ý nghĩa đúng của biểu thức '～わけがない'"
       },
       {
         "index": 3,
         "type": "listening-imamashii",
-        "descriptionVi": "Lựa chọn ý nghĩa đúng của biểu thức '～わけがない'"
+        "descriptionVi": "Lựa chọn phản hồi phù hợp với ngữ cảnh"
       },
       {
         "index": 4,
         "type": "listening-imamashii",
-        "descriptionVi": "Lựa chọn phản hồi phù hợp với ngữ cảnh"
+        "descriptionVi": "Lựa chọn phản hồi phù hợp với ngữ cảnh hội thoại"
       },
       {
         "index": 5,
         "type": "listening-imamashii",
-        "descriptionVi": "Lựa chọn phản hồi phù hợp với ngữ cảnh hội thoại"
+        "descriptionVi": "Xác định tâm trạng của nhân vật trong đoạn hội thoại"
       },
       {
         "index": 6,
         "type": "listening-imamashii",
-        "descriptionVi": "Xác định tâm trạng của nhân vật trong đoạn hội thoại"
+        "descriptionVi": "Lựa chọn ý nghĩa đúng của biểu thức '～わけだ'"
       },
       {
         "index": 7,
         "type": "listening-imamashii",
-        "descriptionVi": "Lựa chọn ý nghĩa đúng của biểu thức '～わけだ'"
+        "descriptionVi": "Lựa chọn ý nghĩa đúng của biểu thức '～わけじゃない'"
       },
       {
         "index": 8,
         "type": "listening-imamashii",
-        "descriptionVi": "Lựa chọn ý nghĩa đúng của biểu thức '～わけじゃない'"
+        "descriptionVi": "Lựa chọn ý nghĩa đúng của biểu thức '～わけだ'"
       },
       {
         "index": 9,
         "type": "listening-imamashii",
-        "descriptionVi": "Lựa chọn ý nghĩa đúng của biểu thức '～わけだ'"
-      },
-      {
-        "index": 10,
-        "type": "listening-imamashii",
         "descriptionVi": "Lựa chọn ý nghĩa đúng của biểu thức '～わけじゃない'"
       },
       {
-        "index": 11,
+        "index": 10,
         "type": "listening-imamashii",
         "descriptionVi": "Lựa chọn ý nghĩa đúng của biểu thức '～わけがない'"
       }
@@ -183,102 +183,102 @@
   "l1d5": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "listening-imamashii",
         "descriptionVi": "Chon tu dung voi cach phat am va bo tuc"
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "listening-imamashii",
         "descriptionVi": "Xac dinh doan hoi thoai dung noi dung"
       },
       {
-        "index": 3,
+        "index": 2,
         "type": "listening-imamashii",
         "descriptionVi": "Nghe doan hoi thoai va dien vao cho trong"
       },
       {
-        "index": 4,
+        "index": 3,
         "type": "listening-imamashii",
         "descriptionVi": "Chon hanh dong hoac phan ung phu hop trong truong hop cu the"
       },
       {
-        "index": 5,
+        "index": 4,
         "type": "listening-imamashii",
         "descriptionVi": "Hieu cam xuc hoac y dinh cua nguoi noi qua cau"
       },
       {
-        "index": 6,
+        "index": 5,
         "type": "listening-kadai",
         "descriptionVi": "Nghe cau hoi va chon tu, phat am chinh xac"
       },
       {
-        "index": 7,
+        "index": 6,
         "type": "listening-kadai",
         "descriptionVi": "Nghe cau hoi va chon cau tra loi dung"
       },
       {
-        "index": 8,
+        "index": 7,
         "type": "listening-point",
         "descriptionVi": "Nghe doan hoi thoai va xac dinh thong tin chinh"
       },
       {
-        "index": 9,
+        "index": 8,
         "type": "listening-gaiyou",
         "descriptionVi": "Xac dinh noi dung chinh cua bai nghe tong hop"
       },
       {
-        "index": 10,
+        "index": 9,
         "type": "listening-imamashii",
         "descriptionVi": "Nghe doan hoi thoai tong hop va chon phu an phu hop"
       },
       {
-        "index": 11,
+        "index": 10,
         "type": "listening-kadai",
         "descriptionVi": "Nghe doan hoi thoai va giai quyet van de cap thiet"
       },
       {
-        "index": 12,
+        "index": 11,
         "type": "listening-point",
         "descriptionVi": "Tim diem chinh trong bai phat bieu hoac thong bao"
       },
       {
-        "index": 13,
+        "index": 12,
         "type": "listening-gaiyou",
         "descriptionVi": "Hieu y nghia tong quat cua doan hoi thoai dai"
       },
       {
-        "index": 14,
+        "index": 13,
         "type": "listening-imamashii",
         "descriptionVi": "Nghe va dua ra quyet dinh dua tren thong tin cho truoc"
       },
       {
-        "index": 15,
+        "index": 14,
         "type": "listening-imamashii",
         "descriptionVi": "Xac dinh vi tri hoac huong di dung"
       },
       {
-        "index": 16,
+        "index": 15,
         "type": "listening-kadai",
         "descriptionVi": "Thuc hien nhiem vu dua tren chi dan da nghe"
       },
       {
-        "index": 17,
+        "index": 16,
         "type": "listening-point",
         "descriptionVi": "Hieu ro nguyen nhan hoac ly do trong tinh the cu the"
       },
       {
-        "index": 18,
+        "index": 17,
         "type": "listening-gaiyou",
         "descriptionVi": "Tong hop thong tin de dua ra ket luan chung"
       },
       {
-        "index": 19,
+        "index": 18,
         "type": "listening-imamashii",
         "descriptionVi": "Nghe doan hoi thoai va chon y kien hoac danh gia dung"
       },
       {
-        "index": 20,
+        "index": 19,
         "type": "listening-imamashii",
         "descriptionVi": "Giai quyet cau hoi tong hop phuc tap dua tren nhieu nguon thong tin"
       }
@@ -311,12 +311,12 @@
   "l2d2": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "listening-kadai",
         "descriptionVi": "Nghe hiểu đoạn hội thoại để xác định người nam cần làm gì tiếp theo hoặc vấn đề cần giải quyết."
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "listening-kadai",
         "descriptionVi": "Nghe đoạn hội thoại và xác định hành động tiếp theo của người nam trong tình huống cụ thể."
       }
@@ -325,12 +325,12 @@
   "l2d3": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "listening-point",
         "descriptionVi": "Nghe doan hoi thoai va xac dinh ly do tai sao nguoi nam lai muon den quan ramen do."
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "listening-point",
         "descriptionVi": "Nghe doan hoi thoai va xac dinh ly do tai sao nguoi nu khong muon vao cong ty cu nua."
       }
@@ -339,12 +339,12 @@
   "l2d4": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "listening-gaiyou",
         "descriptionVi": "Nghe doan hoi thoai va xac dinh muc dich hoac noi dung chinh cua nguoi noi"
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "listening-gaiyou",
         "descriptionVi": "Nghe doan hoi thoai ve mot chu de va tim hieu y chinh hoac ban chat cua van de"
       }
@@ -367,12 +367,12 @@
   "l2d6": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "listening-imamashii",
         "descriptionVi": "Xac dinh cau hoi 1 cho bai l2d6 ve Chon lua - Hieu tong hop"
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "listening-imamashii",
         "descriptionVi": "Xac dinh cau hoi 2 cho bai l2d6 ve Chon lua - Hieu tong hop"
       }
@@ -459,17 +459,17 @@
   "l3d2": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "listening-gaiyou",
         "descriptionVi": "Nghe hieu noi dung chinh cua doan hoi thoa"
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "listening-point",
         "descriptionVi": "Hieu moi quan he giua hai nguoi trong cuoc tro chuyen"
       },
       {
-        "index": 3,
+        "index": 2,
         "type": "listening-imamashii",
         "descriptionVi": "Hieu cuoc tro chuyen dien thoai va tin nhan trong doi song"
       }
@@ -497,17 +497,17 @@
   "l3d4": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "listening-imamashii",
         "descriptionVi": "Hỏi về lý do người nữ không hài lòng với công việc mới."
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "listening-imamashii",
         "descriptionVi": "Hỏi về lý do thực sự khiến người nam không muốn đi karaoke."
       },
       {
-        "index": 3,
+        "index": 2,
         "type": "listening-imamashii",
         "descriptionVi": "Hỏi suy nghĩ của người nam về việc đi tàu điện ngầm ở Tokyo."
       }
@@ -607,17 +607,17 @@
   "l4d4": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "listening-imamashii",
         "descriptionVi": "Hỏi về vị trí chờ đợi của bà cô giáo trong thông báo của cửa hàng bách hóa."
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "listening-point",
         "descriptionVi": "Nghe thông báo tại nhà ga để tìm nguyên nhân khiến giao thông bị rối loạn."
       },
       {
-        "index": 3,
+        "index": 2,
         "type": "listening-kadai",
         "descriptionVi": "Nghe thông báo trên tàu điện để hướng dẫn người phụ nữ cách đổi tuyến."
       }

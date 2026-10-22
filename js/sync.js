@@ -9,6 +9,7 @@ import {
 } from './supabase.js';
 import {
   writeProgressMapExternal,
+  getProgressMap,
   writeStreak,
   setSettings,
 } from './store.js';
@@ -43,15 +44,15 @@ const LEGACY_KEYS = {
   n2_streak_v2: {
     table: 'user_profiles',
     map(value, userId) {
-      // Update profile row; RLS allows auth.uid() = user_id.
-      if (!value || typeof value !== 'object') return null;
-      return {
-        user_id: userId,
-        streak: Number.isFinite(value.streak) ? Math.max(0, Math.floor(value.streak)) : 0,
-        last_study_date: typeof value.lastDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value.lastDate)
-          ? value.lastDate
-          : null,
-      };
+      // Legacy migration used to push streak/last_study_date into
+      // user_profiles, but those columns are now server-owned: the RLS
+      // guard added in 20261021100000_profile_column_guards restores the
+      // old values for browser sessions, so pushing them was a no-op.
+      // touch_user_streak is only meant to be called after the user
+      // actually studies, so a migrated streak cannot be replayed as a
+      // gaming vector. Drop the suggestion and migrate nothing for this key;
+      // the Http-only baseline now starts at zero so the learner re-earns it.
+      return null;
     },
   },
   n2_profile_v2: {
@@ -323,7 +324,19 @@ export async function pullFromCloud(userId) {
     }
   }
   if (progressRes.data) {
-    const map = {};
+    // Union, not replace. The local map can hold lessons completed while
+    // offline whose queued mutation has not reached the server yet; replacing
+    // it with the server view silently dropped those completions from the
+    // dashboard until the next push.
+    //
+    // `learning_progress` is server-authoritative for "done": an un-check
+    // sends `set_lesson_completion(..., done=false)`, which deletes the row
+    // (`supabase/schema.sql` ~507). So a queued un-check that has not landed
+    // leaves no server row, and the union merge simply does NOT add that lesson
+    // back — the offline intent is preserved by omission, without resurrecting
+    // a counter or clobbering progress other accounts earned on the same
+    // device. The union only ever adds progress.
+    const map = getProgressMap();
     for (const row of progressRes.data) map[row.lesson_id] = true;
     writeProgressMapExternal(map);
   }

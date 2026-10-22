@@ -8,6 +8,14 @@ import { renderFurigana } from './furigana.js';
 import { getClient, currentUser } from './supabase.js';
 import { examHistoryStore } from './exam-history.js';
 import { examAudioUrls } from './audio-source.js';
+import {
+  toSessionSnapshot,
+  readExamSession,
+  writeExamSession,
+  clearExamSession,
+  isSessionResumable,
+  answersFromSnapshot,
+} from './exam-session.js';
 
 const SECTION_LABELS = {
   vocab_grammar: '文字・語彙・文法',
@@ -46,6 +54,7 @@ const state = {
   retest: { answers: new Map() },
   audioUrls: [],     // release URLs for the current sitting, in playback order
   audioPartIndex: 0, // which entry of state.audioUrls is currently loaded
+  audioMaxTime: 0,  // furthest point already played — seeking back is blocked
   explainLoading: false,
   explainError: '',
 };
@@ -88,6 +97,23 @@ function clearTimer() {
   timerInterval = null;
 }
 
+/** Save the in-progress exam so a refresh or a reclaimed tab does not cost
+ *  the learner the whole sitting. Called on every answer, phase change, and
+ *  page hide. The exam content itself is re-fetched on resume — only the
+ *  answers, phase, and the absolute deadline are stored here. */
+function persistSession() {
+  if (state.view !== 'taking') return;
+  writeExamSession(toSessionSnapshot({
+    level: state.level,
+    sitting: state.sitting,
+    phaseIndex: state.phaseIndex,
+    phaseDeadline: state.phaseDeadline,
+    activeSectionId: state.activeSectionId,
+    answers: state.answers,
+    audioPartIndex: state.audioPartIndex,
+  }));
+}
+
 function resetForNewExam() {
   state.phaseIndex = 0;
   state.phaseDeadline = Date.now() + PHASES[0].durationMs;
@@ -96,6 +122,7 @@ function resetForNewExam() {
   state.review = null;
   state.submitError = '';
   state.audioPartIndex = 0;
+  state.audioMaxTime = 0;
   state.explainLoading = false;
   state.explainError = '';
 }
@@ -140,6 +167,46 @@ async function loadHistory(token) {
       state.historyLoading = false;
       paint();
     }
+  }
+}
+
+async function restoreFromSession(snapshot, token) {
+  try {
+    const data = await invokeExamFn('exam-fetch', {
+      level: snapshot.level,
+      sitting: snapshot.sitting,
+    });
+    if (token !== mountToken) return;
+
+    state.level = snapshot.level;
+    state.sitting = snapshot.sitting;
+    state.content = data;
+    state.audioUrls = examAudioUrls(snapshot.level, snapshot.sitting);
+
+    // Restore position and clock. The deadline is absolute, so time spent
+    // with the tab closed still counts — resuming does not hand back a fresh
+    // 105 minutes.
+    state.phaseIndex = Math.min(PHASES.length - 1, Math.max(0, Number(snapshot.phaseIndex) || 0));
+    state.phaseDeadline = Number(snapshot.phaseDeadline) || (Date.now() + PHASES[state.phaseIndex].durationMs);
+    state.answers = answersFromSnapshot(snapshot);
+    state.audioPartIndex = Math.max(0, Number(snapshot.audioPartIndex) || 0);
+    state.activeSectionId = String(snapshot.activeSectionId || '') || firstSectionIdForPhase(state.phaseIndex);
+    state.review = null;
+    state.submitError = '';
+    state.view = 'taking';
+    paint();
+    startPhaseTimer(token);
+    if (state.phaseIndex > 0) playFirstListeningPart();
+  } catch (err) {
+    if (token !== mountToken) return;
+    // Restoring failed (offline, exam removed) — drop the snapshot and fall
+    // back to the picker rather than trapping the learner on a dead screen.
+    clearExamSession();
+    state.view = 'picker';
+    state.listError = err instanceof Error ? err.message : String(err);
+    paint();
+    if (state.examList.length === 0) void loadExamList(token);
+    void loadHistory(token);
   }
 }
 
@@ -206,6 +273,8 @@ async function advancePhaseOrSubmit(token, auto = false) {
   } else {
     await submitExam(token, auto);
   }
+  // A phase boundary is a natural resume point — record where we are.
+  persistSession();
 }
 
 function playFirstListeningPart() {
@@ -223,6 +292,8 @@ function handleAudioPartEnded() {
   const urls = state.audioUrls;
   if (state.audioPartIndex >= urls.length - 1) return;
   state.audioPartIndex += 1;
+  // A new part is a new track — the rewind guard restarts with it.
+  state.audioMaxTime = 0;
   const el = rootEl?.querySelector('audio[data-exam-audio]');
   if (el) {
     el.src = urls[state.audioPartIndex];
@@ -233,10 +304,45 @@ function handleAudioPartEnded() {
 /** Every paint() fully replaces rootEl's innerHTML, which destroys and
  * recreates the <audio> element even when the user just answered a
  * question — without this, listening playback would restart from 0 on
- * every click. Captures {currentTime, paused} before the swap. */
+ * every click. Captures {currentTime, paused, maxTime} before the swap. */
 function captureAudioState() {
   const el = rootEl?.querySelector('audio[data-exam-audio]');
-  return el ? { currentTime: el.currentTime, paused: el.paused } : null;
+  return el
+    ? { currentTime: el.currentTime, paused: el.paused, maxTime: state.audioMaxTime }
+    : null;
+}
+
+/** Rewind protection for the listening section.
+ *
+ *  The real JLPT plays the listening section once, straight through, with no
+ *  replay and no scrubbing — that is the whole point of the section. A native
+ *  `<audio controls>` element happily lets the test-taker drag the playhead
+ *  back and hear a question twice, which makes the mock exam a much weaker
+ *  diagnostic than the real thing.
+ *
+ *  The element keeps its native controls (pause/volume are still useful and
+ *  are allowed by the real exam), but any attempt to seek behind the furthest
+ *  point already played is clamped back. Forward skips are allowed because
+ *  the recorded exam has natural gaps between items and the learner has to
+ *  land on the next question's audio; skipping forward cannot reveal anything
+ *  heard earlier.
+ */
+function installSeekGuard(el) {
+  if (!el) return;
+  el.addEventListener('timeupdate', () => {
+    if (Number.isFinite(el.currentTime) && el.currentTime > state.audioMaxTime) {
+      state.audioMaxTime = el.currentTime;
+    }
+  });
+  el.addEventListener('seeking', () => {
+    if (el.currentTime + 0.5 < state.audioMaxTime) {
+      el.currentTime = state.audioMaxTime;
+    }
+  });
+  // No 'loadstart' reset here: paint() rebuilds the <audio> element on every
+  // answer, so every swap fires loadstart and would zero the high-water mark.
+  // Part changes reset it explicitly in handleAudioPartEnded(); a fresh exam
+  // resets it in resetForNewExam().
 }
 
 /** Restores playback position/state after a paint() swap, and (re)wires
@@ -245,8 +351,10 @@ function applyAudioState(saved) {
   const el = rootEl?.querySelector('audio[data-exam-audio]');
   if (!el) return;
   el.onended = handleAudioPartEnded;
+  installSeekGuard(el);
   if (saved) {
     el.currentTime = saved.currentTime;
+    state.audioMaxTime = Math.max(state.audioMaxTime, saved.maxTime || 0);
     if (!saved.paused) el.play().catch(() => { /* autoplay may be blocked — controls remain visible */ });
   }
 }
@@ -277,6 +385,8 @@ async function submitExam(token, auto = false) {
     });
     state.retest = { answers: new Map() };
     state.view = 'score';
+    // The exam is graded and recorded — the resume snapshot is spent.
+    clearExamSession();
   } catch (err) {
     if (token !== mountToken) return;
     state.submitError = err instanceof Error ? err.message : String(err);
@@ -636,10 +746,21 @@ function renderRetest() {
     </section>`;
 }
 
+function renderRestoring() {
+  rootEl.innerHTML = `
+    <section class="exam-page">
+      <div class="exam-loading">
+        <div class="spinner" aria-hidden="true"></div>
+        <p>Đang phục hồi bài thi đang dở dang…</p>
+      </div>
+    </section>`;
+}
+
 function paint() {
   if (!rootEl) return;
   const savedAudio = captureAudioState();
-  if (state.view === 'taking' && state.content) renderTaking();
+  if (state.view === 'restoring') renderRestoring();
+  else if (state.view === 'taking' && state.content) renderTaking();
   else if (state.view === 'score') renderScore();
   else if (state.view === 'review') renderReview();
   else if (state.view === 'retest') renderRetest();
@@ -690,11 +811,16 @@ function onRootClick(event) {
     }
     state.answers.set(key, idx);
     paint();
+    // Every answer is a resume point.
+    persistSession();
     return;
   }
   if (event.target.closest('[data-action="exam-exit"]')) {
     clearTimer();
     state.view = 'picker';
+    // The learner explicitly abandoned the sitting — the resume snapshot
+    // must go too, otherwise a later "Thi thử" would revive it.
+    clearExamSession();
     paint();
     void loadExamList(token);
     void loadHistory(token);
@@ -723,6 +849,39 @@ export function renderExam(root) {
   const token = ++mountToken;
   rootEl = root;
   root.addEventListener('click', onRootClick);
+
+  // A closed tab, a backgrounded tab on mobile, or a swipe-away must still
+  // leave a resumable snapshot behind. Wired before the resume branch so a
+  // resumed exam is persisted too, not just a freshly picked one.
+  const onPageHide = () => persistSession();
+  window.addEventListener('pagehide', onPageHide);
+  window.addEventListener('visibilitychange', onPageHide);
+
+  // Resume path: if a previous sitting was saved and its clock has not run out,
+  // re-fetch the same sitting and put the learner back where they left off.
+  // We only restore when the deadline is still ahead — a reloaded page after
+  // the timer ran out should start the next sit fresh.
+  const saved = readExamSession();
+  if (isSessionResumable(saved)) {
+    // Convert the saved snapshot into state fields before painting, so the
+    // very first render already shows the in-progress exam instead of the
+    // picker. Fetching the content is async, so we show a "Đang phục hồi…”
+    // state in the meantime to avoid a misleading picker flash.
+    state.view = 'restoring';
+    paint();
+
+    void restoreFromSession(saved, token);
+    return {
+      preserveScroll: false,
+      cleanup() {
+        clearTimer();
+        root.removeEventListener('click', onRootClick);
+        window.removeEventListener('pagehide', onPageHide);
+        window.removeEventListener('visibilitychange', onPageHide);
+      },
+    };
+  }
+
   paint();
   if (state.view === 'picker') {
     if (state.examList.length === 0) void loadExamList(token);
@@ -735,6 +894,8 @@ export function renderExam(root) {
     cleanup() {
       clearTimer();
       root.removeEventListener('click', onRootClick);
+      window.removeEventListener('pagehide', onPageHide);
+      window.removeEventListener('visibilitychange', onPageHide);
     },
   };
 }

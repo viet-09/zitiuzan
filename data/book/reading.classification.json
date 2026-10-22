@@ -60,27 +60,27 @@
   "r1d3": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "reading-shusho",
         "descriptionVi": "Ca A va B deu dang tim phong khong co tien dat coc va tien le."
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "reading-riyuu",
         "descriptionVi": "B so di xe buyt nen muon o noi khong phai di xe buyt."
       },
       {
-        "index": 3,
+        "index": 2,
         "type": "reading-riyuu",
         "descriptionVi": "A muon song o noi co the su dung ga co tau toc hanh dung lai."
       },
       {
-        "index": 4,
+        "index": 3,
         "type": "reading-riyuu",
         "descriptionVi": "B khong thich di bo tham chi la 10 phut."
       },
       {
-        "index": 5,
+        "index": 4,
         "type": "reading-riyuu",
         "descriptionVi": "Vi A co xe dap nen du o xa cung khong thay van de gi."
       }
@@ -89,7 +89,7 @@
   "r1d4": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "reading-chikoku",
         "descriptionVi": "Hoi ve thong tin gui xe dap va su viec suyt bi tre hoc vi bai do xe het cho."
       }
@@ -140,7 +140,7 @@
   "r2d1": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "reading-mix",
         "descriptionVi": "Đoạn hội thoại về việc chuẩn bị nước dự trữ cho một đêm cắt nước."
       }
@@ -149,12 +149,12 @@
   "r2d2": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "reading-shusho",
         "descriptionVi": "Tim noi dung khong khop voi thong bao ve cat nuoc trong bai."
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "reading-mix",
         "descriptionVi": "Xac dinh dung noi dung phat bieu cua hai ben A va B trong thong bao."
       }
@@ -247,7 +247,7 @@
   "r3d2": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "reading-shusho",
         "descriptionVi": "Chon phuong an dung nhat dua tren noi dung doan van."
       }
@@ -256,7 +256,7 @@
   "r3d3": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "reading-shusho",
         "descriptionVi": "Đoạn hội thoại về việc tận hưởng cuộc sống và góc nhìn của người chồng về tuổi trẻ."
       }
@@ -274,7 +274,7 @@
   "r3d5": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "reading-shusho",
         "descriptionVi": "Hội thoại bàn về việc địa cầu có các dãy núi lồi lõm không phù hợp với thực tế kích thước tỷ lệ."
       }
@@ -283,22 +283,22 @@
   "r3d7": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "reading-shusho",
         "descriptionVi": "Hoi ve y nghia cua tu itadakimasu theo cach hieu cua nguoi tham van."
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "reading-mix",
         "descriptionVi": "So sanh va danh gia cau tra loi cua A va B doi voi van de cua nguoi tham van."
       },
       {
-        "index": 3,
+        "index": 2,
         "type": "reading-riyuu",
         "descriptionVi": "Hoi y nghia cua cum tu 'dua ra cau tra loi do' trong bai."
       },
       {
-        "index": 4,
+        "index": 3,
         "type": "reading-josou",
         "descriptionVi": "Xac dinh thong diep chinh hoac dieu tac gia muon truyen dat trong bai."
       }
@@ -364,7 +364,7 @@
   "r4d4": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "reading-shusho",
         "descriptionVi": "Chon phat bieu dung dua tren noi dung cua doan van."
       }
@@ -382,22 +382,22 @@
   "r4d7": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "reading-shusho",
         "descriptionVi": "Hoi ve y nghia cua \"hy vong do\" ma tac gia nhac den trong bai."
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "reading-riyuu",
         "descriptionVi": "Hoi ly do vi sao tac gia lai quyet dinh ngoi vao toa xe hut thuoc."
       },
       {
-        "index": 3,
+        "index": 2,
         "type": "reading-riyuu",
         "descriptionVi": "Hoi ly do vi sao tac gia lai cho rang nguoi dan ong trung nien la nguoi hang xom dang chon."
       },
       {
-        "index": 4,
+        "index": 3,
         "type": "reading-shusho",
         "descriptionVi": "Hoi ve cam xuc cua tac gia lien quan den viec co the ngu ngon."
       }
@@ -420,7 +420,7 @@
   "r5d2": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "reading-mix",
         "descriptionVi": "Đọc hội thoại về nội dung một bài viết dạng bài báo về sự kiện hoặc vấn đề thời sự, sau đó chọn đáp án đúng."
       }
@@ -429,7 +429,7 @@
   "r5d3": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "reading-mix",
         "descriptionVi": "Hội thoại giữa mẹ và con trai về đồng hồ đeo tay và các chức năng bổ sung như thông tin liên lạc và máy đếm bước đi."
       }
@@ -504,12 +504,12 @@
   "r6d2": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "reading-josou",
         "descriptionVi": "Hỏi về nội dung chính của bài viết liên quan đến loài ong."
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "reading-riyuu",
         "descriptionVi": "Hỏi lý do tại sao không thể đánh đồng hoặc nói chung chung như vậy được."
       }
@@ -518,12 +518,12 @@
   "r6d3": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "reading-shusho",
         "descriptionVi": "Hỏi về chi tiết \"ngoài điều đó ra còn điều gì đáng sợ\" trong bài viết."
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "reading-riyuu",
         "descriptionVi": "Hỏi về biện pháp để tránh không bị ong tấn công."
       }
@@ -532,12 +532,12 @@
   "r6d4": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "reading-riyuu",
         "descriptionVi": "Hỏi ve ly do khien tac gia cho rang muc do dang so cua ghe ngoi tren tau luon sieu toc co su khac biet."
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "reading-mix",
         "descriptionVi": "Tim phuong an phu hop nhat voi noi dung bai doc ve cam giac khi di tau luon sieu toc."
       }
@@ -546,17 +546,17 @@
   "r6d5": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "reading-josou",
         "descriptionVi": "Hoi ve tu,cum tu hoac bieu dat phu hop de dien vao cho trong ( ) trong bai toan ve con lac."
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "reading-shusho",
         "descriptionVi": "Hoi ve noi dung chinh, y chinh hoac chi tiet dung/sai cua bai toan chia lac."
       },
       {
-        "index": 3,
+        "index": 2,
         "type": "reading-mix",
         "descriptionVi": "Cau hoi luyen tap hoi ve y nghia cua doan hoi thoai ve bai toan chia lac."
       }

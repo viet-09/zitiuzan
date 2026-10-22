@@ -22,9 +22,9 @@ import { completeLessonOnce, toggleLessonCompletion } from './completion.js';
 import { learningState } from './learning-state.js';
 import { buildBookViewerModel, renderBookViewerStrip } from './book-viewer.js';
 import { activateModalDialog } from './modal-dialog.js';
-import { openKanjiWritingPad } from './kanji-writing.js?v=33';
-import { openKanjiSheet } from './kanji-sheet.js?v=33';
-import { announceLessonCompleted } from './pet.js?v=33';
+import { openKanjiWritingPad } from './kanji-writing.js?v=38';
+import { openKanjiSheet } from './kanji-sheet.js?v=38';
+import { announceLessonCompleted } from './pet.js?v=38';
 import { fetchLessonReview, MIN_REVIEW_QUESTIONS } from './lesson-review.js';
 import { formatHanViet, hanVietOf, loadHanViet } from './kanji-hanviet.js';
 
@@ -174,8 +174,10 @@ function renderQuestionItem(question, lessonId, questionIndex) {
 
 function renderKanji(lessonId, content) {
   // Vietnamese explanations (data/book/kanji.vietnamese.json) are one string
-  // per kanji card, in kanji[] order followed by reviewKanji[] order — the
-  // exact same flattening scripts/generate-vietnamese-explanations.mjs uses.
+  // per kanji card in kanji[] order. reviewKanji[] is a recall quiz and
+  // deliberately gets no gloss: showing the meaning would answer it. Lessons
+  // that consist only of reviewKanji (k1d7, k4d7, k5d7) therefore legitimately
+  // have no entries in the vietnamese file.
   const kanjiList = Array.isArray(content.kanji) ? content.kanji : [];
   const cards = kanjiList.map((item, index) => `
     <article class="kanji-item">

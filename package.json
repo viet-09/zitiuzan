@@ -12,7 +12,8 @@
     "build:kanji-strokes": "node scripts/build-kanji-strokes.mjs",
     "build:kanji-hanviet": "node scripts/build-kanji-hanviet.mjs",
     "validate:data": "node scripts/validate-book-data.mjs",
-    "check": "npm test && npm run validate:data",
+    "check:version": "node scripts/bump-version.mjs --check",
+    "check": "npm test && npm run validate:data && npm run check:version",
     "verify:schema": "node scripts/verify-schema.mjs",
     "deploy:supabase": "node scripts/link-and-deploy.mjs"
   },

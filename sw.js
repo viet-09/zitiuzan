@@ -1,29 +1,27 @@
-const CACHE_NAME = 'n2-journal-v33';
+const CACHE_NAME = 'n2-journal-v38';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './icons/app-icon.svg',
-  './css/styles.css?v=33',
-  './js/app.js?v=33',
-  './js/pet.js?v=33',
-  './js/pet-art.js?v=33',
-  './js/pet-companion.js?v=33',
-  './js/pet-companion-state.js?v=33',
-  './js/pet-motion.js?v=33',
-  './js/kanji-writing.js?v=33',
-  './js/viewport-fit.js?v=33',
+  './css/styles.css?v=38',
+  './js/app.js?v=38',
+  './js/pet.js?v=38',
+  './js/pet-art.js?v=38',
+  './js/pet-companion.js?v=38',
+  './js/pet-companion-state.js?v=38',
+  './js/pet-motion.js?v=38',
+  './js/kanji-writing.js?v=38',
+  './js/viewport-fit.js?v=38',
   './js/profile-avatar.js',
   './assets/pets/fox-motion-atlas.png',
   './assets/pets/rabbit-motion-atlas.png',
-  './assets/pets/skins/fox-peacemaker-high-noon.png',
-  './assets/pets/skins/fox-prestige-heartsteel.png',
-  './assets/pets/skins/fox-high-noon.png',
-  './assets/pets/skins/fox-dawnbringer.png',
-  './assets/pets/skins/rabbit-elementalist.png',
-  './assets/pets/skins/rabbit-prestige-spirit-blossom.png',
-  './assets/pets/skins/rabbit-dark-cosmic.png',
-  './assets/pets/skins/rabbit-cosmic.png',
+  // The cosmetic skin atlases are deliberately NOT precached. They total
+  // ~13.6 MB and a learner typically equips one, so precaching them all
+  // made the very first app load download a dozen unused megabytes over
+  // mobile data — and any single failed asset aborts `cache.addAll`,
+  // which fails the whole service worker install. The fetch handler below
+  // runtime-caches a skin the first time it is actually shown.
   './vendor/supabase.js',
   './data/lessons.json',
 ];

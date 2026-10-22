@@ -27,8 +27,45 @@ function writeJSON(key, value) {
   }
 }
 
+// Streak dates must agree with the database, which computes "today" in
+// Asia/Tokyo (see touch_user_streak and the leaderboard's today_study_ms).
+// When the client used the device's own calendar day instead, a learner in
+// Vietnam (UTC+7) studying between 22:00 and midnight local time got a
+// server-side last_study_date of "tomorrow". getStreak() then compared that
+// against the local date, found no match for today or yesterday, and showed
+// a freshly-earned streak as 0.
+const STREAK_TIME_ZONE = 'Asia/Tokyo';
+
+const STREAK_DATE_FORMATTER = (() => {
+  try {
+    return new Intl.DateTimeFormat('en-CA', {
+      timeZone: STREAK_TIME_ZONE,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
+  } catch (err) {
+    // Very old browsers without IANA time-zone data: fall back to local time.
+    return null;
+  }
+})();
+
+/** Calendar day (YYYY-MM-DD) in Asia/Tokyo — the same boundary the server uses. */
 function localDateString(date = new Date()) {
   try {
+    if (STREAK_DATE_FORMATTER) {
+      // Extract parts explicitly so buggy OS/browser locale conventions
+      // (e.g. some Android builds emitting YYYY/MM/DD for en-CA) cannot
+      // produce a slash that breaks the YYYY-MM-DD date comparison.
+      const parts = STREAK_DATE_FORMATTER.formatToParts(date);
+      let y = '', m = '', d = '';
+      for (const p of parts) {
+        if (p.type === 'year') y = p.value;
+        else if (p.type === 'month') m = p.value;
+        else if (p.type === 'day') d = p.value;
+      }
+      if (y && m && d) return `${y}-${m}-${d}`;
+    }
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
@@ -39,9 +76,19 @@ function localDateString(date = new Date()) {
 }
 
 function previousLocalDateString() {
-  const date = new Date();
-  date.setDate(date.getDate() - 1);
-  return localDateString(date);
+  // Subtract from the Tokyo calendar day, not the device's. Using
+  // new Date().setDate(-1) and re-formatting is not enough: that shifts the
+  // instant by 24h, which lands on the correct day only when the offset is a
+  // whole number of hours from the device clock's day boundary. Instead, walk
+  // back from "now" by 24h and 48h and keep the first day that is not today —
+  // that stays correct across DST-free Tokyo and around month boundaries.
+  const today = localDateString();
+  const now = Date.now();
+  for (const hoursBack of [24, 48]) {
+    const candidate = localDateString(new Date(now - hoursBack * 3_600_000));
+    if (candidate && candidate !== today) return candidate;
+  }
+  return '';
 }
 
 // ---------------------------------------------------------------------------

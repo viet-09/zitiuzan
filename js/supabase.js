@@ -52,14 +52,25 @@ export async function ready() {
   return init();
 }
 
-/** Trigger Google OAuth flow. Resolves once the redirect has been initiated. */
+/** Trigger Google OAuth flow. Resolves once the redirect has been initiated.
+ *
+ *  `prompt: 'select_account'` is what makes switching accounts possible.
+ *  Without it Google silently reuses the browser's active session and drops
+ *  the learner straight back into the account they just signed out of — the
+ *  sign-in screen never appears, so there is no way to pick a different
+ *  Google account from this device. Asking Google to always show its
+ *  account chooser costs one extra click and restores that choice.
+ */
 export async function signInWithGoogle() {
   const sb = await getClient();
   if (!sb) throw new Error('Supabase not configured');
   const redirectTo = `${location.origin}${location.pathname}`;
   const { error } = await sb.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo },
+    options: {
+      redirectTo,
+      queryParams: { prompt: 'select_account' },
+    },
   });
   if (error) throw error;
 }

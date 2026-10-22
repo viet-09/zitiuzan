@@ -5,10 +5,12 @@
 
 import { currentUser, signInWithGoogle, signOut, ready as supabaseReady } from './supabase.js';
 import { getProfile, renderAvatar, openProfileDialog, saveProfile } from './profile.js';
-import { PET_TYPES, getPetEvolution, getPetMemories, getPetPreferences, getPetSkins, setPetPreferences, renderPet } from './pet.js?v=33';
-import { mountPetMotion } from './pet-motion.js?v=33';
+import { PET_TYPES, getPetEvolution, getPetMemories, getPetPreferences, getPetSkins, setPetPreferences, renderPet } from './pet.js?v=38';
+import { mountPetMotion } from './pet-motion.js?v=38';
 import { clearUserScopedStorage } from './account-storage.js';
 import { learningState } from './learning-state.js';
+import { flushCompletionQueue, flushReviewQueue } from './sync.js';
+import { clearExamSession } from './exam-session.js';
 
 let profilePreviewMotion = null;
 
@@ -123,8 +125,25 @@ async function paint(el) {
     const btn = event.currentTarget;
     btn.disabled = true;
     try {
+      // Push anything still waiting in the offline queues before the session
+      // and its local copies disappear. Signing out used to clear these
+      // outright, so a lesson completed on a flaky connection could be lost
+      // without a word. If a flush fails the queues survive in localStorage
+      // and are retried on the next sign-in, so the sign-out still proceeds.
+      const user = await currentUser();
+      if (user?.id) {
+        try {
+          await flushCompletionQueue(user.id);
+          await flushReviewQueue(user.id);
+        } catch (syncErr) {
+          console.warn('[profile] pending sync could not be flushed:', syncErr);
+        }
+      }
       await signOut();
       clearUserScopedStorage();
+      // A leftover sessionStorage snapshot from a previous sitting would otherwise
+      // be offered to the next (possibly different) learner on this browser.
+      try { clearExamSession(); } catch { /* sessionStorage may be blocked */ }
       // Full reload so the mandatory sign-in gate re-runs from a clean state.
       location.hash = '#/';
       location.reload();

@@ -52,6 +52,30 @@ test('pet motion assets are versioned consistently to bypass a stale service-wor
   assert.match(read('css/styles.css'), /pets\/fox-motion-atlas\.png/);
   assert.doesNotMatch(read('css/styles.css'), /pets\/fox-motion-sprites\.png/);
   assert.doesNotMatch(worker, /mascot\.glb/);
+
+  // Cosmetic skins are ~13.6 MB in total and a learner equips one; precaching
+  // them all made the first app load download a dozen unused megabytes (and a
+  // single failed asset aborts cache.addAll, failing the whole SW install).
+  // They must be runtime-cached on demand instead.
+  assert.doesNotMatch(worker, /assets\/pets\/skins\//,
+    'cosmetic skin atlases must not be precached in the app shell');
+});
+
+test('every cache-stamped file shares one version, and the bump script keeps it that way', () => {
+  const worker = read('sw.js');
+  const version = worker.match(/const CACHE_NAME = 'n2-journal-v(\d+)'/)?.[1];
+  assert.ok(version, 'sw.js must declare a numbered cache');
+
+  // Any ?v=N anywhere in a file the bump script manages must equal the cache
+  // version. This is what makes the ?v scheme actually atomic: forgetting one
+  // file used to leave a mixed module graph after a deploy.
+  for (const file of ['index.html', 'sw.js', 'js/app.js', 'js/dashboard.js', 'js/lesson.js',
+    'js/pet-companion.js', 'js/pet.js', 'js/profile-page.js', 'js/review.js']) {
+    const source = read(file);
+    for (const match of source.matchAll(/\?v=(\d+)/g)) {
+      assert.equal(match[1], version, `${file} carries ?v=${match[1]} but the cache is v${version}`);
+    }
+  }
 });
 
 test('production CSP needs neither unsafe-eval nor a third-party module CDN', () => {

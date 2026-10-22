@@ -134,42 +134,42 @@
   "v1d4": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu dung chi hanh dong cong em be tren lung."
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu dung de chi hanh dong da bong bang chan."
       },
       {
-        "index": 3,
+        "index": 2,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu dung de dien ta hanh dong quay pha, vung vay khi so tiem."
       },
       {
-        "index": 4,
+        "index": 3,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu chi noi rua bat dia sau khi an."
       },
       {
-        "index": 5,
+        "index": 4,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu khuyen ngan hanh dong cam mong tay."
       },
       {
-        "index": 6,
+        "index": 5,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu dung de chi hanh dong bi bo la mang to tieng."
       },
       {
-        "index": 7,
+        "index": 6,
         "type": "vocab-yougo",
         "descriptionVi": "Dien tu thich hop vao cho trong de chi hanh vi nghich ngom cua tre."
       },
       {
-        "index": 8,
+        "index": 7,
         "type": "vocab-yougo",
         "descriptionVi": "Dien tu thich hop vao cho trong de chi viec nuoi chieu tre em."
       }
@@ -222,42 +222,42 @@
   "v1d6": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu thich hop (a. 預けてある b. 振り込んである) dien vao cau ve so tien gui ngan hang giam bot."
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu thich hop (a. 不足 b. 節約) dien vao cau ve viec tiet kiem tien dien."
       },
       {
-        "index": 3,
+        "index": 2,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu thich hop (a. ぜいたくだ b. 余裕がない) dien vao cau ve viec hang ngay di nha hang."
       },
       {
-        "index": 4,
+        "index": 3,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu thich hop (a. 支払 b. 支出) dien vao cau ve viec hoan thanh tien nha thang nay."
       },
       {
-        "index": 5,
+        "index": 4,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu thich hop (a. 下された b. 引き落とされた) dien vao cau ve tien dien thoai tru tu tai khoan."
       },
       {
-        "index": 6,
+        "index": 5,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu thich hop (a. かたよった b. つりあった) dien vao cau ve cach suy nghi."
       },
       {
-        "index": 7,
+        "index": 6,
         "type": "vocab-yougo",
         "descriptionVi": "Dien tu thich hop vao cho trong ( ) lien quan den viec an ngoai ton nhieu tien."
       },
       {
-        "index": 8,
+        "index": 7,
         "type": "vocab-yougo",
         "descriptionVi": "Dien tu thich hop vao cho trong ( ) lien quan den viec thang nay bi am tien nen khong co du dieu kien."
       }
@@ -266,102 +266,102 @@
   "v1d7": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "vocab-fukugougo",
         "descriptionVi": "Dien tu thich hop vao cau chi thoi gian xay dung ngoi nha."
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "vocab-rentai",
         "descriptionVi": "Xac dinh vi tri cua duong tau chay qua so voi nha."
       },
       {
-        "index": 3,
+        "index": 2,
         "type": "vocab-fukugougo",
         "descriptionVi": "Tim tuchi viec doi moi thiet bi dien de tiet kiem."
       },
       {
-        "index": 4,
+        "index": 3,
         "type": "vocab-rentai",
         "descriptionVi": "Chi loai phi phai tra khi chuyen tien thue nha qua ngan hang."
       },
       {
-        "index": 5,
+        "index": 4,
         "type": "vocab-yougo",
         "descriptionVi": "Dien dong tu chi hanh dong bat giu ten cuop ngan hang."
       },
       {
-        "index": 6,
+        "index": 5,
         "type": "vocab-rentai",
         "descriptionVi": "Phan loai rac de tai che thay vi vora rac chay duoc."
       },
       {
-        "index": 7,
+        "index": 6,
         "type": "vocab-fukugougo",
         "descriptionVi": "Dien dong tu di voi mo hoi khi bi sot."
       },
       {
-        "index": 8,
+        "index": 7,
         "type": "vocab-rentai",
         "descriptionVi": "Chi hanh dong tu nau an o nha thay vi an hang."
       },
       {
-        "index": 9,
+        "index": 8,
         "type": "vocab-rentai",
         "descriptionVi": "Phan loai thung carton cu la loai rac gi khi vut."
       },
       {
-        "index": 10,
+        "index": 9,
         "type": "vocab-yougo",
         "descriptionVi": "Mo ta hanh vi cua nguoi say ruou tren pho."
       },
       {
-        "index": 11,
+        "index": 10,
         "type": "vocab-rentai",
         "descriptionVi": "Loi noi khi den tham nha nguoi khac va duoc moi nuoc."
       },
       {
-        "index": 12,
+        "index": 11,
         "type": "vocab-yougo",
         "descriptionVi": "Chi hanh dong phat ra tieng lon khi tuc giam."
       },
       {
-        "index": 13,
+        "index": 12,
         "type": "vocab-rentai",
         "descriptionVi": "Dinh nghia viec chi tieu qua muc can thi."
       },
       {
-        "index": 14,
+        "index": 13,
         "type": "vocab-yougo",
         "descriptionVi": "Hien tuong chat long chay ra ngoai do binh bi thung."
       },
       {
-        "index": 15,
+        "index": 14,
         "type": "vocab-rentai",
         "descriptionVi": "Hanh dong go to roi hoac poster khoi tuong."
       },
       {
-        "index": 16,
+        "index": 15,
         "type": "vocab-fukugougo",
         "descriptionVi": "Chon tu dong nghia voi viec xu ly bo quan ao cu."
       },
       {
-        "index": 17,
+        "index": 16,
         "type": "vocab-yougo",
         "descriptionVi": "Loi nhac nho mot nguoi hay hanh xu nhu tre con."
       },
       {
-        "index": 18,
+        "index": 17,
         "type": "vocab-rentai",
         "descriptionVi": "Dong tu chi hanh dong thao kinh ram ra."
       },
       {
-        "index": 19,
+        "index": 18,
         "type": "vocab-yougo",
         "descriptionVi": "Hanh dong rua sach lon bia truoc khi vut rac khong chay."
       },
       {
-        "index": 20,
+        "index": 19,
         "type": "vocab-fukugougo",
         "descriptionVi": "Cach dien dat thoi gian nghi ngoi thoai mai o nha dip tet."
       }
@@ -370,42 +370,42 @@
   "v2d1": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "vocab-yougo",
         "descriptionVi": "Dien tu thich hop vao cau ve viec dang ky ten vao tu dien may tinh."
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu chi hinh thuc chi tra tien an ngoai luong."
       },
       {
-        "index": 3,
+        "index": 2,
         "type": "vocab-yougo",
         "descriptionVi": "Xac dinh tu chi tinh trang thieu hut nhan vien ho tro."
       },
       {
-        "index": 4,
+        "index": 3,
         "type": "vocab-yougo",
         "descriptionVi": "Dien tu chi chu so huu hoac nguoi lam tu do cho can ho cho thue."
       },
       {
-        "index": 5,
+        "index": 4,
         "type": "vocab-yougo",
         "descriptionVi": "Chon cach dien dat dung cho viec khong gioi han do tuoi."
       },
       {
-        "index": 6,
+        "index": 5,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu chi trang phuc phu hop khi di du dam cuoi."
       },
       {
-        "index": 7,
+        "index": 6,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu dong nghia hoac dien dat dung khi lam viec tai cong ty may tinh."
       },
       {
-        "index": 8,
+        "index": 7,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu chi viec kiem duoc so tien nhat dinh tu cong việc lam them."
       }
@@ -458,42 +458,42 @@
   "v2d3": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "vocab-rentai",
         "descriptionVi": "Chon tu thich hop de dien vao cho trong: De xuat phuong an hay ghi memo cho san pham moi trong cuoc hop ngay mai."
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu dung chi viec di cong tac hay chuyen cong tac den Tokyo trong 2 ngay tu ngay mai."
       },
       {
-        "index": 3,
+        "index": 2,
         "type": "vocab-rentai",
         "descriptionVi": "Chon dong tu thich hop de ket hop voi tu lich trinh (sukajuru) cho thang toi."
       },
       {
-        "index": 4,
+        "index": 3,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu dung de chi hanh dong phat tai lieu trong cuoc hop."
       },
       {
-        "index": 5,
+        "index": 4,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu dung de dien ta ket luan duoc neu ra hay bi keo dai o cuoi cuoc hop."
       },
       {
-        "index": 6,
+        "index": 5,
         "type": "vocab-rentai",
         "descriptionVi": "Chon dong tu ket hop dung de nhan lam cong viec do."
       },
       {
-        "index": 7,
+        "index": 6,
         "type": "vocab-fukugougo",
         "descriptionVi": "Tim tu thich hop dien vao cho trong noi ve viec y kien duoc dua ra/yeu cau trong cuoc hop."
       },
       {
-        "index": 8,
+        "index": 7,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu chi cuoc hop (meeting) bi keo dai gay met moi."
       }
@@ -546,42 +546,42 @@
   "v2d5": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "vocab-rentai",
         "descriptionVi": "Chọn từ thích hợp để điền vào chỗ trống trong câu: フォントを（ ）する"
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "vocab-rentai",
         "descriptionVi": "Chọn từ thích hợp điền vào câu: 文字のサイズは10ポイントに（ ）してください。"
       },
       {
-        "index": 3,
+        "index": 2,
         "type": "vocab-rentai",
         "descriptionVi": "Chọn từ đúng để hoàn thành câu về việc khôi phục lại trạng thái trước đó"
       },
       {
-        "index": 4,
+        "index": 3,
         "type": "vocab-rentai",
         "descriptionVi": "Chọn từ thích hợp điền vào câu: 写真をクリックすると（ ）できる。"
       },
       {
-        "index": 5,
+        "index": 4,
         "type": "vocab-rentai",
         "descriptionVi": "Chọn cách nói đúng khi canh giữa văn bản: 文字を中央に（ ）"
       },
       {
-        "index": 6,
+        "index": 5,
         "type": "vocab-rentai",
         "descriptionVi": "Chọn từ đúng điền vào câu lưu tài liệu sau khi chỉnh sửa: 編集が完了した文書は（ ）しましょう"
       },
       {
-        "index": 7,
+        "index": 6,
         "type": "vocab-yougo",
         "descriptionVi": "Điền từ còn thiếu vào chỗ trống để hoàn thành câu tạo bưu thiếp từ hình ảnh"
       },
       {
-        "index": 8,
+        "index": 7,
         "type": "vocab-yougo",
         "descriptionVi": "Điền từ thích hợp vào chỗ trống sau khi chọn phạm vi: 範囲を選択して（ ）をつけてください。"
       }
@@ -590,42 +590,42 @@
   "v2d6": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu dung de dien ta hanh dong ket thuc hoac dong may tinh."
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu chi hien tuong may tinh bi nhiem virus."
       },
       {
-        "index": 3,
+        "index": 2,
         "type": "vocab-fukugougo",
         "descriptionVi": "Chon cum tu dien ta viec nhap lieu ton nhieu thoi gian va cong sức."
       },
       {
-        "index": 4,
+        "index": 3,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu chi hanh dong tu choi hoac chan thu rac."
       },
       {
-        "index": 5,
+        "index": 4,
         "type": "vocab-fukugougo",
         "descriptionVi": "Chon tu chi hinh thuc mua ban qua mang internet."
       },
       {
-        "index": 6,
+        "index": 5,
         "type": "vocab-fukugougo",
         "descriptionVi": "Chon tu chi noi dang thong tin, viet bai tren internet."
       },
       {
-        "index": 7,
+        "index": 6,
         "type": "vocab-rentai",
         "descriptionVi": "Dien tu vao cho trong de chi trang thai giay bi ket hoac ran."
       },
       {
-        "index": 8,
+        "index": 7,
         "type": "vocab-rentai",
         "descriptionVi": "Dien tu chi du lieu bi mat khi mat dien dot ngot."
       }
@@ -633,6 +633,11 @@
   },
   "v2d7": {
     "questions": [
+      {
+        "index": 0,
+        "type": "vocab-fukugougo",
+        "descriptionVi": "Chon tu thich hop de dien vao cho trong (van de ve tu ghep)."
+      },
       {
         "index": 1,
         "type": "vocab-fukugougo",
@@ -680,8 +685,8 @@
       },
       {
         "index": 10,
-        "type": "vocab-fukugougo",
-        "descriptionVi": "Chon tu thich hop de dien vao cho trong (van de ve tu ghep)."
+        "type": "vocab-rentai",
+        "descriptionVi": "Chon tu phu hop nhat voi giai thich cho truoc."
       },
       {
         "index": 11,
@@ -705,8 +710,8 @@
       },
       {
         "index": 15,
-        "type": "vocab-rentai",
-        "descriptionVi": "Chon tu phu hop nhat voi giai thich cho truoc."
+        "type": "vocab-yougo",
+        "descriptionVi": "Chon tu co nghia gan nhat voi tu gach chan trong cau."
       },
       {
         "index": 16,
@@ -725,11 +730,6 @@
       },
       {
         "index": 19,
-        "type": "vocab-yougo",
-        "descriptionVi": "Chon tu co nghia gan nhat voi tu gach chan trong cau."
-      },
-      {
-        "index": 20,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu co nghia gan nhat voi tu gach chan trong cau."
       }
@@ -782,42 +782,42 @@
   "v3d2": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu thich hop dien vao cau ve ky uc thoi tho au tro nen mo nhat (あいまい)."
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu chi mau mat khi xau ho (真っ赤)."
       },
       {
-        "index": 3,
+        "index": 2,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu dien ta cam giac tham hai vi khong do (みじめな)."
       },
       {
-        "index": 4,
+        "index": 3,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu chi viec hoa no vao thang 12 la chuyen hi huu, bat thuong (めずらしい)."
       },
       {
-        "index": 5,
+        "index": 4,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu chi viec tao tai lieu bang may tinh la rat rac roi, phuc tap (やっかい)."
       },
       {
-        "index": 6,
+        "index": 5,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu chi buoi sang nha dong anh em nen rat on ao (そうぞうしい)."
       },
       {
-        "index": 7,
+        "index": 6,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu dien ta trang thai dau oc trong rong do cang thang khi phat bieu (真っ白)."
       },
       {
-        "index": 8,
+        "index": 7,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu dien ta su viec dang mung khi chau ket hon (めでたい)."
       }
@@ -870,42 +870,42 @@
   "v3d4": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu dung dien vao cho trong: 'Than linh (a. the thue b. cau nguyen), toi khong noi doi'."
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu dien vao cho trong: Di den Osaka bang oto hay tau dien, toi (a. do du b. phan van)."
       },
       {
-        "index": 3,
+        "index": 2,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu dien vao cho trong: Sap thi roi nhung tam trang (a. nong voi b. hoang hoot) nen khong the hoc duoc."
       },
       {
-        "index": 4,
+        "index": 3,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu dien vao cho trong: Lam viec the nay ma luong bi giam thi (a. xau ho b. khong the chap nhan duoc)."
       },
       {
-        "index": 5,
+        "index": 4,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu dien vao cho trong: Du la mon thich, neu an hang ngay thi se (a. chan b. kinh ngac)."
       },
       {
-        "index": 6,
+        "index": 5,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu dien vao cho trong: Viec anh ay hay di muon bi buoc thoi viec la dieu (a. danh chiu b. dang tiec)."
       },
       {
-        "index": 7,
+        "index": 6,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu dung nhat dien vao cho trong: Du bi tu choi hen ho nhung van bam theo co ay la (1. xau ho 2. phien phuc 3. luyen tiec 4. luyen ai)."
       },
       {
-        "index": 8,
+        "index": 7,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu dung nhat dien vao cho trong: Khong the dat hang nhat nen (1. thong thao 2. uat uc 3. ngo ngac 4. nguong mo)."
       }
@@ -914,42 +914,42 @@
   "v3d5": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu dung dien vao cau ve hanh vi xin loi hoac xin phep khi mac loi."
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu chi cam xuc hoac hanh dong cua ban be khi an ui."
       },
       {
-        "index": 3,
+        "index": 2,
         "type": "vocab-yougo",
         "descriptionVi": "Dien tu chi viec giao phó hoac giao viec lai cho nguoi khac."
       },
       {
-        "index": 4,
+        "index": 3,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu dien ta thai do doi voi nguoi khac, vi du nhu su ton trong."
       },
       {
-        "index": 5,
+        "index": 4,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu dien ta hanh vi lua doi hoac phan boi khach hang."
       },
       {
-        "index": 6,
+        "index": 5,
         "type": "vocab-yougo",
         "descriptionVi": "Dien tu chi hanh dong bat nat hoac tieu diet con trung trong cuoc tro chuyen cua cha con."
       },
       {
-        "index": 7,
+        "index": 6,
         "type": "vocab-rentai",
         "descriptionVi": "Dien tu thich hop vao cho trong de hoan thanh mau cau chi trang thai phan khang hoac trai loi."
       },
       {
-        "index": 8,
+        "index": 7,
         "type": "vocab-rentai",
         "descriptionVi": "Dien tu thich hop de hoan thanh mau cau chi hanh dong doa nat nguoi khac."
       }
@@ -958,42 +958,42 @@
   "v3d6": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "vocab-rentai",
         "descriptionVi": "Chon tu thich hop de dien vao vi tri bóp vai."
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "vocab-rentai",
         "descriptionVi": "Chon tinh tu chi cam giac ngua do bi muoi dot."
       },
       {
-        "index": 3,
+        "index": 2,
         "type": "vocab-rentai",
         "descriptionVi": "Chon bo phan co the bi dau khi xuong cau thang."
       },
       {
-        "index": 4,
+        "index": 3,
         "type": "vocab-rentai",
         "descriptionVi": "Chon loai benh gay ngua mat."
       },
       {
-        "index": 5,
+        "index": 4,
         "type": "vocab-rentai",
         "descriptionVi": "Chon hien tuong co the lien quan den cam lanh."
       },
       {
-        "index": 6,
+        "index": 5,
         "type": "vocab-rentai",
         "descriptionVi": "Chon dong tu chi su giam bot cua con đau."
       },
       {
-        "index": 7,
+        "index": 6,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu chi 'trieu chung' benh ma bac si da hoi."
       },
       {
-        "index": 8,
+        "index": 7,
         "type": "vocab-yougo",
         "descriptionVi": "Chon dong tu chi vet thuong phau thuật da lanh/nep lai."
       }
@@ -1002,102 +1002,102 @@
   "v3d7": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "vocab-rentai",
         "descriptionVi": "Chọn tu thich hop de dien vao cho trong: 'San-ta vác tui to tren vai buoc di.'"
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "vocab-rentai",
         "descriptionVi": "Dien tu thich hop vao cau: 'Doi bong do da bo lo co hoi vo dich trong...'"
       },
       {
-        "index": 3,
+        "index": 2,
         "type": "vocab-rentai",
         "descriptionVi": "Dien tu dien ta viec banh xe bi truot vi troi mua va dam vao tuong."
       },
       {
-        "index": 4,
+        "index": 3,
         "type": "vocab-rentai",
         "descriptionVi": "Dien tu thich hop: 'Khong duoc... bo me mai mai.'"
       },
       {
-        "index": 5,
+        "index": 4,
         "type": "vocab-rentai",
         "descriptionVi": "Dien tu chi hanh dong bi ban than phan boi, dan den khong con tin tuong ai."
       },
       {
-        "index": 6,
+        "index": 5,
         "type": "vocab-rentai",
         "descriptionVi": "Dien tu chi thai do tra loi mo ho, khong ro rang (neu khong thich thi phai noi ro)."
       },
       {
-        "index": 7,
+        "index": 6,
         "type": "vocab-rentai",
         "descriptionVi": "Dien tu chi hanh dong ngam thuoc la trong mieng khi doc bao."
       },
       {
-        "index": 8,
+        "index": 7,
         "type": "vocab-rentai",
         "descriptionVi": "Dien tu chi nguoi hay cuoi, la mot nguoi rat vui ve, hoat bat."
       },
       {
-        "index": 9,
+        "index": 8,
         "type": "vocab-rentai",
         "descriptionVi": "Dien tu chi hanh dong chup X-quang khi kiem tra phoi."
       },
       {
-        "index": 10,
+        "index": 9,
         "type": "vocab-rentai",
         "descriptionVi": "Dien tu chi nguoi hay xin, hay an chuc thuoc la cua nguoi khac."
       },
       {
-        "index": 11,
+        "index": 10,
         "type": "vocab-yougo",
         "descriptionVi": "Giai thich y nghia cua tu 'gac vao, dua vao' (寄りかかる)."
       },
       {
-        "index": 12,
+        "index": 11,
         "type": "vocab-yougo",
         "descriptionVi": "Giai thich y nghia cua cum tu 'tro nen tam trang buon ba' (暗い気持ちになる)."
       },
       {
-        "index": 13,
+        "index": 12,
         "type": "vocab-yougo",
         "descriptionVi": "Giai thich y nghia cua viec nho ve qua khu va cam thay gan gui, than thiet."
       },
       {
-        "index": 14,
+        "index": 13,
         "type": "vocab-yougo",
         "descriptionVi": "Giai thich y nghia cua tu 'noi xau' (dieu khong tot ve nguoi khac)."
       },
       {
-        "index": 15,
+        "index": 14,
         "type": "vocab-yougo",
         "descriptionVi": "Giai thich y nghia cua viec bat dong y kien dan den tranh chap, cai co."
       },
       {
-        "index": 16,
+        "index": 15,
         "type": "vocab-fukugougo",
         "descriptionVi": "Tim tu dong nghia voi hanh dong 'noi nho nhe ben tai' (そっと言った)."
       },
       {
-        "index": 17,
+        "index": 16,
         "type": "vocab-fukugougo",
         "descriptionVi": "Tim tu chi van de phuc tap, can phai suy ngam ky de giai quyet."
       },
       {
-        "index": 18,
+        "index": 17,
         "type": "vocab-fukugougo",
         "descriptionVi": "Tim tu dien ta mot ngay ban ron vi co rat nhieu khach den."
       },
       {
-        "index": 19,
+        "index": 18,
         "type": "vocab-fukugougo",
         "descriptionVi": "Tim tu chi cam giac ngany ngat, chan ngam vi an mot mon qua nhieu lan."
       },
       {
-        "index": 20,
+        "index": 19,
         "type": "vocab-fukugougo",
         "descriptionVi": "Tim tu chi hanh dong can rang chiu dung de tiep tuc lam viec khi bi dau rang."
       }
@@ -1238,42 +1238,42 @@
   "v4d5": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "vocab-yougo",
         "descriptionVi": "Chon phu tu dung de dien ta hanh dong dut khoat hoac bat chap."
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "vocab-yougo",
         "descriptionVi": "Chon phu tu chi tinh trang khong the dung lai hoac bo do."
       },
       {
-        "index": 3,
+        "index": 2,
         "type": "vocab-yougo",
         "descriptionVi": "Phan biet phu tu chi tinh trang cu hoac tam thoi."
       },
       {
-        "index": 4,
+        "index": 3,
         "type": "vocab-yougo",
         "descriptionVi": "Chon phu tu chi su viec sap sua xay ra ngay truoc mat."
       },
       {
-        "index": 5,
+        "index": 4,
         "type": "vocab-yougo",
         "descriptionVi": "So sanh cach dung phu tu mang y nghia vi nhu hay tha hon."
       },
       {
-        "index": 6,
+        "index": 5,
         "type": "vocab-yougo",
         "descriptionVi": "Dien ta toc do va muc do hoan thanh cua hanh dong trong mot lan."
       },
       {
-        "index": 7,
+        "index": 6,
         "type": "vocab-yougo",
         "descriptionVi": "Dien vao o trong phu tu chi muc do hoac su xac thuc."
       },
       {
-        "index": 8,
+        "index": 7,
         "type": "vocab-yougo",
         "descriptionVi": "Chon phu tu chi su tang tien ve mat muc do cua trang thai."
       }
@@ -1326,102 +1326,102 @@
   "v4d7": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "vocab-rentai",
         "descriptionVi": "Chọn phó từ điền vào chỗ trống trong câu về việc nghị sĩ vi phạm pháp luật."
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "vocab-rentai",
         "descriptionVi": "Chọn phó từ miêu tả cơn đau dần biến mất theo thời gian."
       },
       {
-        "index": 3,
+        "index": 2,
         "type": "vocab-rentai",
         "descriptionVi": "Chọn phó từ điền vào câu thành công phát triển sản phẩm mới."
       },
       {
-        "index": 4,
+        "index": 3,
         "type": "vocab-rentai",
         "descriptionVi": "Chọn phó từ miêu tả việc tài tử không còn xuất hiện trên TV từ sau vụ việc."
       },
       {
-        "index": 5,
+        "index": 4,
         "type": "vocab-rentai",
         "descriptionVi": "Chọn phó từ điền vào câu gọi bia trước khi dùng bữa."
       },
       {
-        "index": 6,
+        "index": 5,
         "type": "vocab-rentai",
         "descriptionVi": "Chọn phó từ chỉ sự kiện Olympic sẽ chính thức khai mạc từ ngày mai."
       },
       {
-        "index": 7,
+        "index": 6,
         "type": "vocab-rentai",
         "descriptionVi": "Chọn phó từ điền vào câu miêu tả sự quyết tâm kiên định của người bảo thủ."
       },
       {
-        "index": 8,
+        "index": 7,
         "type": "vocab-rentai",
         "descriptionVi": "Chọn phó từ chỉ chung cư nổi tiếng bán hết veo ngay khi phát hành."
       },
       {
-        "index": 9,
+        "index": 8,
         "type": "vocab-rentai",
         "descriptionVi": "Chọn phó từ chỉ hành động đưa thư cho Tanaka một cách lén lút."
       },
       {
-        "index": 10,
+        "index": 9,
         "type": "vocab-rentai",
         "descriptionVi": "Chọn phó từ chỉ thời điểm trận đấu sắp sửa bắt đầu."
       },
       {
-        "index": 11,
+        "index": 10,
         "type": "vocab-yougo",
         "descriptionVi": "Tìm từ vựng có nghĩa là trạng thái tích lũy, chứa đựng nhiều."
       },
       {
-        "index": 12,
+        "index": 11,
         "type": "vocab-yougo",
         "descriptionVi": "Tìm từ vựng miêu tả trạng thái lặp đi lặp lại những việc giống nhau."
       },
       {
-        "index": 13,
+        "index": 12,
         "type": "vocab-yougo",
         "descriptionVi": "Tìm từ vựng mang ý nghĩa là một chút, hơi."
       },
       {
-        "index": 14,
+        "index": 13,
         "type": "vocab-yougo",
         "descriptionVi": "Tìm từ vựng mang ý nghĩa là nhiều, rất nhiều."
       },
       {
-        "index": 15,
+        "index": 14,
         "type": "vocab-yougo",
         "descriptionVi": "Tìm từ vựng miêu tả trạng thái quyết tâm cứng rắn để thực hiện việc gì đó."
       },
       {
-        "index": 16,
+        "index": 15,
         "type": "vocab-fukugougo",
         "descriptionVi": "Chọn từ vựng đồng nghĩa với từ trong câu về việc sắp tròn 1 năm kể từ vụ tai nạn."
       },
       {
-        "index": 17,
+        "index": 16,
         "type": "vocab-fukugougo",
         "descriptionVi": "Chọn từ vựng đồng nghĩa miêu tả việc vô tình nói ra điều không nên nói."
       },
       {
-        "index": 18,
+        "index": 17,
         "type": "vocab-fukugougo",
         "descriptionVi": "Chọn từ vựng đồng nghĩa với từ chỉ lượng xăng đầy trong xe."
       },
       {
-        "index": 19,
+        "index": 18,
         "type": "vocab-fukugougo",
         "descriptionVi": "Chọn từ vựng đồng nghĩa phản ánh thái độ không muốn quay lại nhà hàng dở và đắt."
       },
       {
-        "index": 20,
+        "index": 19,
         "type": "vocab-fukugougo",
         "descriptionVi": "Chọn từ vựng đồng nghĩa với từ chỉ việc ly hôn từ lâu."
       }
@@ -1518,42 +1518,42 @@
   "v5d3": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu dung giua `一生` va `人生` de hoan thanh cau the hien viec tiep tuc yeu ai do suot cuoc doi."
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "vocab-yougo",
         "descriptionVi": "Phan biet `生じちゃった` va `生えちゃった` de dien dat viec nam moc xuat hien, moc len o cho do."
       },
       {
-        "index": 3,
+        "index": 2,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu thich hop giua `用語` va `学習` de chi viec ghi nho thuat ngữ y hoc la mot viec kho."
       },
       {
-        "index": 4,
+        "index": 3,
         "type": "vocab-yougo",
         "descriptionVi": "Chon giua `引用` va `使用` de noi ve viec su dung may tinh hang ngay."
       },
       {
-        "index": 5,
+        "index": 4,
         "type": "vocab-yougo",
         "descriptionVi": "Phan biet `見学` va `見方` de dien dat goc nhin, cach nhin nhan su vat cua bo."
       },
       {
-        "index": 6,
+        "index": 5,
         "type": "vocab-yougo",
         "descriptionVi": "Chon giua `用心` va `急用` de bieu dat ly do co viec gap nen xin phep ve truoc."
       },
       {
-        "index": 7,
+        "index": 6,
         "type": "vocab-rentai",
         "descriptionVi": "Dien tu thich hop vao cho trong de tao thanh cum tu chi con duong da chon (vi du: `一生` cua mot doi hoac `人生`)."
       },
       {
-        "index": 8,
+        "index": 7,
         "type": "vocab-fukugougo",
         "descriptionVi": "Su dung cau truc tu vung ghep de hoan thanh cau noi ve viec su dung may tinh de tao ra tai lieu."
       }
@@ -1606,42 +1606,42 @@
   "v5d5": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "vocab-rentai",
         "descriptionVi": "Chon tu dung de dien vao cho trong: 12ji ni lobii ni (shugou / goudou) shite kudasai."
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "vocab-fukugougo",
         "descriptionVi": "Chon tu thich hop voi cau: Serusuman ni (tsuyoki / gouin) ni keiyaku saserareta."
       },
       {
-        "index": 3,
+        "index": 2,
         "type": "vocab-rentai",
         "descriptionVi": "Dien tu chi tu tinh chat tuong thich cho dien thoai di dong: (kouryoku na / chikaduyoi) jishaku."
       },
       {
-        "index": 4,
+        "index": 3,
         "type": "vocab-rentai",
         "descriptionVi": "Phan biet ve the trang va can nang khi tap the duc: (tairyoku / taiju) ga fuete shimatta."
       },
       {
-        "index": 5,
+        "index": 4,
         "type": "vocab-rentai",
         "descriptionVi": "Chon tu chi hoat dong cham soc khu vuon ngay nghi: (teire / teate) wo shita."
       },
       {
-        "index": 6,
+        "index": 5,
         "type": "vocab-fukugougo",
         "descriptionVi": "Dien tu phu hop trong truong hop tranh thu thoi gian ranh o cong viec: (tsugou / aima) ni."
       },
       {
-        "index": 7,
+        "index": 6,
         "type": "vocab-yougo",
         "descriptionVi": "Dien tu thich hop dien vao cho trong bieu dat cam xuc khi luong thap."
       },
       {
-        "index": 8,
+        "index": 7,
         "type": "vocab-yougo",
         "descriptionVi": "Dien tu chi cach thuc viet dia chi khong dung may tinh."
       }
@@ -1694,102 +1694,102 @@
   "v5d7": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu thich hop de dien vao cho trong: 'Toi co uoc mo tro thanh ( ) trong tuong lai.'"
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu thich hop de dien vao cho trong: 'Phan nay duoc viet bang cach ( ) tu internet.'"
       },
       {
-        "index": 3,
+        "index": 2,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu thich hop de dien vao cho trong: 'Co tieng dong ( ) dang ngo ngoai vuon.'"
       },
       {
-        "index": 4,
+        "index": 3,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu thich hop de dien vao cho trong: 'Khi tuoi gia, ( ) se dan giam di.'"
       },
       {
-        "index": 5,
+        "index": 4,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu thich hop de dien vao cho trong: 'Hay dien xuat voi tam trang ( ) ma khong cang thang.'"
       },
       {
-        "index": 6,
+        "index": 5,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu thich hop de dien vao cho trong: 'Bien dong gia co da mang lai anh huong ( ) cho cong ty chung toi.'"
       },
       {
-        "index": 7,
+        "index": 6,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu thich hop de dien vao cho trong: 'Hay ( ) de khong bi moc tui hoac lua dao.'"
       },
       {
-        "index": 8,
+        "index": 7,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu thich hop de dien vao cho trong: 'Hay thay the bo loc voi thoi gian ( ) la 1 thang.'"
       },
       {
-        "index": 9,
+        "index": 8,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu thich hop de dien vao cho trong: 'Vi tran dau sap den, chung ta hay ( ) luyen tap.'"
       },
       {
-        "index": 10,
+        "index": 9,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu thich hop de dien vao cho trong: 'Thieu bac si nen khong the ( ) cho nguoi bi thuong.'"
       },
       {
-        "index": 11,
+        "index": 10,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu thich hop nhat cho phan giai thich: 'Phuong phap giao tiep cho nguoi khiem thinh.'"
       },
       {
-        "index": 12,
+        "index": 11,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu thich hop nhat cho phan giai thich: 'Nguoi viet tieu thuyet hoac cac tac pham tuong tu.'"
       },
       {
-        "index": 13,
+        "index": 12,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu thich hop nhat cho phan giai thich: 'O chinh giua, diem giua.'"
       },
       {
-        "index": 14,
+        "index": 13,
         "type": "vocab-fukugougo",
         "descriptionVi": "Chon tu thich hop nhat cho phan giai thich: 'Hai hoac nhieu nhom rieng biet tap hop thanh mot, hoac lam cho hop nhat.'"
       },
       {
-        "index": 15,
+        "index": 14,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu thich hop nhat cho phan giai thich: 'Tao ra lan dau tien nhung thu chua co tren doi.'"
       },
       {
-        "index": 16,
+        "index": 15,
         "type": "vocab-rentai",
         "descriptionVi": "Chon tu co y nghia gan nhat voi tu duoc gach chan: man dien xuat trong tran chung ket cua co ay rat tuyet voi (sujbarashikatta)."
       },
       {
-        "index": 17,
+        "index": 16,
         "type": "vocab-rentai",
         "descriptionVi": "Chon tu co y nghia gan nhat voi tu duoc gach chan: anh ay da kiem duoc rat nhieu tien tu viec danh bac (kaseida)."
       },
       {
-        "index": 18,
+        "index": 17,
         "type": "vocab-rentai",
         "descriptionVi": "Chon tu co y nghia gan nhat voi tu duoc gach chan: bi anh Tanaka ru re mot cach ep buc, toi da di karaoke (gouin ni)."
       },
       {
-        "index": 19,
+        "index": 18,
         "type": "vocab-rentai",
         "descriptionVi": "Chon tu co y nghia gan nhat voi tu duoc gach chan: hom qua, vao ban ngay troi kha oi bức (mushitsukatta)."
       },
       {
-        "index": 20,
+        "index": 19,
         "type": "vocab-rentai",
         "descriptionVi": "Chon tu co y nghia gan nhat voi tu duoc gach chan: toi da duoc chua tri ngon tay bi cat boi dao (chiryoo)."
       }
@@ -1842,42 +1842,42 @@
   "v6d2": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu thich hop dien vao cau ve phi cong co kinh nghiem 30 nam."
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu thich hop dien vao cau ve viec photo 2 ban tai lieu."
       },
       {
-        "index": 3,
+        "index": 2,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu thich hop dien vao cau ve than tuong trong truong."
       },
       {
-        "index": 4,
+        "index": 3,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu thich hop dien vao cau ve poster co chu ky cua tai nang."
       },
       {
-        "index": 5,
+        "index": 4,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu thich hop dien vao cau ve viec khong co binh luan ve su viec do."
       },
       {
-        "index": 6,
+        "index": 5,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu thich hop dien vao cau ve thiet ke trang phuc doc dao."
       },
       {
-        "index": 7,
+        "index": 6,
         "type": "vocab-yougo",
         "descriptionVi": "Dien tu thich hop vao cho trong chi mon an tron goi trong khach san."
       },
       {
-        "index": 8,
+        "index": 7,
         "type": "vocab-yougo",
         "descriptionVi": "Dien tu thich hop vao cho trong de chi con dau xac nhan hieu."
       }
@@ -2018,102 +2018,102 @@
   "v6d7": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "vocab-rentai",
         "descriptionVi": "Chọn từ dien vao cho trong: お忙しいようですので、日を（ ）また来るようにします。"
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "vocab-rentai",
         "descriptionVi": "Chọn từ dien vao cho trong: 兄は（ ）関係の会社に勤めています。"
       },
       {
-        "index": 3,
+        "index": 2,
         "type": "vocab-rentai",
         "descriptionVi": "Chọn từ dien vao cho trong: 私は、卵に（ ）があるので、卵の入ったものは食べないようにしています。"
       },
       {
-        "index": 4,
+        "index": 3,
         "type": "vocab-rentai",
         "descriptionVi": "Chọn từ dien vao cho trong: 彼女の部屋があまりに汚くて（ ）しまった。"
       },
       {
-        "index": 5,
+        "index": 4,
         "type": "vocab-rentai",
         "descriptionVi": "Chọn từ dien vao cho trong: 大丈夫、この症状は（ ）風邪ですからしばらくすれば治りますよ。"
       },
       {
-        "index": 6,
+        "index": 5,
         "type": "vocab-rentai",
         "descriptionVi": "Chọn từ dien vao cho trong: クレジットカードの（ ）をためて商品券をもらった。"
       },
       {
-        "index": 7,
+        "index": 6,
         "type": "vocab-rentai",
         "descriptionVi": "Chọn từ dien vao cho trong: 彼の世界記録が、10年ぶりに（ ）。"
       },
       {
-        "index": 8,
+        "index": 7,
         "type": "vocab-rentai",
         "descriptionVi": "Chọn từ dien vao cho trong: これは（ ）行われた会議で決定したことです。"
       },
       {
-        "index": 9,
+        "index": 8,
         "type": "vocab-rentai",
         "descriptionVi": "Chọn từ dien vao cho trong: パソコンが（ ）に感染してしまい、データが全部なくなってしまった。"
       },
       {
-        "index": 10,
+        "index": 9,
         "type": "vocab-rentai",
         "descriptionVi": "Chọn từ dien vao cho trong: 通行のじゃまになるので、このいすをちょっと（ ）ください。"
       },
       {
-        "index": 11,
+        "index": 10,
         "type": "vocab-yougo",
         "descriptionVi": "Tim tu dong nghia hoac mo ta dung voi: 人の手によって作られること。"
       },
       {
-        "index": 12,
+        "index": 11,
         "type": "vocab-yougo",
         "descriptionVi": "Tim tu dong nghia hoac mo ta dung voi: 物事を進める速さ。"
       },
       {
-        "index": 13,
+        "index": 12,
         "type": "vocab-yougo",
         "descriptionVi": "Tim tu dong nghia hoac mo ta dung voi: スーパーなどで料金を支払うところ。"
       },
       {
-        "index": 14,
+        "index": 13,
         "type": "vocab-yougo",
         "descriptionVi": "Tim tu dong nghia hoac mo ta dung voi: 指で破って細かくする。"
       },
       {
-        "index": 15,
+        "index": 14,
         "type": "vocab-yougo",
         "descriptionVi": "Tim tu dong nghia hoac mo ta dung voi: 数量や時間が限度を超えること。"
       },
       {
-        "index": 16,
+        "index": 15,
         "type": "vocab-fukugougo",
         "descriptionVi": "Tim tu dong nghia gan nhat voi tu gach chan: 以前、この辺りに公園があった。"
       },
       {
-        "index": 17,
+        "index": 16,
         "type": "vocab-fukugougo",
         "descriptionVi": "Tim tu dong nghia gan nhat voi tu gach chan: 人の物を許可を得ないで使わないでください。"
       },
       {
-        "index": 18,
+        "index": 17,
         "type": "vocab-fukugougo",
         "descriptionVi": "Tim tu dong nghia gan nhat voi tu gach chan: 今日の試験は予想と違って難しかった。"
       },
       {
-        "index": 19,
+        "index": 18,
         "type": "vocab-fukugougo",
         "descriptionVi": "Tim tu dong nghia gan nhat voi tu gach chan: 今日の予定を、明日に移動した。"
       },
       {
-        "index": 20,
+        "index": 19,
         "type": "vocab-fukugougo",
         "descriptionVi": "Tim tu dong nghia gan nhat voi tu gach chan: 彼女は入社したあくる年に結婚した。"
       }
@@ -2122,42 +2122,42 @@
   "v7d1": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "vocab-rentai",
         "descriptionVi": "Chon tu thich hop cho cau ve het pin dien thoai"
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "vocab-rentai",
         "descriptionVi": "Chon cum tu dien ta du doan khong trung khop"
       },
       {
-        "index": 3,
+        "index": 2,
         "type": "vocab-rentai",
         "descriptionVi": "Chon tu dien ta thoi gian den Olympic"
       },
       {
-        "index": 4,
+        "index": 3,
         "type": "vocab-rentai",
         "descriptionVi": "Chon tu dien ta khoang cach diem so trong thi dau"
       },
       {
-        "index": 5,
+        "index": 4,
         "type": "vocab-rentai",
         "descriptionVi": "Chon dong tu di voi quan ao khi laui"
       },
       {
-        "index": 6,
+        "index": 5,
         "type": "vocab-rentai",
         "descriptionVi": "Chon tu dien ta cam giac te chan khi ngoi lau"
       },
       {
-        "index": 7,
+        "index": 6,
         "type": "vocab-yougo",
         "descriptionVi": "Dien tu thich hop chi chieu cao 170cm hon kem mot chut"
       },
       {
-        "index": 8,
+        "index": 7,
         "type": "vocab-yougo",
         "descriptionVi": "Dien tu thich hop dien ta viec chua quyet tam ket hon"
       }
@@ -2166,42 +2166,42 @@
   "v7d2": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu thich hop de dien vao cau ve viec mua bao hiem cho nhac cu."
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu dung de dien vao cau ve viec luu lai ban ghi phuong van."
       },
       {
-        "index": 3,
+        "index": 2,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu dung de noi ve viec ngoi xuong ghe sofa."
       },
       {
-        "index": 4,
+        "index": 3,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu dung khi noi den viec mua bao hiem cho chuyen du lich nuoc ngoai."
       },
       {
-        "index": 5,
+        "index": 4,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu thich hop de dien vao cau ve phuong phap giao duc phat trien tai nang."
       },
       {
-        "index": 6,
+        "index": 5,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu dung de dien vao cau noi ve viec bi thu thue khi mua xe hoac nha."
       },
       {
-        "index": 7,
+        "index": 6,
         "type": "vocab-yougo",
         "descriptionVi": "Dien tu thich hop vao cho trong de chi do dai cua mai toc den vai."
       },
       {
-        "index": 8,
+        "index": 7,
         "type": "vocab-yougo",
         "descriptionVi": "Dien tu thich hop vao cho trong de chi viec chiec ban chiem dien tich phong."
       }
@@ -2210,42 +2210,42 @@
   "v7d3": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu thich hop (kurai/kitsui) dien vao cau noi ve anh nang mua he gay gat."
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu dung (kitsuku/tsuraku) de chi viec bi thay giao mang nat nghiem khac do di hoc muon nhieu lan."
       },
       {
-        "index": 3,
+        "index": 2,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu dung (kurai/kitsuku) de dien ta qua khu toi tam khong the noi voi ai."
       },
       {
-        "index": 4,
+        "index": 3,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu thich hop (karui/kitsui) de noi ve do ruou nang, kho uong nhieu."
       },
       {
-        "index": 5,
+        "index": 4,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu dung (hana/atama) de hoan thanh thanh ngu the hien su tu hao vi con trai vao truong dai hoc tot."
       },
       {
-        "index": 6,
+        "index": 5,
         "type": "vocab-yougo",
         "descriptionVi": "Chon tu thich hop (kurai/kitsui) de chi su thieu hieu biet, mu mo ve van de kinh te Nhat Ban do song o nuoc ngoai lau."
       },
       {
-        "index": 7,
+        "index": 6,
         "type": "vocab-yougo",
         "descriptionVi": "Dien tu thich hop vao cho trong de chi khach san co y nghia/dang cap cao va phi luu tru rat lon."
       },
       {
-        "index": 8,
+        "index": 7,
         "type": "vocab-yougo",
         "descriptionVi": "Dien tu thich hop vao cho trong de dien ta su thieu quan tam den chinh tri cua gioi tre hien nay."
       }
@@ -2254,42 +2254,42 @@
   "v7d4": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "vocab-rentai",
         "descriptionVi": "Chon tu dung truoc danh tu chi toan bo the gioi."
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "vocab-rentai",
         "descriptionVi": "Chon tu dung truoc danh tu chi giam doc qua doi."
       },
       {
-        "index": 3,
+        "index": 2,
         "type": "vocab-rentai",
         "descriptionVi": "Chon tien to chi su chua hoan thanh."
       },
       {
-        "index": 4,
+        "index": 3,
         "type": "vocab-rentai",
         "descriptionVi": "Chon tien to chi su phi thong thuong, trai dao duc."
       },
       {
-        "index": 5,
+        "index": 4,
         "type": "vocab-rentai",
         "descriptionVi": "Chon tien to chi muc do cuc ky, qua 100%."
       },
       {
-        "index": 6,
+        "index": 5,
         "type": "vocab-rentai",
         "descriptionVi": "Chon tien to chi su khong the."
       },
       {
-        "index": 7,
+        "index": 6,
         "type": "vocab-rentai",
         "descriptionVi": "Dien tu thich hop vao vi tri chi tong so dan so."
       },
       {
-        "index": 8,
+        "index": 7,
         "type": "vocab-rentai",
         "descriptionVi": "Dien tien to chi viec cong khai phi chinh thuc."
       }
@@ -2386,102 +2386,102 @@
   "v7d7": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "vocab-rentai",
         "descriptionVi": "Q1: Điền tiền tố phù hợp vào câu về ý thức móng tay."
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "vocab-rentai",
         "descriptionVi": "Q2: Điền hậu tố phù hợp cho khoản tiền nhập học."
       },
       {
-        "index": 3,
+        "index": 2,
         "type": "vocab-rentai",
         "descriptionVi": "Q3: Điền tiền tố phù hợp cho từ lao động ngoài giờ."
       },
       {
-        "index": 4,
+        "index": 3,
         "type": "vocab-rentai",
         "descriptionVi": "Q4: Điền tiền tố phù hợp cho ước mơ chung của nhân loại."
       },
       {
-        "index": 5,
+        "index": 4,
         "type": "vocab-rentai",
         "descriptionVi": "Q5: Điền hậu tố phù hợp cho buổi biểu diễn sáo flute."
       },
       {
-        "index": 6,
+        "index": 5,
         "type": "vocab-yougo",
         "descriptionVi": "Q6: Chọn từ điền vào chỗ trống miêu tả lòng tự ái cao."
       },
       {
-        "index": 7,
+        "index": 6,
         "type": "vocab-yougo",
         "descriptionVi": "Q7: Chọn từ chỉ mốc thời gian 20 năm gặp lại."
       },
       {
-        "index": 8,
+        "index": 7,
         "type": "vocab-yougo",
         "descriptionVi": "Q8: Chọn từ điền vào chỗ trống việc cấp lại giấy phép."
       },
       {
-        "index": 9,
+        "index": 8,
         "type": "vocab-yougo",
         "descriptionVi": "Q9: Chọn tính từ miêu tả tâm trạng khi đồng ý không vừa lòng."
       },
       {
-        "index": 10,
+        "index": 9,
         "type": "vocab-yougo",
         "descriptionVi": "Q10: Chọn động từ chỉ hạn sử dụng bị quá."
       },
       {
-        "index": 11,
+        "index": 10,
         "type": "vocab-fukugougo",
         "descriptionVi": "Q11: Tìm từ giải thích cho vẻ ngoài của mắt khi nhìn."
       },
       {
-        "index": 12,
+        "index": 11,
         "type": "vocab-fukugougo",
         "descriptionVi": "Q12: Tìm động từ kép chỉ kiến thức, thói quen thuộc về mình."
       },
       {
-        "index": 13,
+        "index": 12,
         "type": "vocab-fukugougo",
         "descriptionVi": "Q13: Tìm danh từ chỉ cử động cơ thể để truyền đạt ý chí."
       },
       {
-        "index": 14,
+        "index": 13,
         "type": "vocab-fukugougo",
         "descriptionVi": "Q14: Tìm động từ kép chỉ việc đột nhiên tức giận."
       },
       {
-        "index": 15,
+        "index": 14,
         "type": "vocab-fukugougo",
         "descriptionVi": "Q15: Tìm từ chỉ thời điểm giao mùa."
       },
       {
-        "index": 16,
+        "index": 15,
         "type": "vocab-yougo",
         "descriptionVi": "Q16: Tìm từ đồng nghĩa với 「1時間おきに」."
       },
       {
-        "index": 17,
+        "index": 16,
         "type": "vocab-yougo",
         "descriptionVi": "Q17: Tìm từ đồng nghĩa với レベルの高い."
       },
       {
-        "index": 18,
+        "index": 17,
         "type": "vocab-yougo",
         "descriptionVi": "Q19: Tìm từ đồng nghĩa với 予測すると."
       },
       {
-        "index": 19,
+        "index": 18,
         "type": "vocab-yougo",
         "descriptionVi": "Q19: Tìm từ đồng nghĩa với 効果がなくなった."
       },
       {
-        "index": 20,
+        "index": 19,
         "type": "vocab-yougo",
         "descriptionVi": "Q20: Tìm từ đồng nghĩa với お金がなくて、つらい."
       }
@@ -2490,42 +2490,42 @@
   "v8d1": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "vocab-fukugougo",
         "descriptionVi": "Chon tu dung de chi tinh trang ban chay cua dia nhac."
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "vocab-fukugougo",
         "descriptionVi": "Chon dong tu ghep phu hop de dien ta viec tiep thu y kien."
       },
       {
-        "index": 3,
+        "index": 2,
         "type": "vocab-fukugougo",
         "descriptionVi": "Chon dong tu ghep dung de noi ve viec nhan hoc sinh."
       },
       {
-        "index": 4,
+        "index": 3,
         "type": "vocab-fukugougo",
         "descriptionVi": "Chon dong tu ghep chi hanh dong nhac ghe len hoac don di."
       },
       {
-        "index": 5,
+        "index": 4,
         "type": "vocab-fukugougo",
         "descriptionVi": "Chon tu ghep chi hanh dong quay tro lai cong ty khi bo quen do."
       },
       {
-        "index": 6,
+        "index": 5,
         "type": "vocab-fukugougo",
         "descriptionVi": "Chon dong tu ghep dung de noi ve viec kinh doanh san pham."
       },
       {
-        "index": 7,
+        "index": 6,
         "type": "vocab-fukugougo",
         "descriptionVi": "Chon tu thich hop de dien vao cho trong noi ve doanh thu trong ngay."
       },
       {
-        "index": 8,
+        "index": 7,
         "type": "vocab-fukugougo",
         "descriptionVi": "Chon tu thich hop de dien ta viec ket hop giua hinh anh va am nhac."
       }
@@ -2622,42 +2622,42 @@
   "v8d4": {
     "questions": [
       {
-        "index": 1,
+        "index": 0,
         "type": "vocab-yougo",
         "descriptionVi": "Chọn cách diễn đạt phù hợp khi xe phải đi sửa nên không có phương tiện đi lại."
       },
       {
-        "index": 2,
+        "index": 1,
         "type": "vocab-yougo",
         "descriptionVi": "Chọn cụm từ diễn đạt việc sửa chữa, can thiệp một chút vào chiếc bàn để tiếp tục sử dụng."
       },
       {
-        "index": 3,
+        "index": 2,
         "type": "vocab-yougo",
         "descriptionVi": "Chọn cụm từ diễn đạt việc xếp hàng 3 tiếng và cuối cùng đã có được thứ gì đó."
       },
       {
-        "index": 4,
+        "index": 3,
         "type": "vocab-yougo",
         "descriptionVi": "Chọn từ chỉ kỹ năng, tay nghề tốt của nha sĩ."
       },
       {
-        "index": 5,
+        "index": 4,
         "type": "vocab-yougo",
         "descriptionVi": "Chọn cụm từ diễn đạt tâm trạng nặng nề, lo lắng khi nghĩ đến việc ngày mai lại đi học."
       },
       {
-        "index": 6,
+        "index": 5,
         "type": "vocab-yougo",
         "descriptionVi": "Chọn cụm từ diễn đạt việc đi xa hơn một chút để đến Kyoto."
       },
       {
-        "index": 7,
+        "index": 6,
         "type": "vocab-yougo",
         "descriptionVi": "Chọn cụm từ diễn đạt tính chất công việc (ví dụ: công việc không bận rộn lắm, không rảnh rỗi...)."
       },
       {
-        "index": 8,
+        "index": 7,
         "type": "vocab-yougo",
         "descriptionVi": "Chọn cụm từ diễn đạt việc chú ý đến sức khỏe bên cạnh việc làm việc."
       }
@@ -2739,6 +2739,11 @@
   "v8d7": {
     "questions": [
       {
+        "index": 0,
+        "type": "vocab-fukugougo",
+        "descriptionVi": "Dien tu thich hop vao cho trong de hoan thanh tu ghep (fukugougo)."
+      },
+      {
         "index": 1,
         "type": "vocab-fukugougo",
         "descriptionVi": "Dien tu thich hop vao cho trong de hoan thanh tu ghep (fukugougo)."
@@ -2760,8 +2765,8 @@
       },
       {
         "index": 5,
-        "type": "vocab-fukugougo",
-        "descriptionVi": "Dien tu thich hop vao cho trong de hoan thanh tu ghep (fukugougo)."
+        "type": "vocab-yougo",
+        "descriptionVi": "Dien tu hoac bieu thuc phu hop vao cho trong cua cau."
       },
       {
         "index": 6,
@@ -2786,7 +2791,7 @@
       {
         "index": 10,
         "type": "vocab-yougo",
-        "descriptionVi": "Dien tu hoac bieu thuc phu hop vao cho trong cua cau."
+        "descriptionVi": "Chon tu hoac cum tu giai thich dung nhat cho y nghia cua cau."
       },
       {
         "index": 11,
@@ -2810,8 +2815,8 @@
       },
       {
         "index": 15,
-        "type": "vocab-yougo",
-        "descriptionVi": "Chon tu hoac cum tu giai thich dung nhat cho y nghia cua cau."
+        "type": "vocab-rentai",
+        "descriptionVi": "Tim tu hoac bieu thuc co y nghia gan nhat voi phan duoc gach chan."
       },
       {
         "index": 16,
@@ -2830,11 +2835,6 @@
       },
       {
         "index": 19,
-        "type": "vocab-rentai",
-        "descriptionVi": "Tim tu hoac bieu thuc co y nghia gan nhat voi phan duoc gach chan."
-      },
-      {
-        "index": 20,
         "type": "vocab-rentai",
         "descriptionVi": "Tim tu hoac bieu thuc co y nghia gan nhat voi phan duoc gach chan."
       }

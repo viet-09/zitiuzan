@@ -204,10 +204,28 @@ function bindShellEvents() {
     });
   }
 
-  // Delegated click handler for per-message TTS buttons (survives innerHTML repaints
-  // of #tutor-messages because the container element itself is never replaced).
+  // Delegated click handler for per-message TTS buttons and retry buttons
+  // (survives innerHTML repaints of #tutor-messages because the container
+  // element itself is never replaced).
   if (messagesEl) {
     messagesEl.addEventListener('click', (evt) => {
+      const retryBtn = evt.target.closest('[data-action="tutor-retry"]');
+      if (retryBtn && messagesEl.contains(retryBtn)) {
+        // Find the last user message to re-send. If there are no turns yet,
+        // it was the opening challenge that failed — re-fetch that instead.
+        const lastUser = [...history].reverse().find((m) => m && m.role === 'user');
+        if (lastUser && typeof lastUser.text === 'string') {
+          // Drop the trailing user turn from history before re-sending, so
+          // handleSend does not duplicate it in the transcript.
+          history = history.slice(0, history.lastIndexOf(lastUser));
+          setTutorHistory(history);
+          void handleSend(lastUser.text);
+        } else {
+          void fetchFirstChallenge(mountToken);
+        }
+        return;
+      }
+
       const btn = evt.target.closest('.tts-btn');
       if (!btn || !messagesEl.contains(btn)) return;
       const idx = Number(btn.getAttribute('data-tts-idx'));
@@ -345,11 +363,21 @@ function loadingBubble() {
 }
 
 function errorBubble(message) {
+  // The learner's own message is still the last turn in `history`, so a retry
+  // re-sends exactly what they typed instead of making them retype it. The
+  // button is the difference between a dead end and one click.
+  const isQuota = /hết lượt|quota|429/i.test(String(message || ''));
+  const retryHint = isQuota
+    ? 'Hôm nay đã hết lượt dùng AI. Bạn vẫn có thể học bài và ôn lỗi sai bình thường — phần gia sư sẽ hoạt động lại sau khi hạn ngạch được làm mới.'
+    : 'Nếu chưa đăng nhập, hãy đăng nhập rồi thử lại — trợ lý AI cần tài khoản để hoạt động.';
   return `
     <div class="chat-msg model chat-error" role="alert">
       <div class="chat-msg-bubble">
         ⚠️ Rất tiếc, đã có lỗi xảy ra: ${escapeHtml(message)}<br>
-        Nếu chưa đăng nhập, hãy đăng nhập rồi thử lại — trợ lý AI cần tài khoản để hoạt động.
+        ${escapeHtml(retryHint)}
+        <div class="chat-error-actions">
+          <button type="button" class="study-btn" data-action="tutor-retry">Thử lại</button>
+        </div>
       </div>
     </div>
   `;

@@ -54,7 +54,7 @@ const TYPE_WHITELIST = {
 
 const PROMPT = (category, lessonId, title, titleEn, questionBlocks) => `Ban la tro ly phan loai cau hoi JLPT N2 cho sach "${category}" (lesson ${lessonId}, title "${title}" / ${titleEn}).
 
-Toi cung cap cac cau hoi trong bai (duoc danh so Q1..Qn). Voi moi cau, hay:
+Toi cung cap cac cau hoi trong bai (duoc danh so Q0..Qn-1, bat dau tu 0). Voi moi cau, hay:
 1) Chon mot type tu whitelist: ${TYPE_WHITELIST[category].join(', ')}
 2) Viet 1 cau tom tat de bai bang tieng Viet (toi da 200 ky tu).
 
@@ -62,7 +62,7 @@ Tra ve JSON duy nhat: {"questions": [{"index": 0, "type": "...", "descriptionVi"
 Chinh xac ${questionBlocks.length} phan tu, theo dung thu tu.
 
 CAC CAU HOI:
-${questionBlocks.map((q, i) => `Q${i + 1}: ${q}`).join('\n')}
+${questionBlocks.map((q, i) => `Q${i}: ${q}`).join('\n')}
 
 CHI tra ve JSON thuan, khong giai thich them, khong markdown.`;
 
@@ -196,9 +196,19 @@ async function askClassify(fileUri, category, lessonId, lesson) {
   try { parsed = JSON.parse(text); } catch (err) {
     throw new Error(`Invalid JSON from Gemini: ${text.slice(0, 200)}`);
   }
+  const rawItems = Array.isArray(parsed?.questions) ? parsed.questions : [];
+  // Detect if Gemini emitted 1-based indices (min index 1, max index n) and
+  // normalize to 0-based so the lookup matches question array indices.
+  const rawIndices = rawItems.map((it) => Number(it?.index)).filter(Number.isInteger);
+  const isOneBased = rawIndices.length > 0
+    && Math.min(...rawIndices) === 1
+    && Math.max(...rawIndices) === rawIndices.length;
+  const indexOffset = isOneBased ? -1 : 0;
+
   const out = [];
-  for (const item of (Array.isArray(parsed?.questions) ? parsed.questions : [])) {
-    const idx = Number.isInteger(item?.index) ? item.index : -1;
+  for (const item of rawItems) {
+    const rawIdx = Number.isInteger(item?.index) ? item.index : -1;
+    const idx = rawIdx >= 0 ? rawIdx + indexOffset : -1;
     const type = TYPE_WHITELIST[category].includes(item?.type) ? item.type : null;
     const desc = typeof item?.descriptionVi === 'string'
       ? item.descriptionVi.trim().slice(0, 200)

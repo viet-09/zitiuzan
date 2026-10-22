@@ -534,6 +534,10 @@ function validateEnrichmentFile(category, content, lessonIds, fileLabel) {
         warn('ENRICHMENT_DESC_LONG', `${loc}.descriptionVi`, 'Description must be string ≤ 200 chars.');
       }
     });
+    // Classification indices must cover [0..N-1] without gaps, matching question array indexing.
+    if (body.questions.length > 0 && !seenIdx.has(0)) {
+      fail('ENRICHMENT_NON_ZERO_INDEX', `${fileLabel}.${id}.questions`, `Classification indices must start at 0; got min index ${Math.min(...seenIdx)}.`);
+    }
   }
 }
 

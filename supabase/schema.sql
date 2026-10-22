@@ -549,6 +549,49 @@ drop policy if exists "profile update self" on public.user_profiles;
 create policy "profile update self"
   on public.user_profiles for update using (auth.uid() = user_id);
 
+-- Only user-editable columns may be written from browser sessions; server-owned
+-- counters (streak, total_study_ms, last_study_date) are managed exclusively
+-- through the SECURITY DEFINER RPCs above.
+revoke update on public.user_profiles from authenticated;
+grant update (display_name, avatar_type, avatar_data, furigana, exam_target_date, tutor_memory)
+  on public.user_profiles to authenticated;
+
+-- Defense in depth: even a future broad grant cannot move a server-owned
+-- counter from a browser session, because the trigger restores the old value.
+--
+-- The role check uses current_user, and the function is deliberately NOT
+-- SECURITY DEFINER. That combination is what makes the two paths differ:
+--
+--   * A browser session issuing a direct UPDATE runs the statement as
+--     'authenticated', so current_user reads 'authenticated' and the guard
+--     restores the counters.
+--   * The SECURITY DEFINER RPCs (touch_user_streak, heartbeat_study_session)
+--     run their UPDATE as the function owner, so current_user reads
+--     'postgres' inside the trigger and the guard lets it through.
+--
+-- The two alternatives both break: SECURITY DEFINER + current_user would
+-- always read the owner ('postgres') and the guard would never fire, while
+-- SECURITY DEFINER + session_user would always read the original login role
+-- ('authenticated') and would also block the legitimate RPC writes.
+create or replace function public.guard_profile_server_columns()
+returns trigger language plpgsql set search_path = public as $$
+begin
+  if current_user in ('authenticated', 'anon') then
+    new.streak := old.streak;
+    new.last_study_date := old.last_study_date;
+    new.total_study_ms := old.total_study_ms;
+    new.created_at := old.created_at;
+    new.updated_at := now();
+  end if;
+  return new;
+end;
+$$;
+drop trigger if exists user_profiles_guard_server_columns on public.user_profiles;
+create trigger user_profiles_guard_server_columns
+  before update on public.user_profiles
+  for each row execute function public.guard_profile_server_columns();
+revoke all on function public.guard_profile_server_columns() from public, anon, authenticated;
+
 -- learning_progress: read/write/delete self
 drop policy if exists "progress read self"   on public.learning_progress;
 drop policy if exists "progress insert self" on public.learning_progress;

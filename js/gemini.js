@@ -38,7 +38,52 @@ async function extractFunctionError(error) {
  * @param {{system?:string, history?:Array, user?:string, schema?:object, audio?:{base64:string,mimeType:string}}} body
  * @returns {Promise<string>}
  */
-async function callGeminiProxy(body, feature) {
+// Client-side timeout for an individual chat or voice turn.
+//
+// The server has its own fallback chain (gemini-proxy -> _shared/gemini-models.js)
+// which tries up to 4 models. A slow/thinking model can take 15-20s, and walking
+// 2-3 fallback models when earlier ones 429 takes ~30-40s total server-side.
+// We set a 60s client ceiling so legitimate server completions are not cut
+// short, while still guarding the learner against an indefinitely hung socket.
+export const CLIENT_TIMEOUT_MS = 60_000;
+
+export const TIMEOUT_MESSAGE = 'Trợ lý AI phản hồi quá lâu. Vui lòng bấm thử lại hoặc kiểm tra kết nối.';
+
+/**
+ * Whether a failure from `functions.invoke` was a timeout or caller abort
+ * rather than an HTTP/relay error.
+ *
+ * `invoke()` does not throw when the fetch fails — it *resolves* with a
+ * `FunctionsFetchError` in `{ error }`. That error's own `message` is the
+ * fixed string "Failed to send a request to the Edge Function" and its `name`
+ * is 'FunctionsFetchError', so neither ever mentions a timeout. The original
+ * fetch rejection — an `AbortError`, which is what both the `timeout` option
+ * and a caller-supplied `AbortSignal` produce — is nested in `.context`.
+ * Checking that is the only way to tell "the server is slow" apart from
+ * "the server said no".
+ *
+ * @param {unknown} error a value from `{ error }` or a rejection
+ * @returns {boolean}
+ */
+export function isInvokeTimeout(error) {
+  // A FunctionsHttpError carries a Response in `.context`, which has no `name`
+  // or `message`, so treating it as the cause is harmless and correctly
+  // reports "not a timeout". A plain object context (e.g. `{requestId}`) is
+  // likewise inert.
+  const cause = (error && typeof error === 'object' && error.context) || error;
+  if (cause?.name === 'AbortError' || cause?.name === 'TimeoutError') return true;
+  // Bare DOMException/Error rejections from other fetch wrappers.
+  return /\btimed?\s*out\b|\baborted\b/i.test(String(cause?.message || ''));
+}
+
+/**
+ * Call the gemini-proxy Edge Function and return the raw response text.
+ * Throws a readable Vietnamese Error on any failure (not signed in, rate
+ * limited, network, timeout, or an empty/blocked Gemini response).
+ * @param {{system?:string, history?:Array, user?:string, schema?:object, audio?:{base64:string,mimeType:string}}} body
+ * @returns {Promise<string>}
+ */
+async function callGeminiProxy(body, feature, { signal } = {}) {
   const sb = await getClient();
   if (!sb) {
     throw new Error('Chưa đăng nhập. Vui lòng đăng nhập để dùng trợ lý AI.');
@@ -47,12 +92,23 @@ async function callGeminiProxy(body, feature) {
   let data;
   let error;
   try {
-    ({ data, error } = await sb.functions.invoke('gemini-proxy', { body: { ...body, feature } }));
+    ({ data, error } = await sb.functions.invoke('gemini-proxy', {
+      body: { ...body, feature },
+      // supabase-js aborts the request itself after this many milliseconds and
+      // surfaces a FunctionsFetchError, so a hung upstream cannot keep the
+      // learner's chat spinning through the server's whole model chain.
+      timeout: CLIENT_TIMEOUT_MS,
+      ...(signal ? { signal } : {}),
+    }));
   } catch (networkErr) {
+    // `invoke()` resolves {data, error} rather than rejecting, so this branch
+    // only fires on a hard throw from a future/patched build.
+    if (isInvokeTimeout(networkErr)) throw new Error(TIMEOUT_MESSAGE);
     throw new Error(`Không thể kết nối tới máy chủ AI: ${networkErr && networkErr.message ? networkErr.message : networkErr}`);
   }
 
   if (error) {
+    if (isInvokeTimeout(error)) throw new Error(TIMEOUT_MESSAGE);
     throw new Error(await extractFunctionError(error));
   }
   if (!data || typeof data.text !== 'string' || !data.text) {
@@ -67,20 +123,20 @@ async function callGeminiProxy(body, feature) {
 
 /**
  * Ask Gemini a plain-text question.
- * @param {{system?:string, history?:Array<{role:string,text:string}>, user:string}} args
+ * @param {{system?:string, history?:Array<{role:string,text:string}>, user:string, signal?:AbortSignal}} args
  * @returns {Promise<string>}
  */
-export async function askText({ system, history = [], user }) {
-  return callGeminiProxy({ system, history, user: String(user || '') }, 'tutor');
+export async function askText({ system, history = [], user, signal }) {
+  return callGeminiProxy({ system, history, user: String(user || '') }, 'tutor', { signal });
 }
 
 /**
  * Ask Gemini for a JSON-shaped answer; the response text is JSON.parse'd.
- * @param {{system?:string, history?:Array<{role:string,text:string}>, user:string, schema?:object}} args
+ * @param {{system?:string, history?:Array<{role:string,text:string}>, user:string, schema?:object, signal?:AbortSignal}} args
  * @returns {Promise<object>}
  */
-export async function askJSON({ system, history = [], user, schema }) {
-  const text = await callGeminiProxy({ system, history, user: String(user || ''), schema }, 'voice');
+export async function askJSON({ system, history = [], user, schema, signal }) {
+  const text = await callGeminiProxy({ system, history, user: String(user || ''), schema }, 'voice', { signal });
   try {
     return JSON.parse(text);
   } catch (parseErr) {
@@ -95,7 +151,7 @@ export async function askJSON({ system, history = [], user, schema }) {
  * @param {{system?:string, history?:Array<{role:string,text:string}>, audioBase64:string, mimeType:string, promptText?:string, schema?:object}} args
  * @returns {Promise<object|string>}
  */
-export async function askAudio({ system, history = [], audioBase64, mimeType, promptText, schema }) {
+export async function askAudio({ system, history = [], audioBase64, mimeType, promptText, schema, signal }) {
   if (!audioBase64) {
     throw new Error('Thiếu dữ liệu âm thanh để gửi tới Gemini.');
   }
@@ -106,7 +162,7 @@ export async function askAudio({ system, history = [], audioBase64, mimeType, pr
     user: promptText ? String(promptText) : undefined,
     schema,
     audio: { base64: audioBase64, mimeType: mimeType || 'audio/webm' },
-  }, 'voice');
+  }, 'voice', { signal });
 
   if (schema) {
     try {

@@ -2,7 +2,7 @@
 // Loads lesson data, wires the header/nav controls, and starts the hash router.
 
 import { setLessons, resetBookContent, mergeBookContent, setTutorContext, setQuestionClassification, setLessonImages, setVietnameseExplanations, getStreak } from './store.js';
-import { mountPet } from './pet.js?v=33';
+import { mountPet } from './pet.js?v=38';
 import { getCurrentRoute, initRouter, navigate } from './router.js';
 import { initFuriganaToggle } from './furigana.js';
 import { openSettings } from './gemini.js';
@@ -12,6 +12,7 @@ import { renderTutor } from './tutor.js';
 import { renderVoice } from './voice.js';
 import { renderLeaderboard } from './leaderboard.js';
 import { renderExam } from './exam.js';
+import { setExamSessionOwner } from './exam-session.js';
 import { renderProfilePage } from './profile-page.js';
 import { renderReview } from './review.js';
 import {
@@ -25,7 +26,7 @@ import { openSignInGate } from './auth.js';
 import { onAuthChange, ready as supabaseReady, currentUser } from './supabase.js';
 import { flushCompletionQueue, flushReviewQueue, maybeMigrateLocalData, maybeSeedProfileFromGoogle, pullFromCloud, pushProfile, syncReviewRemote } from './sync.js';
 import { REVIEW_RECORDED_EVENT } from './learning-state.js';
-import { mountAppViewportFit } from './viewport-fit.js?v=33';
+import { mountAppViewportFit } from './viewport-fit.js?v=38';
 
 function registerServiceWorker() {
     if (!('serviceWorker' in navigator) || location.protocol === 'file:') return;
@@ -201,8 +202,10 @@ async function bootstrap() {
         const user = sb ? await currentUser() : null;
 
         if (user) {
+            setExamSessionOwner(user.id);
             markProfilePromptSeen();
         } else {
+            setExamSessionOwner('');
             openSignInGate();
             return;
         }
@@ -219,18 +222,26 @@ async function bootstrap() {
             if (!authedUser) {
                 syncedUserId = null;
                 openSignInGate();
+                // A signed-out tab must not offer the previous account's
+                // in-progress exam to whoever signs in next.
+                setExamSessionOwner('');
                 return;
             }
             if (syncedUserId === authedUser.id) return;
             syncedUserId = authedUser.id;
+            setExamSessionOwner(authedUser.id);
             markProfilePromptSeen();
             try {
                 const migrated = await maybeMigrateLocalData();
                 if (migrated) console.info('[sync] localStorage migrated to Supabase');
                 await maybeSeedProfileFromGoogle(authedUser);
-                await pullFromCloud(authedUser.id);
+                // Flush queued offline mutations FIRST. pullFromCloud rewrites
+                // the local progress projection, so pushing the queue after
+                // the pull meant a lesson completed while offline was
+                // dropped from the dashboard until the next sign-in.
                 await flushCompletionQueue(authedUser.id);
                 await flushReviewQueue(authedUser.id);
+                await pullFromCloud(authedUser.id);
                 petController?.update({ streak: Number((getStreak() || {}).streak) || 0 });
             } catch (err) {
                 console.warn('[sync] bootstrap sync failed:', err);

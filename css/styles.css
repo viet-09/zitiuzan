@@ -1624,6 +1624,12 @@ body.furigana-off rt {
     color: var(--text-primary);
 }
 
+.chat-error-actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 8px;
+}
+
 .chat-empty {
     text-align: center;
     color: var(--text-muted);
