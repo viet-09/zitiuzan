@@ -4,6 +4,8 @@
 //
 // POST /functions/v1/lesson-review-quiz
 // Body: { lesson_id: "g1d1", content: {...}, existing_prompts: ["…"], refresh?: true }
+// `content` is only used as a fallback corpus, and a set generated from it is
+// returned to the caller without being stored — see fetchLessonCorpus.
 // Response: { lessonId, questions: [{prompt, options, answerIndex, note}], cached }
 //
 // The result is stored in public.lesson_review_quiz, which is shared by every
@@ -35,6 +37,12 @@ const GEMINI_MODEL = Deno.env.get('GEMINI_MODEL') ?? '';
 const COOLDOWN_MS = 20_000;
 const lastCallByUser = new Map<string, number>();
 
+// Where the deployed book content lives, so the corpus the model studies from
+// can come from the server instead of the request. Left unset in most
+// environments: the function then still generates for the caller, it just
+// refuses to publish the result to the table every learner reads.
+const CORPUS_BASE_URL = (Deno.env.get('LESSON_CORPUS_BASE_URL') ?? '').replace(/\/$/, '');
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -46,6 +54,33 @@ function jsonResponse(body: unknown, status = 200) {
     status,
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
+}
+
+/**
+ * The lesson corpus, fetched from the deployed book data. A request body must
+ * never be able to choose what the model studies from: the result is written
+ * to a table every learner reads, so a crafted corpus would seed the shared
+ * practice set with whatever answers its author wanted.
+ */
+async function fetchLessonCorpus(lessonId: string): Promise<string | null> {
+  if (!CORPUS_BASE_URL) return null;
+  try {
+    const res = await fetch(`${CORPUS_BASE_URL}/data/book/manifest.json`, { signal: AbortSignal.timeout(8_000) });
+    if (!res.ok) return null;
+    const manifest = await res.json();
+    const categories = (manifest?.categories ?? {}) as Record<string, { lessonIds?: unknown }>;
+    const entry = Object.entries(categories).find(([, value]) => (
+      Array.isArray(value?.lessonIds) && value.lessonIds.includes(lessonId)
+    ));
+    if (!entry) return null;
+    const bookRes = await fetch(`${CORPUS_BASE_URL}/data/book/${encodeURIComponent(entry[1].file ?? `${entry[0]}.json`)}`, { signal: AbortSignal.timeout(8_000) });
+    if (!bookRes.ok) return null;
+    const book = await bookRes.json();
+    const lesson = book?.[lessonId];
+    return lesson ? JSON.stringify(lesson) : null;
+  } catch {
+    return null;
+  }
 }
 
 function buildPrompt(content: string, existing: string[], want: number): string {
@@ -146,7 +181,13 @@ Deno.serve(async (req) => {
   }
   lastCallByUser.set(user.id, Date.now());
 
-  const content = typeof raw.content === 'string' ? raw.content : JSON.stringify(raw.content ?? '');
+  // Trusted corpus first. Without one the generator still runs for the caller
+  // who asked, but its output is not published to the shared table — see the
+  // `publish` flag where the row is written.
+  const serverCorpus = await fetchLessonCorpus(lessonId);
+  const publish = serverCorpus !== null;
+  const content = serverCorpus
+    ?? (typeof raw.content === 'string' ? raw.content : JSON.stringify(raw.content ?? ''));
   if (content.trim().length < 40) return jsonResponse({ error: 'Lesson content is empty' }, 400);
   const fromBook = Array.isArray(raw.existing_prompts)
     ? raw.existing_prompts.filter((p): p is string => typeof p === 'string').map((p) => p.slice(0, 400))
@@ -200,11 +241,13 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'Chưa tạo được phần ôn lại, thử lại sau.' }, 502);
   }
 
-  const { error: writeErr } = await service
-    .from('lesson_review_quiz')
-    .upsert({ lesson_id: lessonId, questions: attempt.value, model: usedModel });
-  // A failed write only costs the next reader one more generation.
-  if (writeErr) console.error('lesson-review-quiz cache write failed:', writeErr.message);
+  if (publish) {
+    const { error: writeErr } = await service
+      .from('lesson_review_quiz')
+      .upsert({ lesson_id: lessonId, questions: attempt.value, model: usedModel });
+    // A failed write only costs the next reader one more generation.
+    if (writeErr) console.error('lesson-review-quiz cache write failed:', writeErr.message);
+  }
 
   return jsonResponse({ lessonId, questions: attempt.value, cached: false });
 });

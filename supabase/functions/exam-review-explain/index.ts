@@ -88,6 +88,16 @@ function questionId(q: { section: string; part: string; number: number }): strin
   return `${q.section}:${q.part}:${q.number}`;
 }
 
+/** Live rows keep the answer key for the explanation step; never hand it to
+ *  the browser for a question the learner has not already got wrong. */
+function forClient(detailedReview: unknown) {
+  if (!Array.isArray(detailedReview)) return [];
+  return detailedReview.map((row) => {
+    const entry = (row ?? {}) as Record<string, unknown>;
+    return entry.is_correct ? { ...entry, correct_answer: '' } : entry;
+  });
+}
+
 async function callGemini(systemInstruction: string, prompt: string, schema: Record<string, unknown>) {
   const attempt = await withGeminiModelFallback<unknown>(GEMINI_MODEL, async (model, key) => {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${key}`;
@@ -209,7 +219,7 @@ Deno.serve(async (req) => {
       source_file: attempt.source_file,
       score: attempt.score,
       weakness_tags: attempt.weakness_tags ?? [],
-      detailed_review: detailedReview,
+      detailed_review: forClient(detailedReview),
       retest_generated: attempt.retest_generated,
       retest_questions: attempt.retest_questions,
     });
@@ -238,7 +248,11 @@ Deno.serve(async (req) => {
     .map((r: Record<string, unknown>) => {
       const q = byId.get(String(r.question_id));
       if (!q) return null;
-      return { ...q, id: String(r.question_id), userAnswerText: String(r.user_answer ?? ''), correctAnswerText: String(r.correct_answer ?? '') };
+      // The answer key comes from exam_content, not from the stored row: the
+      // stored row only carries the answer for questions the learner answered
+      // wrongly, so an unanswered question would arrive with an empty key.
+      const correctAnswerText = q.options[q.answerIndex] ?? String(r.correct_answer ?? '');
+      return { ...q, id: String(r.question_id), userAnswerText: String(r.user_answer ?? ''), correctAnswerText };
     })
     .filter((w: unknown): w is NonNullable<typeof w> => w !== null);
 
@@ -313,7 +327,7 @@ Deno.serve(async (req) => {
     source_file: attempt.source_file,
     score: attempt.score,
     weakness_tags: weaknessTags,
-    detailed_review: detailedReview,
+    detailed_review: forClient(detailedReview),
     retest_generated: retestQuestions.length > 0,
     retest_questions: retestQuestions.length > 0 ? retestQuestions : null,
   });

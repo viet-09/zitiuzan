@@ -32,6 +32,13 @@ async function init() {
         storage: localStorage,
         storageKey: 'n2_sb_session',
         detectSessionInUrl: true,
+        // PKCE, not the implicit flow. The implicit flow accepts any URL
+        // fragment carrying access_token/refresh_token and adopts it, so a
+        // crafted #access_token=<attacker> link would silently sign the
+        // reader into the sender's account and write their work there. PKCE
+        // refuses to exchange without the verifier this browser generated,
+        // which an attacker's link cannot carry.
+        flowType: 'pkce',
       },
     });
     return _client;

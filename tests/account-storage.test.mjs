@@ -29,7 +29,10 @@ test('sign-out clears user data but preserves device preferences', () => {
   const snapshot = storage.snapshot();
 
   for (const key of USER_SCOPED_STORAGE_KEYS) assert.equal(snapshot[key], undefined);
-  assert.equal(snapshot.n2_settings_v2, '{"furigana":false}');
+  // The settings also hold the exam target date, which belongs to the
+  // account that set it — the next learner must not inherit that schedule.
+  assert.equal(snapshot.n2_settings_v2, undefined);
+  // The pet is a device preference, not account data.
   assert.equal(snapshot.n2_pet_v2, '{"petType":"cat"}');
 });
 

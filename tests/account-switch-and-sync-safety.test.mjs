@@ -97,8 +97,15 @@ test('the exam resume snapshot is scoped to the account that created it', () => 
   );
   assert.match(
     sessionSource,
-    /parsed\.userId && \(!userId \|\| parsed\.userId !== userId\)/,
-    'readExamSession must discard a snapshot belonging to another account'
+    /if \(!userId \|\| parsed\.userId !== userId\) return null;/,
+    'readExamSession must discard a snapshot that names no owner, or another account'
+  );
+  // A snapshot written while signed out has no owner stamp, and would then be
+  // offered to whoever signs in next. It must not be written at all.
+  assert.match(
+    sessionSource,
+    /if \(!String\(state\.userId \?\? ownerId\)\) return null;/,
+    'toSessionSnapshot must refuse to stamp a snapshot with no owner'
   );
 
   const appSource = read('js/app.js');
@@ -198,7 +205,10 @@ test('the profile guard checks current_user and is not SECURITY DEFINER', () => 
   // server writes.
   for (const file of ['supabase/schema.sql', 'supabase/migrations/20261021100000_profile_column_guards.sql']) {
     const source = read(file);
-    const guard = source.slice(source.indexOf('guard_profile_server_columns()'));
+    // Only the trigger function itself — a later SECURITY DEFINER RPC in the
+    // same file is unrelated to the guard.
+    const start = source.indexOf('guard_profile_server_columns()');
+    const guard = source.slice(start, source.indexOf('$$;', start) + 3);
     assert.match(guard, /current_user in \('authenticated', 'anon'\)/,
       `${file} must gate the profile guard on current_user`);
     assert.doesNotMatch(guard, /session_user in \('authenticated', 'anon'\)/,

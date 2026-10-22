@@ -36,12 +36,16 @@ export function setExamSessionOwner(userId) {
  */
 export function toSessionSnapshot(state) {
   if (!state || !state.level || !state.sitting) return null;
+  if (!String(state.userId ?? ownerId)) return null;
   const answers = state.answers instanceof Map
     ? [...state.answers.entries()]
     : Array.isArray(state.answers) ? state.answers : [];
   if (!answers.length) return null;
   return {
-    userId: String(state.userId ?? ownerId),
+    // A snapshot with no owner is nobody's: it can be resumed by whoever
+    // signs in next. When the account is unknown the snapshot is dropped
+    // instead of being anonymised.
+    userId: String(state.userId ?? ownerId) || '',
     level: String(state.level),
     sitting: String(state.sitting),
     phaseIndex: Math.max(0, Number(state.phaseIndex) || 0),
@@ -65,11 +69,10 @@ export function readExamSession(userId = ownerId, storage = globalThis.sessionSt
     if (!parsed || typeof parsed !== 'object') return null;
     if (!parsed.level || !parsed.sitting) return null;
     if (!Array.isArray(parsed.answers) || !parsed.answers.length) return null;
-    // A snapshot that names its owner belongs to that owner only. With no
+    // A snapshot belongs to the account it names, and to no one else. With no
     // signed-in account there is nobody to attribute it to, so it is not
-    // offered at all. Snapshots written before the owner stamp existed have
-    // no userId and stay readable.
-    if (parsed.userId && (!userId || parsed.userId !== userId)) return null;
+    // offered at all.
+    if (!userId || parsed.userId !== userId) return null;
     return parsed;
   } catch {
     return null;

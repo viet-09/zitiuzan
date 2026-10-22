@@ -125,6 +125,24 @@ Deno.serve(async (req) => {
   const { data: { user }, error: userErr } = await sb.auth.getUser();
   if (userErr || !user) return jsonResponse({ error: 'Invalid session' }, 401);
 
+  // Durable, cross-isolate limit. Returns -1 on refusal, otherwise the
+  // count written. The in-memory limiter above is retained as a fast-path
+  // brake (no DB round trip for obvious floods) but it is no longer the
+  // authority. The call counts toward the ceiling before it is spent, so a
+  // model error does not hand the slot back — better a slightly pessimistic
+  // count than an accountant that shrinks when things fail.
+  const RATE_LIMIT_DAILY = 240;
+  try {
+    const { data, error } = await sb.rpc('consume_ai_calls', { p_max: RATE_LIMIT_DAILY });
+    if (error || (typeof data === 'number' && data < 0)) {
+      // Refused — the durable ledger decides. Set the in-memory one too so
+      // the next burst pays no DB cost for the obvious answer.
+      requestLogByUser.set(user.id, new Array(RATE_LIMIT_MAX_REQUESTS + 1).fill(Date.now()));
+      return jsonResponse({ error: 'Rate limit exceeded, please slow down' }, 429);
+    }
+  } catch (err) {
+    console.warn('consume_ai_calls failed, falling back to in-memory limit:', err);
+  }
   if (isRateLimited(user.id)) {
     return jsonResponse({ error: 'Rate limit exceeded, please slow down' }, 429);
   }

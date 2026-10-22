@@ -19,8 +19,18 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 
 test('toSessionSnapshot extracts only serializable state and requires answers', () => {
+  setExamSessionOwner('user-a');
   assert.equal(toSessionSnapshot(null), null);
   assert.equal(toSessionSnapshot({ level: 'N2', sitting: '2023-12', answers: new Map() }), null);
+  // A snapshot with no owner can be resumed by the next account to sign in,
+  // so it is not written at all.
+  setExamSessionOwner('');
+  assert.equal(
+    toSessionSnapshot({ level: 'N2', sitting: '2023-12', answers: new Map([['q1', 1]]) }),
+    null,
+    'an ownerless snapshot must not be created',
+  );
+  setExamSessionOwner('user-a');
 
   const snapshot = toSessionSnapshot({
     level: 'N2',
@@ -38,11 +48,14 @@ test('toSessionSnapshot extracts only serializable state and requires answers', 
   assert.equal(snapshot.phaseDeadline, 1700000000000);
   assert.equal(snapshot.activeSectionId, 'listening');
   assert.deepEqual(snapshot.answers, [['vocab:1:1', 2], ['vocab:1:2', 0]]);
+  setExamSessionOwner('');
 });
 
 test('session round-trips through storage and can be cleared', () => {
+  setExamSessionOwner('user-a');
   const storage = createFakeStorage();
   const snapshot = {
+    userId: 'user-a',
     level: 'N2',
     sitting: '2023-12',
     phaseIndex: 0,
@@ -52,16 +65,17 @@ test('session round-trips through storage and can be cleared', () => {
     audioPartIndex: 0,
   };
 
-  assert.equal(readExamSession('', storage), null);
+  assert.equal(readExamSession('user-b', storage), null);
   assert.equal(writeExamSession(snapshot, storage), true);
 
-  const readBack = readExamSession('', storage);
+  const readBack = readExamSession('user-a', storage);
   assert.equal(readBack.level, 'N2');
   assert.equal(readBack.sitting, '2023-12');
   assert.deepEqual(readBack.answers, [['q1', 1]]);
 
   clearExamSession(storage);
-  assert.equal(readExamSession('', storage), null);
+  assert.equal(readExamSession('user-a', storage), null);
+  setExamSessionOwner('');
 });
 
 test('isSessionResumable rejects expired deadlines so time cannot be cheated', () => {

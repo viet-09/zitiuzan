@@ -7,6 +7,10 @@ export const LEGACY_MIGRATION_MARKER = 'n2_migrated_v1';
 
 export const USER_SCOPED_STORAGE_KEYS = Object.freeze([
   'n2_progress_v2',
+  // Settings carry the exam target date, which is the previous learner's
+  // exam schedule. It is synced per account (user_profiles.exam_target_date),
+  // so it must not survive a sign-out into the next learner's session.
+  'n2_settings_v2',
   'n2_streak_v2',
   'n2_tutor_v2',
   'n2_tutor_context_v2',

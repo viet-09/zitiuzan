@@ -22,12 +22,12 @@ import { completeLessonOnce, toggleLessonCompletion } from './completion.js';
 import { learningState } from './learning-state.js';
 import { buildBookViewerModel, renderBookViewerStrip } from './book-viewer.js';
 import { activateModalDialog } from './modal-dialog.js';
-import { openKanjiWritingPad } from './kanji-writing.js?v=41';
-import { openKanjiSheet } from './kanji-sheet.js?v=41';
-import { announceLessonCompleted } from './pet.js?v=41';
+import { openKanjiWritingPad } from './kanji-writing.js?v=42';
+import { openKanjiSheet } from './kanji-sheet.js?v=42';
+import { announceLessonCompleted } from './pet.js?v=42';
 import { fetchLessonReview, MIN_REVIEW_QUESTIONS } from './lesson-review.js';
 import { formatHanViet, hanVietOf, loadHanViet } from './kanji-hanviet.js';
-import { ensureLessonContent } from './book-content.js?v=41';
+import { ensureLessonContent } from './book-content.js?v=42';
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (char) => ({

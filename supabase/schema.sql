@@ -714,3 +714,63 @@ alter table public.exam_attempts enable row level security;
 drop policy if exists "exam attempts read self" on public.exam_attempts;
 create policy "exam attempts read self"
   on public.exam_attempts for select using (auth.uid() = user_id);
+
+-- ---------------------------------------------------------------------------
+-- 13. ai_call_ledger — durable per-user AI quota accounting.
+-- The Gemini Edge Functions previously limited callers with an in-memory Map,
+-- which is per-isolate and resets on every cold start; one account could
+-- therefore spend far more of the shared free-tier quota than intended. This
+-- table is the authority. Learners may read their own row; every write goes
+-- through consume_ai_calls(), which applies the ceiling inside the same
+-- statement so concurrent calls cannot both pass it.
+-- See supabase/migrations/20261022120000_ai_call_ledger.sql.
+-- ---------------------------------------------------------------------------
+create table if not exists public.ai_call_ledger (
+  user_id     uuid not null references auth.users(id) on delete cascade,
+  day         date not null,
+  call_count  integer not null default 0 check (call_count >= 0),
+  updated_at  timestamptz not null default now(),
+  primary key (user_id, day)
+);
+
+alter table public.ai_call_ledger enable row level security;
+
+drop policy if exists "ai ledger self read" on public.ai_call_ledger;
+create policy "ai ledger self read"
+  on public.ai_call_ledger for select to authenticated using (auth.uid() = user_id);
+
+revoke insert, update, delete on public.ai_call_ledger from anon, authenticated;
+grant select on public.ai_call_ledger to authenticated;
+
+create or replace function public.consume_ai_calls(p_max integer)
+returns integer
+language plpgsql security definer set search_path = public as $$
+declare
+  v_user uuid := auth.uid();
+  v_day  date := (now() at time zone 'Asia/Tokyo')::date;
+  v_new  integer;
+begin
+  if v_user is null then
+    raise exception 'consume_ai_calls: no authenticated user';
+  end if;
+  if p_max is null or p_max < 1 then
+    raise exception 'consume_ai_calls: daily maximum must be at least 1';
+  end if;
+
+  insert into public.ai_call_ledger (user_id, day, call_count)
+  values (v_user, v_day, 1)
+  on conflict (user_id, day)
+    do update set call_count = public.ai_call_ledger.call_count + 1,
+                  updated_at = now()
+    where public.ai_call_ledger.call_count < p_max
+  returning call_count into v_new;
+
+  if v_new is null then
+    return -1;
+  end if;
+  return v_new;
+end;
+$$;
+
+revoke all on function public.consume_ai_calls(integer) from public, anon;
+grant execute on function public.consume_ai_calls(integer) to authenticated;

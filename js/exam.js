@@ -694,7 +694,7 @@ function renderReview() {
         <article class="exam-review-item">
           <div class="exam-review-id">${esc(r.question_id)}</div>
           <div class="correction-original">Bạn chọn: ${esc(r.user_answer)}</div>
-          <div class="correction-fixed">Đáp án đúng: ${esc(r.correct_answer)}</div>
+          ${r.correct_answer ? `<div class="correction-fixed">Đáp án đúng: ${esc(r.correct_answer)}</div>` : ''}
           ${r.explanation ? `<p class="exam-review-explain">${esc(r.explanation)}</p>` : ''}
           ${r.remediation_rule ? `<p class="exam-review-rule">📌 ${esc(r.remediation_rule)}</p>` : ''}
         </article>`).join('');

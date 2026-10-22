@@ -164,12 +164,16 @@ Deno.serve(async (req) => {
     sectionTotals.set(q.section, bucket);
 
     const userAnswerText = selectedIndex >= 0 && selectedIndex < q.options.length ? q.options[selectedIndex] : '(không trả lời)';
-    const correctAnswerText = q.options[q.answerIndex] ?? '';
+    // The response only explains the questions the learner actually got
+    // wrong. Returning the key for every question turned a single throwaway
+    // submission into a full answer key: post one answer, read all 200. The
+    // stored attempt keeps the complete key for exam-review-explain.
+    const revealedAnswer = !isCorrect && selectedIndex >= 0 ? q.options[q.answerIndex] ?? '' : '';
 
     detailedReview.push({
       question_id: id,
       user_answer: userAnswerText,
-      correct_answer: correctAnswerText,
+      correct_answer: revealedAnswer,
       is_correct: isCorrect,
       explanation: '',
       remediation_rule: '',
